@@ -1,5 +1,5 @@
-#ifndef GLAD_WRAPPER_H
-#define GLAD_WRAPPER_H
+#ifndef GLFW_WRAPPER_H
+#define GLFW_WRAPPER_H
 
 
 #include <glad/glad.h> 
@@ -18,12 +18,14 @@ class GLFWWrapper{
         virtual void update() = 0;
 
         int createWindow(int width, int height, const char* title);
-// framebuffer_size_callback
+        int FPS();
     private:
         GLFWwindow* window;
 
-
-
+        double fpsLastTime;
+        int fpsCounter;
+        int fps;
+        void calculateFPS();
 };  
 
 #endif

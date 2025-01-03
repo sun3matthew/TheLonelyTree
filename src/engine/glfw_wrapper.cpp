@@ -1,7 +1,7 @@
 #include "engine/glfw_wrapper.h"
 
 #include <iostream>
-
+#include <engine/input.h>
 
 float GLFWWrapper::lastX = 0.0f;
 float GLFWWrapper::lastY = 0.0f;
@@ -16,6 +16,12 @@ GLFWWrapper::GLFWWrapper(){
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3); // OpenGL X.3
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); // Core profile
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // Needed for Mac for some reason..
+
+    window = nullptr;
+
+    fps = 0;
+    fpsCounter = 0;
+    fpsLastTime = 0.0;
 }
 
 GLFWWrapper::~GLFWWrapper(){
@@ -53,7 +59,24 @@ int GLFWWrapper::createWindow(int width, int height, const char* title){
 
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
+    Input::setWindow(window, width, height);
+
     return 0;
+}
+
+int GLFWWrapper::FPS(){
+    return fps;
+}
+
+void GLFWWrapper::calculateFPS(){
+    double currentTime = glfwGetTime();
+    fpsCounter++;
+
+    if (currentTime - fpsLastTime >= 1.0){
+        fps = fpsCounter;
+        fpsCounter = 0;
+        fpsLastTime = currentTime;
+    }
 }
 
 int GLFWWrapper::run(){
@@ -64,13 +87,17 @@ int GLFWWrapper::run(){
     }
 
     while(!glfwWindowShouldClose(window)){
-
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         update();
-        glfwSwapBuffers(window);  // Swap the buffers (important for double buffering)
+
+        glfwSwapBuffers(window);
+
+        Input::processInput();
         glfwPollEvents();
+
+        calculateFPS();
     }
     return 0;
 }

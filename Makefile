@@ -2,7 +2,7 @@
 BUILD_DIR = build
 
 # Default build type (Release or Debug)
-BUILD_TYPE ?= Release
+BUILD_TYPE ?= Debug
 
 PROJECT_NAME = TheLonelyTree
 

@@ -1,0 +1,11 @@
+#ifndef MOUSE_BUTTON_CODE_H
+#define MOUSE_BUTTON_CODE_H
+
+enum class MouseButtonCode {
+    MOUSE_BUTTON_LEFT = 0,
+    MOUSE_BUTTON_RIGHT,
+    MOUSE_BUTTON_MIDDLE,
+    MAX_BUTTONS
+};
+
+#endif // MOUSE_BUTTON_CODE_H
