@@ -19,6 +19,7 @@ class GLFWWrapper{
 
         int createWindow(int width, int height, const char* title);
         int FPS();
+        int getDeltaTime();
     private:
         GLFWwindow* window;
 
@@ -26,6 +27,10 @@ class GLFWWrapper{
         int fpsCounter;
         int fps;
         void calculateFPS();
+
+        float deltaTime = 0.0f;
+        float lastFrame = 0.0f;
+        void calculateDeltaTime();
 };  
 
 #endif

@@ -1,7 +1,12 @@
-#include <the_lonely_tree.h>
+#include "the_lonely_tree.h"
 
 #include <iostream>
 #include <engine/input.h>
+#include <glm/glm.hpp>
+
+// Camera 
+TheLonelyTree::TheLonelyTree() : camera(glm::vec3(0.0f, 0.0f, 3.0f))
+{}
 
 TheLonelyTree::~TheLonelyTree(){
 
@@ -13,18 +18,19 @@ void TheLonelyTree::start(){
 
 void TheLonelyTree::update(){
 
-    if (Input::getKeyDown(KeyCode::KEY_A)){
-        std::cout << "A Down" << std::endl;
-    }
+    // if (Input::getKey(KeyCode::KEY_W))
+    //     camera.ProcessKeyboard(FORWARD, getDeltaTime());
+    // if (Input::getKey(KeyCode::KEY_S))
+    //     camera.ProcessKeyboard(BACKWARD, getDeltaTime());
+    // if (Input::getKey(KeyCode::KEY_A))
+    //     camera.ProcessKeyboard(LEFT, getDeltaTime());
+    // if (Input::getKey(KeyCode::KEY_D))
+    //     camera.ProcessKeyboard(RIGHT, getDeltaTime());
 
-    if (Input::getKey(KeyCode::KEY_A)){
-        std::cout << "A" << std::endl;
-    }
+    // camera.ProcessMouseScroll(Input::getMouseScroll());
 
-
-    if (Input::getKeyUp(KeyCode::KEY_A)){
-        std::cout << "A Up" << std::endl;
-    }
+    // glm::vec2 mouseDelta = Input::getMouseDelta();
+    // camera.ProcessMouseMovement(mouseDelta.x, mouseDelta.y);
 
     if (Input::getMouseDown(MouseButtonCode::MOUSE_BUTTON_LEFT)){
         std::cout << "Left Mouse Button Down" << std::endl;

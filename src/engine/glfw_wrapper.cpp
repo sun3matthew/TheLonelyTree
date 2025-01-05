@@ -1,4 +1,4 @@
-#include "engine/glfw_wrapper.h"
+#include <engine/glfw_wrapper.h>
 
 #include <iostream>
 #include <engine/input.h>
@@ -79,6 +79,16 @@ void GLFWWrapper::calculateFPS(){
     }
 }
 
+void GLFWWrapper::calculateDeltaTime(){
+    float currentFrame = glfwGetTime();
+    deltaTime = currentFrame - lastFrame;
+    lastFrame = currentFrame;  
+}
+
+int GLFWWrapper::getDeltaTime(){
+    return deltaTime;
+}
+
 int GLFWWrapper::run(){
     start();
     if (!window){
@@ -98,6 +108,7 @@ int GLFWWrapper::run(){
         glfwPollEvents();
 
         calculateFPS();
+        calculateDeltaTime();
     }
     return 0;
 }

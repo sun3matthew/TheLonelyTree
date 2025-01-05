@@ -26,6 +26,10 @@ add_library(glad STATIC external/glad/src/glad.c)
 target_include_directories(glad PUBLIC external/glad/include)
 target_link_libraries(${PROJECT_NAME} PRIVATE glad)
 
+add_library(stb STATIC external/stb/src/stb_image.cpp)
+target_include_directories(stb PUBLIC external/stb/include)
+target_link_libraries(${PROJECT_NAME} PRIVATE stb)
+
 add_subdirectory(external/glm)
 target_link_libraries(${PROJECT_NAME} PRIVATE glm)
 

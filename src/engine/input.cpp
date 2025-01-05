@@ -1,4 +1,4 @@
-#include "engine/input.h"
+#include <engine/input.h>
 #include <cassert>
 
 glm::vec2 Input::lastMousePosition = glm::vec2(0.0f);
