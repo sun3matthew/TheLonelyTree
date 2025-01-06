@@ -4,10 +4,10 @@
 #include <iostream>
 
 Texture Texture::defaultDiffuse(){
-    return Texture((const unsigned char[]) {0xFF, 0xFF, 0xFF}, 1, 1, 1, TextureType::Diffuse);
+    return Texture((const unsigned char[]) {0xFF, 0xFF, 0xFF}, 1, 1, 3, TextureType::Diffuse);
 }
 Texture Texture::defaultSpecular(){
-    return Texture((const unsigned char[]) {0xFF, 0xFF, 0xFF}, 1, 1, 1, TextureType::Specular);
+    return Texture((const unsigned char[]) {0xFF, 0xFF, 0xFF}, 1, 1, 3, TextureType::Specular);
 }
 
 Texture::Texture(const char* path, TextureType textureType) : type(textureType){
@@ -40,7 +40,9 @@ Texture::Texture(const char* path, TextureType textureType) : type(textureType){
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-Texture::Texture(const unsigned char* data, int w, int h, int nC, TextureType type) : width(w), height(h), nChannels(nC){
+Texture::Texture(const unsigned char* data, int w, int h, int nC, TextureType textureType) 
+    : width(w), height(h), nChannels(nC), type(textureType)
+{
     glGenTextures(1, &ID);  
     glBindTexture(GL_TEXTURE_2D, ID);
 

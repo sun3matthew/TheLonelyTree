@@ -40,15 +40,14 @@ out vec4 FragColor;
 vec3 CalcDirLight(DirectionalLight light, vec3 norm, vec3 viewDir){
     vec3 lightDir = normalize(-light.direction.xyz);
 
-    vec3 ambient = light.lightingData.ambient;
+    vec3 ambient = light.lightingData.ambient * vec3(texture(material.diffuse1, TexCoords));
 
-    vec3 diffuse = light.lightingData.diffuse;
+    vec3 diffuse = light.lightingData.diffuse * vec3(texture(material.diffuse1, TexCoords));
     diffuse *= max(dot(norm, lightDir), 0.0);
 
-    vec3 specular = light.lightingData.specular;
+    vec3 specular = light.lightingData.specular * vec3(texture(material.specular1, TexCoords));
     vec3 reflectDir = reflect(-lightDir, norm);
-    // specular *= pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
-    specular *= pow(max(dot(viewDir, reflectDir), 0.0), 64);
+    specular *= pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
 
     return ambient + diffuse + specular;
 }
@@ -56,12 +55,12 @@ vec3 CalcDirLight(DirectionalLight light, vec3 norm, vec3 viewDir){
 vec3 CalcPointLight(PointLight light, vec3 norm, vec3 FragPos, vec3 viewDir){
     vec3 lightDir = normalize(light.position - FragPos);
 
-    vec3 ambient = light.lightingData.ambient;
+    vec3 ambient = light.lightingData.ambient * vec3(texture(material.diffuse1, TexCoords));
 
-    vec3 diffuse = light.lightingData.diffuse;
+    vec3 diffuse = light.lightingData.diffuse * vec3(texture(material.diffuse1, TexCoords));
     diffuse *= max(dot(norm, lightDir), 0.0);
 
-    vec3 specular = light.lightingData.specular;
+    vec3 specular = light.lightingData.specular * vec3(texture(material.specular1, TexCoords));
     vec3 reflectDir = reflect(-lightDir, norm);
     specular *= pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
 

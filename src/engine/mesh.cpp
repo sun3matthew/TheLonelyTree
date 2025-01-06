@@ -7,11 +7,14 @@
 Mesh::Mesh(std::vector<Vertex> verticesIn, std::vector<unsigned int> indicesIn, std::vector<Texture> texturesIn)
     : vertices(verticesIn), indices(indicesIn), textures(texturesIn)
 {
+    shininess = 16;
     setupMesh();
 }
 Mesh::Mesh(std::vector<Vertex> verticesIn, std::vector<unsigned int> indicesIn)
     : vertices(verticesIn), indices(indicesIn)
 {
+    shininess = 16;
+
     textures = {Texture::defaultDiffuse(), Texture::defaultSpecular()};
 
     setupMesh();
@@ -20,6 +23,8 @@ Mesh::Mesh(std::vector<Vertex> verticesIn, std::vector<unsigned int> indicesIn)
 Mesh::Mesh(std::vector<Vertex> verticesIn, std::vector<Texture> texturesIn)
     : vertices(verticesIn), textures(texturesIn)
 {
+    shininess = 16;
+
     std::vector<unsigned int> indices(vertices.size());
     for(int i = 0; i < vertices.size(); i++)
         indices.push_back(i);
@@ -31,6 +36,8 @@ Mesh::Mesh(std::vector<Vertex> verticesIn, std::vector<Texture> texturesIn)
 Mesh::Mesh(std::vector<Vertex> verticesIn)
     : vertices(verticesIn)
 {
+    shininess = 16;
+
     std::vector<unsigned int> indices(vertices.size());
     for(int i = 0; i < vertices.size(); i++)
         indices.push_back(i);
@@ -71,6 +78,8 @@ void Mesh::setupMesh()
 }  
 void Mesh::draw(Shader &shader) 
 {
+    shader.setFloat("material.shininess", shininess);
+
     unsigned int diffuseNr = 1;
     unsigned int specularNr = 1;
     for(unsigned int i = 0; i < textures.size(); i++)

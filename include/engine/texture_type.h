@@ -12,11 +12,11 @@ enum class TextureType {
 inline std::string TextureTypeToString(TextureType textureType){
     switch (textureType){
         case TextureType::Diffuse:
-            return "Diffuse";
+            return "diffuse";
         case TextureType::Specular:
-            return "Specular";
+            return "specular";
         default:
-            return "Unknown";
+            return "unknown";
     }
 }
 
