@@ -6,6 +6,8 @@
 #include <engine/input.h>
 #include <engine/mesh_generation.h>
 
+#include <engine/gltf_loader.h>
+
 // Camera 
 TheLonelyTree::TheLonelyTree()
     : camera(glm::vec3(0.0f, 0.0f, 3.0f)), 
@@ -27,6 +29,9 @@ TheLonelyTree::~TheLonelyTree(){
 void TheLonelyTree::start(){
     meshShader = new Shader("resources/shaders/model.vert", "resources/shaders/model.frag");
     meshes.push_back(MeshGeneration::Sphere(64, 64));
+
+    GLTFLoader::loadMesh("");
+
 }
 
 void TheLonelyTree::update(){

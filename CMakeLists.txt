@@ -17,10 +17,10 @@ add_executable(${PROJECT_NAME} ${SRC_FILES})
 # Include directories
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/include )
 
-# set(ASSIMP_NO_EXPORT ON CACHE BOOL "Disable Assimp's export functionality")
-# add_subdirectory(external/assimp)
-# target_include_directories(${PROJECT_NAME} PUBLIC external/assimp/include)
-# target_link_libraries(${PROJECT_NAME} PUBLIC assimp)
+set(TINYGLTF_HEADER_ONLY ON CACHE INTERNAL "" FORCE)
+set(TINYGLTF_INSTALL OFF CACHE INTERNAL "" FORCE)
+add_subdirectory(external/tinygltf)
+target_include_directories(${PROJECT_NAME} PRIVATE "external/tinygltf")
 
 add_library(glad STATIC external/glad/src/glad.c)
 target_include_directories(glad PUBLIC external/glad/include)
