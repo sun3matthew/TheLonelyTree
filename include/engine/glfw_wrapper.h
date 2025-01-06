@@ -19,7 +19,9 @@ class GLFWWrapper{
 
         int createWindow(int width, int height, const char* title);
         int FPS();
-        int getDeltaTime();
+        float getDeltaTime();
+
+        void lockCursor(bool lock);
     private:
         GLFWwindow* window;
 

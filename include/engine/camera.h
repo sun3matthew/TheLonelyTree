@@ -5,6 +5,8 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+#include <engine/shader.h>
+
 // Defines several possible options for camera movement.
 enum Camera_Movement {
     FORWARD,
@@ -45,6 +47,7 @@ public:
     void ProcessMouseMovement(float xoffset, float yoffset, GLboolean constrainPitch = true);
     void ProcessMouseScroll(float yoffset);
 
+    void writeToShader(Shader &shader);
 private:
     // Update vectors based on Euler Angles
     void updateCameraVectors();

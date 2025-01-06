@@ -3,8 +3,12 @@
 #include <stb/stb_image.h>
 #include <iostream>
 
-Texture Texture::defaultDiffuse = Texture((const unsigned char[]) {0xFF, 0xFF, 0xFF}, 1, 1, 1, TextureType::Diffuse);
-Texture Texture::defaultSpecular = Texture((const unsigned char[]) {0xFF, 0xFF, 0xFF}, 1, 1, 1, TextureType::Specular);
+Texture Texture::defaultDiffuse(){
+    return Texture((const unsigned char[]) {0xFF, 0xFF, 0xFF}, 1, 1, 1, TextureType::Diffuse);
+}
+Texture Texture::defaultSpecular(){
+    return Texture((const unsigned char[]) {0xFF, 0xFF, 0xFF}, 1, 1, 1, TextureType::Specular);
+}
 
 Texture::Texture(const char* path, TextureType textureType) : type(textureType){
 

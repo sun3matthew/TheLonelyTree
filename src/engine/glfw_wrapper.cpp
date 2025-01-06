@@ -54,12 +54,16 @@ int GLFWWrapper::createWindow(int width, int height, const char* title){
     glViewport(0, 0, width * 2, height * 2);
 
 
+
     lastX = width / 2.0f;
     lastY = height / 2.0f;
 
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
     Input::setWindow(window, width, height);
+
+    glEnable(GL_DEPTH_TEST);  
+    glEnable(GL_CULL_FACE);  
 
     return 0;
 }
@@ -85,7 +89,7 @@ void GLFWWrapper::calculateDeltaTime(){
     lastFrame = currentFrame;  
 }
 
-int GLFWWrapper::getDeltaTime(){
+float GLFWWrapper::getDeltaTime(){
     return deltaTime;
 }
 
@@ -111,4 +115,13 @@ int GLFWWrapper::run(){
         calculateDeltaTime();
     }
     return 0;
+}
+
+void GLFWWrapper::lockCursor(bool lock){
+    assert(window != nullptr);
+
+    if(lock)
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    else
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 }

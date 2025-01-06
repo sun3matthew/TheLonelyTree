@@ -52,7 +52,7 @@ glm::vec2 Input::getMousePosition(){
 }
 
 glm::vec2 Input::getMouseDelta(){
-    return getMousePosition() - lastMousePosition;
+    return lastMousePosition - getMousePosition();
 }
 
 float Input::getMouseScroll(){

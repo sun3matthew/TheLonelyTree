@@ -3,6 +3,11 @@
 
 #include <engine/glfw_wrapper.h>
 #include <engine/camera.h>
+#include <engine/mesh.h>
+#include <engine/shader.h>
+#include <engine/light_directional.h>
+
+#include <vector>
 
 class TheLonelyTree : public GLFWWrapper{
     public:
@@ -14,6 +19,10 @@ class TheLonelyTree : public GLFWWrapper{
 
     private:
         Camera camera;
+        LightDirectional directionalLight;
+        Shader* meshShader;
+
+        std::vector<Mesh> meshes;
 };  
 
 #endif

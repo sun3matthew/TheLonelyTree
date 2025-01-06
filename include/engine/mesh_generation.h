@@ -8,9 +8,9 @@
 class MeshGeneration {
 public:
     // Static methods
-    static Mesh Add(int xSegments, int ySegments){
+    static Mesh Sphere(int xSegments, int ySegments){
         std::vector<Vertex> vertices;
-        std::vector<unsigned int> Indices;
+        std::vector<unsigned int> indices;
         for (unsigned int y = 0; y <= ySegments; ++y)
         {
             for (unsigned int x = 0; x <= xSegments; ++x)
@@ -33,25 +33,26 @@ public:
         {
             for (int x = 0; x < xSegments; ++x)
             {
-                Indices.push_back((y + 1) * (xSegments + 1) + x);
-                Indices.push_back(y       * (xSegments + 1) + x);
-                Indices.push_back(y       * (xSegments + 1) + x + 1);
+                indices.push_back((y + 1) * (xSegments + 1) + x);
+                indices.push_back(y       * (xSegments + 1) + x);
+                indices.push_back(y       * (xSegments + 1) + x + 1);
 
-                Indices.push_back((y + 1) * (xSegments + 1) + x);
-                Indices.push_back(y       * (xSegments + 1) + x + 1);
-                Indices.push_back((y + 1) * (xSegments + 1) + x + 1);
+                indices.push_back((y + 1) * (xSegments + 1) + x);
+                indices.push_back(y       * (xSegments + 1) + x + 1);
+                indices.push_back((y + 1) * (xSegments + 1) + x + 1);
             }
         }
 
         //TODO Investigate performance on the fact that this is copied.
-        return Mesh(std::move(vertices), std::move(Indices));
+        // return Mesh(std::move(vertices), std::move(Indices));
+        return Mesh(vertices, indices);
     }
 
 
 
 private:
     // Private constructor to prevent instantiation
-    MathUtils() = delete;
+    MeshGeneration() = delete;
 };
 
 #endif // MESH_GENERATION_H

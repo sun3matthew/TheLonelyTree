@@ -12,7 +12,7 @@ Mesh::Mesh(std::vector<Vertex> verticesIn, std::vector<unsigned int> indicesIn, 
 Mesh::Mesh(std::vector<Vertex> verticesIn, std::vector<unsigned int> indicesIn)
     : vertices(verticesIn), indices(indicesIn)
 {
-    textures = {Texture::defaultDiffuse, Texture::defaultSpecular};
+    textures = {Texture::defaultDiffuse(), Texture::defaultSpecular()};
 
     setupMesh();
 }
@@ -36,7 +36,7 @@ Mesh::Mesh(std::vector<Vertex> verticesIn)
         indices.push_back(i);
     this->indices = indices;
 
-    textures = {Texture::defaultDiffuse, Texture::defaultSpecular};
+    textures = {Texture::defaultDiffuse(), Texture::defaultSpecular()};
 
     setupMesh();
 }
@@ -45,8 +45,6 @@ Mesh::Mesh(std::vector<Vertex> verticesIn)
 void Mesh::updateTextures(std::vector<Texture> textures){
     this->textures = textures;
 }
-
-
 
 void Mesh::setupMesh()
 {

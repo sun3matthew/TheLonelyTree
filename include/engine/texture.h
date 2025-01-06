@@ -6,8 +6,6 @@
 class Texture
 {
 public:
-    static Texture defaultDiffuse;
-    static Texture defaultSpecular;
 
     TextureType type;
 
@@ -19,6 +17,9 @@ public:
     int getWidth();
     int getHeight();
     int getNrChannels();
+
+    static Texture defaultDiffuse();
+    static Texture defaultSpecular();
 private:
     unsigned int ID;
     int textureUnit;
