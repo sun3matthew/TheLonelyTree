@@ -6,6 +6,7 @@
 #include <engine/mesh.h>
 #include <engine/shader.h>
 #include <engine/light_directional.h>
+#include <engine/light_spot.h>
 
 #include <vector>
 
@@ -20,6 +21,7 @@ class TheLonelyTree : public GLFWWrapper{
     private:
         Camera camera;
         LightDirectional directionalLight;
+        std::vector<LightSpot> pointLights;
         Shader* meshShader;
 
         std::vector<Mesh> meshes;

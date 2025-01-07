@@ -15,7 +15,7 @@ Texture::Texture(const char* path, TextureType textureType) : type(textureType){
     glGenTextures(1, &ID);  
     glBindTexture(GL_TEXTURE_2D, ID);
 
-    stbi_set_flip_vertically_on_load(true); // tell stb_image.h to flip loaded texture's on the y-axis.
+    stbi_set_flip_vertically_on_load(false); // tell stb_image.h to flip loaded texture's on the y-axis.
 
     // target, mipmap level, internal format, width, height, 0, format, type, data
     unsigned char *data = stbi_load(path, &width, &height, &nChannels, 0);

@@ -25,8 +25,9 @@ struct PointLight {
 };
 
 uniform DirectionalLight dirLight; 
-#define NR_POINT_LIGHTS 4  
-uniform PointLight pointLights[NR_POINT_LIGHTS];
+#define MAX_POINT_LIGHTS 10
+uniform int numPointLights;
+uniform PointLight pointLights[MAX_POINT_LIGHTS];
 
 uniform Material material;
 uniform vec3 viewPos;
@@ -66,6 +67,9 @@ vec3 CalcPointLight(PointLight light, vec3 norm, vec3 FragPos, vec3 viewDir){
 
     float distance = length(light.position - FragPos);
     float attenuation = 1.0 / (light.attenuation.x + light.attenuation.y * distance + light.attenuation.z * (distance * distance)); 
+    // float attenuation = 1.0 / (1.0 + 0.09 * distance + 0.032 * (distance * distance)); 
+            // glm::vec3(1.0f, 0.09f, 0.032f),
+    // attenuation = 1.0;
 
     return (ambient + diffuse + specular) * attenuation;
 }
@@ -76,8 +80,8 @@ void main()
     vec3 viewDir = normalize(viewPos - FragPos);
 
     vec3 result = CalcDirLight(dirLight, norm, viewDir);
-    // for(int i = 0; i < NR_POINT_LIGHTS; i++)
-    //     result += CalcPointLight(pointLights[i], norm, FragPos, viewDir);    
+    for(int i = 0; i < numPointLights; i++)
+        result += CalcPointLight(pointLights[i], norm, FragPos, viewDir);    
     
     FragColor = vec4(result, 1.0);
 }  
