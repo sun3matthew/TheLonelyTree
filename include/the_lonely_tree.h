@@ -7,24 +7,22 @@
 #include <engine/shader.h>
 #include <engine/light_directional.h>
 #include <engine/light_spot.h>
+#include <engine/gameobject.h>
 
 #include <vector>
+#include <list>
 
 class TheLonelyTree : public GLFWWrapper{
     public:
         TheLonelyTree();
-        ~TheLonelyTree();
+        ~TheLonelyTree() override;
     protected:
         void start() override;
         void update() override;
+        void lateUpdate() override;
 
     private:
-        Camera camera;
-        LightDirectional directionalLight;
-        std::vector<LightSpot> pointLights;
-        Shader* meshShader;
-
-        std::vector<Mesh> meshes;
+        Camera* camera;
 };  
 
 #endif

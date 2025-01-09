@@ -8,7 +8,7 @@
 class MeshGeneration {
 public:
     // Static methods
-    static Mesh Sphere(int xSegments, int ySegments){
+    static Mesh* Sphere(int xSegments, int ySegments){
         std::vector<Vertex> vertices;
         std::vector<unsigned int> indices;
         for (unsigned int y = 0; y <= ySegments; ++y)
@@ -45,10 +45,8 @@ public:
 
         //TODO Investigate performance on the fact that this is copied.
         // return Mesh(std::move(vertices), std::move(Indices));
-        return Mesh(vertices, indices);
+        return new Mesh("model", vertices, indices);
     }
-
-
 
 private:
     // Private constructor to prevent instantiation

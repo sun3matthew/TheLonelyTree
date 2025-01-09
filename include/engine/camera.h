@@ -5,6 +5,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+#include <engine/component.h>
 #include <engine/shader.h>
 
 // Defines several possible options for camera movement.
@@ -22,7 +23,7 @@ const float SPEED = 20.5f;
 const float SENSITIVITY = 0.4f;
 const float ZOOM = 45.0f;
 
-class Camera {
+class Camera : public Component{
 public:
     // Camera Attributes
     glm::vec3 Position, Front, Up, Right, WorldUp;
@@ -47,7 +48,7 @@ public:
     void ProcessMouseMovement(float xoffset, float yoffset, GLboolean constrainPitch = true);
     void ProcessMouseScroll(float yoffset);
 
-    void writeToShader(Shader &shader);
+    void update() override;
 private:
     // Update vectors based on Euler Angles
     void updateCameraVectors();

@@ -25,6 +25,9 @@ GLFWWrapper::GLFWWrapper(){
 }
 
 GLFWWrapper::~GLFWWrapper(){
+    for (Gameobject* gameobject : gameobjects)
+        delete gameobject;
+
     if (window) {
         glfwDestroyWindow(window);
     }
@@ -93,6 +96,23 @@ float GLFWWrapper::getDeltaTime(){
     return deltaTime;
 }
 
+Gameobject* GLFWWrapper::find(std::string name){
+    for(Gameobject* gameobject : gameobjects)
+        if(gameobject->name == name)
+            return gameobject;
+    return nullptr;
+}
+
+void GLFWWrapper::addGameobject(Gameobject* gameobject){
+    gameobjects.push_back(gameobject);
+}
+
+void GLFWWrapper::removeGameobject(Gameobject* gameobject){
+    gameobjects.remove(gameobject);
+}
+
+
+
 int GLFWWrapper::run(){
     start();
     if (!window){
@@ -100,11 +120,21 @@ int GLFWWrapper::run(){
         return -1;
     }
 
+    // TODO Investigate if you should essentially render the last frame and then while it is rendering to the double buffer, do the current frame processing, then swap the buffers.
     while(!glfwWindowShouldClose(window)){
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         update();
+        for(Gameobject* gameobject : gameobjects)
+            gameobject->update();
+
+        for(Gameobject* gameobject : gameobjects)
+            gameobject->lateUpdate();
+        lateUpdate();
+
+        // END OF FRAME
+        RenderManager::instance.draw();
 
         glfwSwapBuffers(window);
 

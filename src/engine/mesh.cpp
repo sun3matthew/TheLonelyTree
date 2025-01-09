@@ -4,14 +4,14 @@
 #include <string>
 
 // Maybe look into using pointer..? but tbh you shouldn't be loading meshes during play
-Mesh::Mesh(std::vector<Vertex> verticesIn, std::vector<unsigned int> indicesIn, std::vector<Texture> texturesIn)
-    : vertices(verticesIn), indices(indicesIn), textures(texturesIn)
+Mesh::Mesh(std::string shaderName, std::vector<Vertex> verticesIn, std::vector<unsigned int> indicesIn, std::vector<Texture> texturesIn)
+    : RenderObject(shaderName), vertices(verticesIn), indices(indicesIn), textures(texturesIn)
 {
     shininess = 16;
     setupMesh();
 }
-Mesh::Mesh(std::vector<Vertex> verticesIn, std::vector<unsigned int> indicesIn)
-    : vertices(verticesIn), indices(indicesIn)
+Mesh::Mesh(std::string shaderName, std::vector<Vertex> verticesIn, std::vector<unsigned int> indicesIn)
+    : RenderObject(shaderName), vertices(verticesIn), indices(indicesIn)
 {
     shininess = 16;
 
@@ -20,8 +20,8 @@ Mesh::Mesh(std::vector<Vertex> verticesIn, std::vector<unsigned int> indicesIn)
     setupMesh();
 }
 
-Mesh::Mesh(std::vector<Vertex> verticesIn, std::vector<Texture> texturesIn)
-    : vertices(verticesIn), textures(texturesIn)
+Mesh::Mesh(std::string shaderName, std::vector<Vertex> verticesIn, std::vector<Texture> texturesIn)
+    : RenderObject(shaderName), vertices(verticesIn), textures(texturesIn)
 {
     shininess = 16;
 
@@ -33,8 +33,8 @@ Mesh::Mesh(std::vector<Vertex> verticesIn, std::vector<Texture> texturesIn)
     setupMesh();
 }
 
-Mesh::Mesh(std::vector<Vertex> verticesIn)
-    : vertices(verticesIn)
+Mesh::Mesh(std::string shaderName, std::vector<Vertex> verticesIn)
+    : RenderObject(shaderName), vertices(verticesIn)
 {
     shininess = 16;
 
@@ -75,10 +75,12 @@ void Mesh::setupMesh()
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, TexCoords));
 
     glBindVertexArray(0);
-}  
-void Mesh::draw(Shader &shader) 
+}
+
+void Mesh::drawCall(Shader* shader) 
 {
-    shader.setFloat("material.shininess", shininess);
+    shader->use();
+    shader->setFloat("material.shininess", shininess);
 
     unsigned int diffuseNr = 1;
     unsigned int specularNr = 1;
@@ -94,7 +96,7 @@ void Mesh::draw(Shader &shader)
         else if(type == TextureType::Specular)
             number = std::to_string(specularNr++);
 
-        shader.setInt(("material." + TextureTypeToString(type) + number).c_str(), i);
+        shader->setInt(("material." + TextureTypeToString(type) + number).c_str(), i);
         glBindTexture(GL_TEXTURE_2D, textures[i].getID());
     }
     glActiveTexture(GL_TEXTURE0);

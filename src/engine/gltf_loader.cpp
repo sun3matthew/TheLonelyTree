@@ -6,7 +6,11 @@
 #include <tiny_gltf.h>
 
 #include <engine/gltf_loader.h>
+#include <engine/mesh_comp.h>
+#include <engine/mesh.h>
 #include <glm/gtc/type_ptr.hpp>
+#include <vector>
+#include <string> 
 #include <iostream>
 
 const float* GetAttributeData(const tinygltf::Model &model, const tinygltf::Primitive &primitive, const std::string &attributeName) {
@@ -19,12 +23,12 @@ const float* GetAttributeData(const tinygltf::Model &model, const tinygltf::Prim
     return nullptr;
 }
 
-// processNode 
+const std::vector<Gameobject*> processMesh(tinygltf::Mesh &mesh, glm::mat4 &transform, tinygltf::Model &model){
+    std::vector<Gameobject*> gameobjects;
 
-const std::vector<Mesh> processMesh(tinygltf::Mesh &mesh, glm::mat4 &transform, tinygltf::Model &model){
-    std::vector<Mesh> meshes;
-
+    int i = 0;
     for (const auto &primitive : mesh.primitives) {
+        i++;
         // Extract indices
         std::vector<unsigned int> indices;
         if (primitive.indices >= 0) {
@@ -72,14 +76,17 @@ const std::vector<Mesh> processMesh(tinygltf::Mesh &mesh, glm::mat4 &transform, 
             }
         }
         // TODO do a move
-        meshes.push_back(Mesh(vertices, indices));
+        Mesh* generatedMesh = new Mesh("model", vertices, indices);
+        Gameobject* gameobject = new Gameobject(mesh.name + " " + std::to_string(i));
+        gameobject->addComponent(new MeshComp(generatedMesh));
+        gameobjects.push_back(gameobject);
     }
-    return meshes;
+    return gameobjects;
 }
 
-const std::vector<Mesh> processNode(int nodeIdx, glm::mat4 transform, tinygltf::Model &model){
+Gameobject* processNode(int nodeIdx, glm::mat4 transform, tinygltf::Model &model){
     tinygltf::Node &node = model.nodes[nodeIdx];
-    std::vector<Mesh> meshes;
+    Gameobject* gameobject = new Gameobject(node.name);
     
     if (node.matrix.size() == 16){
         transform = transform * (glm::mat4)glm::make_mat4(node.matrix.data());
@@ -87,19 +94,20 @@ const std::vector<Mesh> processNode(int nodeIdx, glm::mat4 transform, tinygltf::
 
     if (node.mesh >= 0) {
         tinygltf::Mesh &mesh = model.meshes[node.mesh];
-        std::vector<Mesh> newMeshes = processMesh(mesh, transform, model); // Handle the mesh
-        meshes.insert(meshes.end(), newMeshes.begin(), newMeshes.end());
+        std::vector<Gameobject*> newGameobjects = processMesh(mesh, transform, model); // Handle the mesh
+        for(Gameobject* newGameobject : newGameobjects)
+            newGameobject->setParent(gameobject);
     }
 
     // Recursively process child nodes
     for (int childIndex : node.children) {
-        std::vector<Mesh> newMeshes = processNode(childIndex, transform, model);
-        meshes.insert(meshes.end(), newMeshes.begin(), newMeshes.end());
+        Gameobject* newGameobject = processNode(childIndex, transform, model);
+        newGameobject->setParent(gameobject);
     }
-    return meshes;
+    return gameobject;
 }
 
-std::vector<Mesh> GLTFLoader::loadMesh(const char* path){
+Gameobject* GLTFLoader::loadMesh(const char* path){
     tinygltf::Model model;
     tinygltf::TinyGLTF loader;
     std::string err;
@@ -130,14 +138,15 @@ std::vector<Mesh> GLTFLoader::loadMesh(const char* path){
         // }
     // }
 
-    std::vector<Mesh> meshes;
+    // std::vector<Mesh> meshes;
+    Gameobject* rootGameobject = new Gameobject(path);
     std::vector<int> sceneNodes = model.scenes[0].nodes;
     for(const int rootNode : sceneNodes){
-        std::vector<Mesh> nodeMeshes = processNode(rootNode, glm::mat4(1.0), model);
-        meshes.insert(meshes.end(), nodeMeshes.begin(), nodeMeshes.end());
+        Gameobject* gameobject = processNode(rootNode, glm::mat4(1.0), model);
+        gameobject->setParent(rootGameobject);
     }
 
-    return meshes;
+    return rootGameobject;
 }
 
 // NORMAL

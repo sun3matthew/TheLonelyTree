@@ -5,8 +5,10 @@
 
 #include <engine/shader.h>
 #include <engine/texture.h>
+#include <engine/render_object.h>
 
 #include <vector>
+#include <string>
 
 struct Vertex {
     glm::vec3 Position;
@@ -14,7 +16,7 @@ struct Vertex {
     glm::vec2 TexCoords;
 };
 
-class Mesh {
+class Mesh : public RenderObject{
     public:
         // mesh data
         std::vector<Vertex>       vertices;
@@ -22,11 +24,15 @@ class Mesh {
         std::vector<Texture>      textures;
         float shininess;
 
-        Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures);
-        Mesh(std::vector<Vertex> vertices, std::vector<Texture> textures);
-        Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices);
-        Mesh(std::vector<Vertex> vertices);
-        void draw(Shader &shader);
+        std::string shaderName;
+
+        Mesh(std::string shaderName, std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures);
+        Mesh(std::string shaderName, std::vector<Vertex> vertices, std::vector<Texture> textures);
+        Mesh(std::string shaderName, std::vector<Vertex> vertices, std::vector<unsigned int> indices);
+        Mesh(std::string shaderName, std::vector<Vertex> vertices);
+        // TODO add destructor
+
+        void drawCall(Shader* shader) override;
         void updateTextures(std::vector<Texture> textures);
     private:
         //  render data

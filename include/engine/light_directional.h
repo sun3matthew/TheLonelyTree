@@ -7,7 +7,7 @@ class LightDirectional : public Light{
     public:
         LightDirectional(glm::vec3 dir, glm::vec3 amb, glm::vec3 diff, glm::vec3 spec);
 
-        void writeToShader(Shader& shader) override;
+        void update() override;
 
     private:
         glm::vec3 direction;

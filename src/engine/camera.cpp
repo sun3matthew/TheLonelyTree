@@ -1,6 +1,6 @@
 #include <engine/camera.h>
 #include <glm/gtc/type_ptr.hpp>
-#include <iostream>
+#include <engine/render_manager.h>
 
 // Constructor with vectors
 Camera::Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitch)
@@ -77,13 +77,19 @@ void Camera::updateCameraVectors() {
     Up = glm::normalize(glm::cross(Right, Front));
 }
 
-void Camera::writeToShader(Shader &shader){
+void Camera::update(){
     glm::mat4 view = GetViewMatrix();
-    shader.setMat4("view", glm::value_ptr(view));
-
     glm::mat4 projection = glm::perspective(glm::radians(Zoom), 800.0f / 600.0f, 0.1f, 100.0f);
-    shader.setMat4("projection", glm::value_ptr(projection));
 
-    // std::cout << Position.x << std::endl;
-    shader.setVec3("viewPos", Position.x, Position.y, Position.z);
+    glm::mat4 modelMat(1);
+    modelMat = glm::scale(modelMat, glm::vec3(0.05, 0.05, 0.05));
+
+    std::vector<Shader*> shaders = RenderManager::instance.getShadersAccepting("camera");
+    for(Shader* shader : shaders){
+        shader->setMat4("view", glm::value_ptr(view));
+        shader->setMat4("projection", glm::value_ptr(projection));
+        shader->setVec3("viewPos", Position.x, Position.y, Position.z);
+
+        shader->setMat4("model", glm::value_ptr(modelMat));
+    }
 }

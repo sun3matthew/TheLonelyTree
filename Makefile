@@ -22,6 +22,9 @@ build: configure
 run: build
 	cd $(BUILD_DIR) && ./$(PROJECT_NAME)
 
+run-lldb: build
+	lldb $(BUILD_DIR)/./$(PROJECT_NAME)
+
 # Clean the build files
 clean:
 	rm -rf $(BUILD_DIR)

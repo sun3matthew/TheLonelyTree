@@ -2,15 +2,20 @@
 #define SHADER_H
 
 #include <string>
+#include <unordered_set>
 
 class Shader
 {
 private:
     unsigned int ID;
+    std::string name;
+    std::unordered_set<std::string> canAccept;
+
 public:
+    //TODO add getters
   
     // constructor reads and builds the shader
-    Shader(const char* vertexPath, const char* fragmentPath);
+    Shader(std::string nameIn, const char* vertexPath, const char* fragmentPath, std::vector<std::string> canAcceptList);
     // use/activate the shader
     void use();
     // utility uniform functions
@@ -21,6 +26,8 @@ public:
     void setMat4(const std::string &name, float *value) const;
 
     int getID();
+    std::string getName();
+    bool canAcceptAttribute(std::string);
 };
-  
+
 #endif

@@ -1,12 +1,11 @@
 #ifndef GLTF_LOADER_H
 #define GLTF_LOADER_H
 
-#include <engine/mesh.h>
-#include <vector>
+#include <engine/gameobject.h>
 
 class GLTFLoader{
     public:
-        static std::vector<Mesh> loadMesh(const char* path);
+        static Gameobject* loadMesh(const char* path);
 };
 
 #endif

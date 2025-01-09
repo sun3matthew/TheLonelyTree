@@ -5,6 +5,12 @@
 #include <glad/glad.h> 
 #include <GLFW/glfw3.h>
 
+#include <engine/gameobject.h>
+#include <engine/render_manager.h>
+
+#include <list>
+#include <string>
+
 class GLFWWrapper{
     public:
         int run();
@@ -14,8 +20,13 @@ class GLFWWrapper{
 
         static float lastX, lastY;
     protected:
+        Gameobject* find(std::string);
+        void addGameobject(Gameobject*);
+        void removeGameobject(Gameobject*);
+
         virtual void start() = 0;
         virtual void update() = 0;
+        virtual void lateUpdate() = 0;
 
         int createWindow(int width, int height, const char* title);
         int FPS();
@@ -23,6 +34,9 @@ class GLFWWrapper{
 
         void lockCursor(bool lock);
     private:
+        std::list<Gameobject*> gameobjects;
+        
+
         GLFWwindow* window;
 
         double fpsLastTime;

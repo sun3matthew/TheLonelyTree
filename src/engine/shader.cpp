@@ -21,7 +21,13 @@ static char* readShaderFile(const char* filepath){
     return content;
 }
 
-Shader::Shader(const char* vertexPath, const char* fragmentPath){
+Shader::Shader(std::string nameIn, const char* vertexPath, const char* fragmentPath, std::vector<std::string> canAcceptList)
+    : name(nameIn)
+{
+    for(std::string attribute : canAcceptList){
+        canAccept.insert(attribute);
+    }
+
     int  success;
     char infoLog[512];
 
@@ -60,6 +66,14 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath){
     }
     glDeleteShader(fragmentShader); 
     glDeleteShader(vertexShader);
+}
+
+std::string Shader::getName(){
+    return name;
+}
+
+bool Shader::canAcceptAttribute(std::string attribute){
+    return canAccept.count(attribute);
 }
 
 void Shader::use(){
