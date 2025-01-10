@@ -68,6 +68,10 @@ int GLFWWrapper::createWindow(int width, int height, const char* title){
     glEnable(GL_DEPTH_TEST);  
     glEnable(GL_CULL_FACE);  
 
+    glEnable(GL_BLEND);
+    glDepthFunc(GL_LESS);  
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
     return 0;
 }
 

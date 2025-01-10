@@ -22,6 +22,7 @@ public:
 
     static Texture defaultDiffuse();
     static Texture defaultSpecular();
+    static Texture defaultGlossy();
 private:
     unsigned int ID;
     int textureUnit;

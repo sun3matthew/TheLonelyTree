@@ -9,6 +9,9 @@ Texture Texture::defaultDiffuse(){
 Texture Texture::defaultSpecular(){
     return Texture((const unsigned char[]) {0xFF, 0xFF, 0xFF}, 1, 1, 3, TextureType::Specular);
 }
+Texture Texture::defaultGlossy(){
+    return Texture((const unsigned char[]) {0xFF}, 1, 1, 1, TextureType::Glossy);
+}
 
 Texture::Texture(const char* path, TextureType textureType) : type(textureType){
 
@@ -24,6 +27,8 @@ Texture::Texture(const char* path, TextureType textureType) : type(textureType){
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
         }else if (nChannels == 4){
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+        }else if (nChannels == 1){
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, width, height, 0, GL_RED, GL_UNSIGNED_BYTE, data);
         }
         glGenerateMipmap(GL_TEXTURE_2D);
     }else{
@@ -51,6 +56,8 @@ Texture::Texture(const unsigned char* data, int w, int h, int nC, TextureType te
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
     }else if (nChannels == 4){
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+    }else if (nChannels == 1){
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, width, height, 0, GL_RED, GL_UNSIGNED_BYTE, data);
     }
     glGenerateMipmap(GL_TEXTURE_2D);
 

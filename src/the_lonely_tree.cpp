@@ -10,6 +10,11 @@
 #include <engine/gltf_loader.h>
 #include <engine/mesh_comp.h>
 
+#include <engine/mesh.h>
+#include <engine/shader.h>
+#include <engine/light_directional.h>
+#include <engine/light_spot.h>
+
 // Camera 
 TheLonelyTree::TheLonelyTree()
 {
@@ -21,6 +26,8 @@ TheLonelyTree::~TheLonelyTree(){
 }
 
 void TheLonelyTree::start(){
+    numLights = 0;
+
     RenderManager::instance.addShader(
         new Shader("model", "resources/shaders/model.vert", "resources/shaders/model.frag",
             std::vector<std::string>{"camera", "dirLight", "pointLights"}));
@@ -32,26 +39,19 @@ void TheLonelyTree::start(){
 
     Gameobject* directionalLight = new Gameobject("Directional Light");
     directionalLight->addComponent(new LightDirectional(
-        glm::vec3(-0.2f, -1.0f, -0.3f),
+        glm::vec3(-0.3f, 1.0f, -0.0f),
         glm::vec3(0.35f, 0.35f, 0.35f),
         glm::vec3(0.95f, 0.95f, 0.95f),
         glm::vec3(0.9f, 0.9f, 0.9f)));
     addGameobject(directionalLight);
 
     Gameobject* backpack = GLTFLoader::loadMesh("resources/models/backpack/scene.gltf");
+    // Gameobject* backpack = GLTFLoader::loadMesh("resources/models/backpack/scene.gltf");
     addGameobject(backpack);
 
     // Gameobject* sphere = new Gameobject("Sphere");
     // sphere->addComponent(new MeshComp(MeshGeneration::Sphere(64, 64)));
     // addGameobject(sphere);
-
-    // Texture diffuse("resources/models/backpack/textures/Scene_-_Root_baseColor.jpeg", TextureType::Diffuse);
-    // Texture specular("resources/models/backpack/textures/Scene_-_Root_specular.jpg", TextureType::Specular);
-    // std::vector<Texture> textures{diffuse, specular};
-    // for (Mesh &mesh : backpack){
-    //     mesh.updateTextures(textures);
-    //     meshes.push_back(mesh);
-    // }
 }
 
 void TheLonelyTree::update(){
@@ -69,31 +69,20 @@ void TheLonelyTree::update(){
     glm::vec2 mouseDelta = Input::getMouseDelta();
     camera->ProcessMouseMovement(-mouseDelta.x, mouseDelta.y);
 
-    // meshShader->use();
-    // camera.writeToShader(*meshShader);
-    // directionalLight.writeToShader(*meshShader);
-    // glm::mat4 modelMat(1);
-    // modelMat = glm::scale(modelMat, glm::vec3(0.05, 0.05, 0.05));
-    // meshShader->setMat4("model", glm::value_ptr(modelMat));
+    if (Input::getKeyUp(KeyCode::KEY_SPACE)){
+        Gameobject* gameobject = new Gameobject();
+        gameobject->addComponent(new LightSpot(
+            camera->Position,
+            glm::vec3(1.0f, 0.09f, 0.032f),
+            numLights,
+            glm::vec3(0.15f, 0.15f, 0.15f),
+            glm::vec3(0.6f, 0.6f, 0.6f),
+            glm::vec3(0.8f, 0.8f, 0.8f)));
+        addGameobject(gameobject);
 
-    // meshShader->setInt("numPointLights", pointLights.size());
-    // for(LightSpot light : pointLights)
-    //     light.writeToShader(*meshShader);
-
-    // for (int i = 0; i < meshes.size(); i++){
-    //     meshes[i].draw(*meshShader);
-    // }
-
-
-    // if (Input::getKeyUp(KeyCode::KEY_SPACE)){
-    //     pointLights.push_back(LightSpot(
-    //         camera.Position,
-    //         glm::vec3(1.0f, 0.09f, 0.032f),
-    //         pointLights.size(),
-    //         glm::vec3(0.15f, 0.15f, 0.15f),
-    //         glm::vec3(0.6f, 0.6f, 0.6f),
-    //         glm::vec3(0.8f, 0.8f, 0.8f)));
-    // }
+        numLights++;
+        RenderManager::instance.getShadersAccepting("pointLights")[0]->setInt("numPointLights", numLights);
+    }
 
     // std::cout << "FPS: " << FPS() << std::endl;
 }
