@@ -23,7 +23,6 @@ class Mesh : public RenderObject{
         std::vector<unsigned int> indices;
 
         std::vector<Texture>      textures;
-        float shininess;
 
         std::string shaderName;
 

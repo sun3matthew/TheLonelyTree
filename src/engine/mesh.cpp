@@ -11,8 +11,7 @@ Mesh::Mesh(std::string shaderName,
     : RenderObject(shaderName), 
       vertices(std::move(verticesIn)), 
       indices(std::move(indicesIn)), 
-      textures(std::move(texturesIn)), 
-      shininess(16) 
+      textures(std::move(texturesIn))
 {
     setupMesh();
 }
@@ -33,7 +32,7 @@ Mesh::Mesh(std::string shaderName,
 Mesh::Mesh(std::string shaderName, 
            std::vector<Vertex> verticesIn)
     : Mesh(shaderName, std::move(verticesIn), generateIndices(verticesIn), 
-           {Texture::defaultDiffuse(), Texture::defaultSpecular()})
+           {Texture::defaultDiffuse(), Texture::defaultSpecular(), Texture::defaultGlossy()})
 {}
 
 // Helper function to generate default indices

@@ -13,6 +13,16 @@ Texture Texture::defaultGlossy(){
     return Texture((const unsigned char[]) {0xFF}, 1, 1, 1, TextureType::Glossy);
 }
 
+Texture Texture::diffuse(unsigned char r, unsigned char g, unsigned char b){
+    return Texture((const unsigned char[]) {r, g, b}, 1, 1, 3, TextureType::Diffuse);
+}
+Texture Texture::specular(unsigned char r, unsigned char g, unsigned char b){
+    return Texture((const unsigned char[]) {r, g, b}, 1, 1, 3, TextureType::Specular);
+}
+Texture Texture::glossy(unsigned char amt){
+    return Texture((const unsigned char[]) {0xFF}, 1, 1, 1, TextureType::Glossy);
+}
+
 Texture::Texture(const char* path, TextureType textureType) : type(textureType){
 
     glGenTextures(1, &ID);  

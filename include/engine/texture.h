@@ -23,6 +23,10 @@ public:
     static Texture defaultDiffuse();
     static Texture defaultSpecular();
     static Texture defaultGlossy();
+
+    static Texture diffuse(unsigned char r, unsigned char g, unsigned char b);
+    static Texture specular(unsigned char r, unsigned char g, unsigned char b);
+    static Texture glossy(unsigned char r);
 private:
     unsigned int ID;
     int textureUnit;

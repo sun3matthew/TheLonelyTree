@@ -33,28 +33,39 @@ void TheLonelyTree::start(){
             std::vector<std::string>{"camera", "dirLight", "pointLights"}));
 
     Gameobject* camera = new Gameobject("Camera");
-    this->camera = new Camera(glm::vec3(0.0f, 0.0f, 3.0f));
+    this->camera = new Camera(
+        glm::vec3(0.0f, 0.0f, 0.0f),
+        glm::vec3(0.0f, 1.0f, 0.0f),
+        0.0f,
+        0.0f
+        );
     camera->addComponent(this->camera);
     addGameobject(camera);
 
     Gameobject* directionalLight = new Gameobject("Directional Light");
     directionalLight->addComponent(new LightDirectional(
-        glm::vec3(-0.3f, 1.0f, -0.0f),
+        glm::vec3(-3.0f, -1.0f, -0.0f),
         glm::vec3(0.35f, 0.35f, 0.35f),
-        glm::vec3(0.95f, 0.95f, 0.95f),
+        glm::vec3(0.65f, 0.65f, 0.65f),
         glm::vec3(0.9f, 0.9f, 0.9f)));
     addGameobject(directionalLight);
 
     // Gameobject* backpack = GLTFLoader::loadMesh("resources/models/backpack/scene.gltf");
-    Gameobject* backpack = GLTFLoader::loadMesh("resources/models/backpack/scene.gltf");
-    addGameobject(backpack);
+    // Gameobject* backpack = GLTFLoader::loadMesh("resources/models/backpack/scene.gltf");
+    // addGameobject(backpack);
+    // backpack->setScale(glm::vec3(0.01f));
 
-    backpack->setScale(glm::vec3(0.1f));
+    Gameobject* sphere = new Gameobject("Sphere");
+    sphere->addComponent(new MeshComp(MeshGeneration::Sphere(32, 32)));
+    addGameobject(sphere);
+    sphere->setPosition(glm::vec3(0, 3, 0));
 
+    Gameobject* plane = new Gameobject("Plane");
+    plane->addComponent(new MeshComp(MeshGeneration::Terrain(12923952u, 64, 64)));
+    addGameobject(plane);
 
-    // Gameobject* sphere = new Gameobject("Sphere");
-    // sphere->addComponent(new MeshComp(MeshGeneration::Sphere(64, 64)));
-    // addGameobject(sphere);
+    plane->setPosition(glm::vec3(0, -3, 0));
+    plane->setScale(glm::vec3(90, 10, 90));
 }
 
 void TheLonelyTree::update(){
@@ -86,7 +97,7 @@ void TheLonelyTree::update(){
         numLights++;
         RenderManager::instance.getShadersAccepting("pointLights")[0]->setInt("numPointLights", numLights);
     }
-    // std::cout << "FPS: " << FPS() << std::endl;
+    std::cout << "FPS: " << FPS() << std::endl;
 }
 
 void TheLonelyTree::lateUpdate() {}
