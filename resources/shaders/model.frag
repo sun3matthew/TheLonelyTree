@@ -5,7 +5,6 @@ struct Material {
     sampler2D diffuse1;
     sampler2D specular1;
     sampler2D glossy1;
-    float shininess;
 }; 
 
 struct LightingData {
@@ -51,7 +50,6 @@ vec3 CalcDirLight(DirectionalLight light, vec3 norm, vec3 viewDir){
     vec3 reflectDir = reflect(-lightDir, norm);
     float glossy = float(texture(material.glossy1, TexCoords)) * 100;
     specular *= pow(max(dot(viewDir, reflectDir), 0.0), glossy);
-    // specular *= pow(max(dot(viewDir, reflectDir), 0.0), 64);
 
     return ambient + diffuse + specular;
 }
@@ -66,15 +64,12 @@ vec3 CalcPointLight(PointLight light, vec3 norm, vec3 FragPos, vec3 viewDir){
 
     vec3 specular = light.lightingData.specular * vec3(texture(material.specular1, TexCoords));
     vec3 reflectDir = reflect(-lightDir, norm);
-    specular *= pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
+    float glossy = float(texture(material.glossy1, TexCoords)) * 100;
+    specular *= pow(max(dot(viewDir, reflectDir), 0.0), glossy);
 
     float distance = length(light.position - FragPos);
     float attenuation = 1.0 / (light.attenuation.x + light.attenuation.y * distance + light.attenuation.z * (distance * distance)); 
     
-    // float attenuation = 1.0 / (1.0 + 0.09 * distance + 0.032 * (distance * distance)); 
-            // glm::vec3(1.0f, 0.09f, 0.032f),
-    // attenuation = 1.0;
-
     return (ambient + diffuse + specular) * attenuation;
 }
 

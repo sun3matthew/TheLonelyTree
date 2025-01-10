@@ -13,6 +13,7 @@
 
 #include <engine/mesh_comp.h>
 #include <engine/render_manager.h>
+#include <engine/gameobject.h>
 
 MeshComp::MeshComp(Mesh* meshIn)
     : mesh(meshIn)
@@ -24,6 +25,7 @@ MeshComp::~MeshComp(){
 }
 
 void MeshComp::update(){
+    mesh->modelMatrix = gameobject->getModelMatrix();
     RenderManager::instance.addToBuffer(mesh);
 }
 

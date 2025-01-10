@@ -45,9 +45,12 @@ void TheLonelyTree::start(){
         glm::vec3(0.9f, 0.9f, 0.9f)));
     addGameobject(directionalLight);
 
-    Gameobject* backpack = GLTFLoader::loadMesh("resources/models/backpack/scene.gltf");
     // Gameobject* backpack = GLTFLoader::loadMesh("resources/models/backpack/scene.gltf");
+    Gameobject* backpack = GLTFLoader::loadMesh("resources/models/backpack/scene.gltf");
     addGameobject(backpack);
+
+    backpack->setScale(glm::vec3(0.1f));
+
 
     // Gameobject* sphere = new Gameobject("Sphere");
     // sphere->addComponent(new MeshComp(MeshGeneration::Sphere(64, 64)));
@@ -83,7 +86,6 @@ void TheLonelyTree::update(){
         numLights++;
         RenderManager::instance.getShadersAccepting("pointLights")[0]->setInt("numPointLights", numLights);
     }
-
     // std::cout << "FPS: " << FPS() << std::endl;
 }
 

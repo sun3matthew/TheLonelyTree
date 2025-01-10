@@ -5,6 +5,8 @@
 #include <string>
 
 #include <engine/component.h>
+#include <glm/gtc/type_ptr.hpp>
+
 // #include <cassert>
 
 class Gameobject{
@@ -27,7 +29,21 @@ class Gameobject{
 
         void update();
         void lateUpdate();
+
+        glm::vec3 getPosition();
+        void setPosition(glm::vec3);
+        glm::quat getRotation();
+        void setRotation(glm::quat);
+        glm::vec3 getScale();
+        void setScale(glm::vec3);
+        glm::mat4 getModelMatrix();
     private:
+        glm::vec3 position;
+        glm::quat rotation;
+        glm::vec3 scale;
+
+        glm::mat4 modelMatrix;
+        void updateModelMatrix();
 
         //TODO investigate if you should use a unordered_map instead.
         Gameobject* parent;

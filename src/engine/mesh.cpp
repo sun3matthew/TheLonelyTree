@@ -4,49 +4,47 @@
 #include <string>
 
 // Maybe look into using pointer..? but tbh you shouldn't be loading meshes during play
-Mesh::Mesh(std::string shaderName, std::vector<Vertex> verticesIn, std::vector<unsigned int> indicesIn, std::vector<Texture> texturesIn)
-    : RenderObject(shaderName), vertices(verticesIn), indices(indicesIn), textures(texturesIn)
+Mesh::Mesh(std::string shaderName, 
+           std::vector<Vertex> verticesIn, 
+           std::vector<unsigned int> indicesIn, 
+           std::vector<Texture> texturesIn)
+    : RenderObject(shaderName), 
+      vertices(std::move(verticesIn)), 
+      indices(std::move(indicesIn)), 
+      textures(std::move(texturesIn)), 
+      shininess(16) 
 {
-    shininess = 16;
-    setupMesh();
-}
-Mesh::Mesh(std::string shaderName, std::vector<Vertex> verticesIn, std::vector<unsigned int> indicesIn)
-    : RenderObject(shaderName), vertices(verticesIn), indices(indicesIn)
-{
-    shininess = 16;
-
-    textures = {Texture::defaultDiffuse(), Texture::defaultSpecular()};
-
     setupMesh();
 }
 
-Mesh::Mesh(std::string shaderName, std::vector<Vertex> verticesIn, std::vector<Texture> texturesIn)
-    : RenderObject(shaderName), vertices(verticesIn), textures(texturesIn)
-{
-    shininess = 16;
+Mesh::Mesh(std::string shaderName, 
+           std::vector<Vertex> verticesIn, 
+           std::vector<unsigned int> indicesIn)
+    : Mesh(shaderName, std::move(verticesIn), std::move(indicesIn), 
+           {Texture::defaultDiffuse(), Texture::defaultSpecular()})
+{}
 
+Mesh::Mesh(std::string shaderName, 
+           std::vector<Vertex> verticesIn, 
+           std::vector<Texture> texturesIn)
+    : Mesh(shaderName, std::move(verticesIn), generateIndices(verticesIn), std::move(texturesIn))
+{}
+
+Mesh::Mesh(std::string shaderName, 
+           std::vector<Vertex> verticesIn)
+    : Mesh(shaderName, std::move(verticesIn), generateIndices(verticesIn), 
+           {Texture::defaultDiffuse(), Texture::defaultSpecular()})
+{}
+
+// Helper function to generate default indices
+std::vector<unsigned int> Mesh::generateIndices(const std::vector<Vertex>& vertices) {
     std::vector<unsigned int> indices(vertices.size());
-    for(int i = 0; i < vertices.size(); i++)
-        indices.push_back(i);
-    this->indices = indices;
-
-    setupMesh();
+    for (unsigned int i = 0; i < vertices.size(); ++i) {
+        indices[i] = i;
+    }
+    return indices;
 }
 
-Mesh::Mesh(std::string shaderName, std::vector<Vertex> verticesIn)
-    : RenderObject(shaderName), vertices(verticesIn)
-{
-    shininess = 16;
-
-    std::vector<unsigned int> indices(vertices.size());
-    for(int i = 0; i < vertices.size(); i++)
-        indices.push_back(i);
-    this->indices = indices;
-
-    textures = {Texture::defaultDiffuse(), Texture::defaultSpecular()};
-
-    setupMesh();
-}
 
 //TODO Encapsulate better
 void Mesh::updateTextures(std::vector<Texture> textures){
@@ -80,7 +78,8 @@ void Mesh::setupMesh()
 void Mesh::drawCall(Shader* shader) 
 {
     shader->use();
-    shader->setFloat("material.shininess", shininess);
+
+    shader->setMat4("model", glm::value_ptr(modelMatrix));
 
     unsigned int diffuseNr = 1;
     unsigned int specularNr = 1;

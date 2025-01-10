@@ -39,6 +39,7 @@ class Mesh : public RenderObject{
         //  render data
         unsigned int VAO, VBO, EBO;
 
+        std::vector<unsigned int> generateIndices(const std::vector<Vertex>& vertices);
         void setupMesh();
 };  
 

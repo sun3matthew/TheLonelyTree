@@ -15,7 +15,7 @@ class Component{
 
         Gameobject* getGameobject();
         void setGameobject(Gameobject*);
-    private:
+    protected:
         Gameobject* gameobject;
 };
 

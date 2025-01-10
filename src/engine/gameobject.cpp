@@ -1,17 +1,20 @@
 
 #include <engine/gameobject.h>
 
+#include "glm/gtc/matrix_transform.hpp"
+
+
 Gameobject::Gameobject()
-    : parent(nullptr)
-{
-    active = true;
-}
+    : Gameobject("")
+{}
 
 Gameobject::Gameobject(std::string gameobjectName)
-    : parent(nullptr), name(gameobjectName)
-{
-    active = true;
-}
+    : parent(nullptr), name(std::move(gameobjectName)), active(true),
+      position(glm::vec3(0.0f)), 
+      rotation(glm::quat(1.0f, 0.0f, 0.0f, 0.0f)), 
+      scale(glm::vec3(1.0f)), 
+      modelMatrix(glm::mat4(1.0f))
+{}
 
 
 Gameobject::~Gameobject(){
@@ -45,6 +48,52 @@ void Gameobject::setParent(Gameobject* parent){
     this->parent = parent;
     if(parent)
         parent->children.push_back(this);
+}
+
+glm::vec3 Gameobject::getPosition(){
+    return position;
+}
+
+void Gameobject::setPosition(glm::vec3 position){
+    this->position = position;
+    updateModelMatrix();
+}
+
+glm::quat Gameobject::getRotation(){
+    return rotation;
+}
+
+void Gameobject::setRotation(glm::quat rotation){
+    this->rotation = rotation;
+    updateModelMatrix();
+}
+
+glm::vec3 Gameobject::getScale(){
+    return scale;
+}
+
+void Gameobject::setScale(glm::vec3 scale){
+    this->scale = scale;
+    updateModelMatrix();
+}
+
+glm::mat4 Gameobject::getModelMatrix(){
+    return modelMatrix;
+}
+
+inline void Gameobject::updateModelMatrix(){
+    if (parent){
+        modelMatrix = parent->modelMatrix;
+    }else{
+        modelMatrix = glm::mat4(1.0f);
+    }
+    modelMatrix = glm::translate(modelMatrix, position);
+    modelMatrix = modelMatrix * glm::mat4_cast(rotation);
+    modelMatrix = glm::scale(modelMatrix, scale);
+
+    for(Gameobject* child : children){
+        child->updateModelMatrix();
+    }
 }
 
 void Gameobject::update(){
