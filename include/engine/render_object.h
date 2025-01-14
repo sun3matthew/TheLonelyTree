@@ -7,11 +7,13 @@
 
 class RenderObject{
     public:
-        std::string shaderName;
+        std::vector<std::string> shaderNames;
         glm::mat4 modelMatrix;
 
-        RenderObject(std::string name);
+        RenderObject();
         virtual ~RenderObject() = default;
+
+        void addShader(std::string shaderName);
 
         void draw();
         virtual void drawCall(Shader*) = 0;

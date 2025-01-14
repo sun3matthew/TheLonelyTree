@@ -24,21 +24,19 @@ class Mesh : public RenderObject{
 
         std::vector<Texture>      textures;
 
-        std::string shaderName;
-
-        Mesh(std::string shaderName, std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures);
-        Mesh(std::string shaderName, std::vector<Vertex> vertices, std::vector<Texture> textures);
-        Mesh(std::string shaderName, std::vector<Vertex> vertices, std::vector<unsigned int> indices);
-        Mesh(std::string shaderName, std::vector<Vertex> vertices);
+        Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures);
+        Mesh(std::vector<Vertex> vertices, std::vector<Texture> textures);
+        Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices);
+        Mesh(std::vector<Vertex> vertices);
         // TODO add destructor
 
         void drawCall(Shader* shader) override;
-        void updateTextures(std::vector<Texture> textures);
+        void updateTexture(Texture);
     private:
         //  render data
         unsigned int VAO, VBO, EBO;
 
-        std::vector<unsigned int> generateIndices(const std::vector<Vertex>& vertices);
+        std::vector<unsigned int> generateIndices(const std::vector<Vertex>&);
         void setupMesh();
 };  
 

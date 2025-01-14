@@ -4,35 +4,30 @@
 #include <string>
 
 // Maybe look into using pointer..? but tbh you shouldn't be loading meshes during play
-Mesh::Mesh(std::string shaderName, 
-           std::vector<Vertex> verticesIn, 
+Mesh::Mesh(std::vector<Vertex> verticesIn, 
            std::vector<unsigned int> indicesIn, 
            std::vector<Texture> texturesIn)
-    : RenderObject(shaderName), 
-      vertices(std::move(verticesIn)), 
+    : vertices(std::move(verticesIn)), 
       indices(std::move(indicesIn)), 
       textures(std::move(texturesIn))
 {
+    if(indices.size() == 0)
+        indices = generateIndices(vertices);
     setupMesh();
 }
 
-Mesh::Mesh(std::string shaderName, 
-           std::vector<Vertex> verticesIn, 
+Mesh::Mesh(std::vector<Vertex> verticesIn, 
            std::vector<unsigned int> indicesIn)
-    : Mesh(shaderName, std::move(verticesIn), std::move(indicesIn), 
-           {Texture::defaultDiffuse(), Texture::defaultSpecular()})
+    : Mesh(std::move(verticesIn), std::move(indicesIn), {})
 {}
 
-Mesh::Mesh(std::string shaderName, 
-           std::vector<Vertex> verticesIn, 
+Mesh::Mesh(std::vector<Vertex> verticesIn, 
            std::vector<Texture> texturesIn)
-    : Mesh(shaderName, std::move(verticesIn), generateIndices(verticesIn), std::move(texturesIn))
+    : Mesh(std::move(verticesIn), {}, std::move(texturesIn))
 {}
 
-Mesh::Mesh(std::string shaderName, 
-           std::vector<Vertex> verticesIn)
-    : Mesh(shaderName, std::move(verticesIn), generateIndices(verticesIn), 
-           {Texture::defaultDiffuse(), Texture::defaultSpecular(), Texture::defaultGlossy()})
+Mesh::Mesh(std::vector<Vertex> verticesIn)
+    : Mesh(std::move(verticesIn), {}, {})
 {}
 
 // Helper function to generate default indices
@@ -44,10 +39,14 @@ std::vector<unsigned int> Mesh::generateIndices(const std::vector<Vertex>& verti
     return indices;
 }
 
-
-//TODO Encapsulate better
-void Mesh::updateTextures(std::vector<Texture> textures){
-    this->textures = textures;
+void Mesh::updateTexture(Texture newTexture){
+    for(int i = 0; i < textures.size(); i++){
+        if(textures[i].type == newTexture.type){
+            textures[i] = newTexture;
+            return;
+        }
+    }
+    textures.push_back(newTexture);
 }
 
 void Mesh::setupMesh()
@@ -80,25 +79,30 @@ void Mesh::drawCall(Shader* shader)
 
     shader->setMat4("model", glm::value_ptr(modelMatrix));
 
-    unsigned int diffuseNr = 1;
-    unsigned int specularNr = 1;
-    unsigned int glossyNr = 1;
+    // unsigned int diffuseNr = 1;
+    // unsigned int specularNr = 1;
+    // unsigned int glossyNr = 1;
+    // unsigned int glossyNr = 1;
     for(unsigned int i = 0; i < textures.size(); i++)
     {
-        glActiveTexture(GL_TEXTURE0 + i); // activate proper texture unit before binding
+        // glActiveTexture(GL_TEXTURE0 + i); // activate proper texture unit before binding
         std::string number;
         // std::string name = textures[i].type;
 
         TextureType type = textures[i].type;
-        if(type == TextureType::Diffuse)
-            number = std::to_string(diffuseNr++);
-        else if(type == TextureType::Specular)
-            number = std::to_string(specularNr++);
-        else if(type == TextureType::Glossy)
-            number = std::to_string(glossyNr++);
+        // if(type == TextureType::Diffuse)
+        //     number = std::to_string(diffuseNr++);
+        // else if(type == TextureType::Specular)
+        //     number = std::to_string(specularNr++);
+        // else if(type == TextureType::Glossy)
+        //     number = std::to_string(glossyNr++);
+        // else if(type == TextureType::CubeMap
+        //     number = std::to_string(glossyNr++);
 
+        number = "1";
         shader->setInt(("material." + TextureTypeToString(type) + number).c_str(), i);
-        glBindTexture(GL_TEXTURE_2D, textures[i].getID());
+        textures[i].bind(i);
+        // glBindTexture(GL_TEXTURE_2D, textures[i].getID());
     }
     glActiveTexture(GL_TEXTURE0);
 

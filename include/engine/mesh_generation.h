@@ -5,6 +5,7 @@
 #include <vector>
 #include <engine/constants.h>
 #include <PerlinNoise.hpp>
+#include <engine/mesh_generation_buffers.h>
 
 
 class MeshGeneration {
@@ -45,8 +46,37 @@ public:
             }
         }
 
-        //TODO Investigate performance on the fact that this is copied.
-        return new Mesh("model", std::move(vertices), std::move(indices));
+        return new Mesh(std::move(vertices), std::move(indices), {Texture::defaultDiffuse(), Texture::defaultSpecular(), Texture::defaultGlossy()});
+    }
+
+    static Mesh* Cube(){
+        std::vector<Vertex> vertices;
+        std::vector<float> cubeData = MeshGenerationBuffers::cube();
+
+        for(int i = 0; i < cubeData.size(); i += 8){
+            Vertex vertex;
+            vertex.Position = glm::vec3(cubeData[i], cubeData[i + 1], cubeData[i + 2]);
+            vertex.Normal = glm::vec3(cubeData[i + 3], cubeData[i + 4], cubeData[i + 5]);
+            vertex.TexCoords = glm::vec2(cubeData[i + 6], cubeData[i + 7]);
+            vertices.push_back(vertex);
+        }
+
+        std::cout << vertices.size() << std::endl;
+
+        return new Mesh(std::move(vertices), {Texture::defaultDiffuse(), Texture::defaultSpecular(), Texture::defaultGlossy()});
+    }
+
+    static Mesh* SkyMap(){
+        std::vector<Vertex> vertices;
+        std::vector<float> cubeData = MeshGenerationBuffers::skyMap();
+
+        for(int i = 0; i < cubeData.size(); i += 3){
+            Vertex vertex;
+            vertex.Position = glm::vec3(cubeData[i], cubeData[i + 1], cubeData[i + 2]);
+            vertices.push_back(vertex);
+        }
+
+        return new Mesh(std::move(vertices));
     }
 
     static Mesh* Plane(int xSegments, int ySegments){
@@ -78,7 +108,7 @@ public:
             }
         }
 
-        return new Mesh("model", std::move(vertices), std::move(indices));
+        return new Mesh(std::move(vertices), std::move(indices), {Texture::defaultDiffuse(), Texture::defaultSpecular(), Texture::defaultGlossy()});
     }
 
     static Mesh* Terrain(unsigned int seed, int xSegments, int ySegments){
@@ -147,10 +177,14 @@ public:
             }
         }
 
-        return new Mesh("model", std::move(vertices), std::move(indices)
-            ,std::vector<Texture>{Texture::diffuse(0x80, 0x9D, 0x3C), Texture::specular(0, 0, 0), Texture::defaultGlossy()}
+        return new Mesh(std::move(vertices), std::move(indices)
+            ,std::vector<Texture>{Texture::diffuse(0x80, 0x7D, 0x73), Texture::specular(0, 0, 0), Texture::defaultGlossy()}
         );
+        // #807d73
+        // #809D3C
     }
+
+
 private:
     // Private constructor to prevent instantiation
     MeshGeneration() = delete;

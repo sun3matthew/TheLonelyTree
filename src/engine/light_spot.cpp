@@ -10,6 +10,7 @@ LightSpot::LightSpot(glm::vec3 pos, glm::vec3 att, unsigned int idx, glm::vec3 a
 void LightSpot::update(){
     std::vector<Shader*> shaders = RenderManager::instance.getShadersAccepting("pointLights");
     for(Shader* shader : shaders){
+        shader->use();
         shader->setVec3("pointLights[" + std::to_string(index) + "].position", position.x, position.y, position.z);
         shader->setVec3("pointLights[" + std::to_string(index) + "].attenuation", attenuation.x, attenuation.y, attenuation.z);
         shader->setVec3("pointLights[" + std::to_string(index) + "].lightingData.ambient", ambient.x, ambient.y, ambient.z);

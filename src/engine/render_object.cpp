@@ -2,12 +2,14 @@
 #include <engine/render_manager.h>
 #include <cassert>
 
-RenderObject::RenderObject(std::string name)
-    : shaderName(name)
-{
-    assert(RenderManager::instance.getShader(name));
+RenderObject::RenderObject(){}
+
+void RenderObject::addShader(std::string shaderName){
+    shaderNames.push_back(shaderName);
 }
 
 void RenderObject::draw(){
-    drawCall(RenderManager::instance.getShader(shaderName));
+    for(std::string shaderName : shaderNames){
+        drawCall(RenderManager::instance.getShader(shaderName));
+    }
 }

@@ -28,6 +28,8 @@ class RenderManager{
         void draw();
     private:
         std::unordered_map<std::string, Shader*> shaders;
+        
+        // TODO render orders
         std::vector<RenderObject*> renderBuffer;
 };
 

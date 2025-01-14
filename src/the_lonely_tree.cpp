@@ -18,7 +18,7 @@
 // Camera 
 TheLonelyTree::TheLonelyTree()
 {
-    createWindow(800, 600, "The Lonely Tree");
+    createWindow(800 * 1.5f, 600 * 1.5f, "The Lonely Tree");
     lockCursor(true);
 }
 
@@ -31,6 +31,9 @@ void TheLonelyTree::start(){
     RenderManager::instance.addShader(
         new Shader("model", "resources/shaders/model.vert", "resources/shaders/model.frag",
             std::vector<std::string>{"camera", "dirLight", "pointLights"}));
+    RenderManager::instance.addShader(
+        new Shader("skyBox", "resources/shaders/skybox.vert", "resources/shaders/skybox.frag",
+            std::vector<std::string>{"cameraSkyBox"}));
 
     Gameobject* camera = new Gameobject("Camera");
     this->camera = new Camera(
@@ -51,21 +54,58 @@ void TheLonelyTree::start(){
     addGameobject(directionalLight);
 
     // Gameobject* backpack = GLTFLoader::loadMesh("resources/models/backpack/scene.gltf");
-    // Gameobject* backpack = GLTFLoader::loadMesh("resources/models/backpack/scene.gltf");
+    // std::list<Gameobject*> allChildren = backpack->getAllChildren();
+    // for(Gameobject* child : allChildren){
+    //     MeshComp* meshComp = child -> getComponent<MeshComp>();
+    //     if(meshComp){
+    //         meshComp->getMesh()->addShader("model");
+    //     }
+    // }
     // addGameobject(backpack);
     // backpack->setScale(glm::vec3(0.01f));
 
-    Gameobject* sphere = new Gameobject("Sphere");
-    sphere->addComponent(new MeshComp(MeshGeneration::Sphere(32, 32)));
-    addGameobject(sphere);
-    sphere->setPosition(glm::vec3(0, 3, 0));
-
     Gameobject* plane = new Gameobject("Plane");
-    plane->addComponent(new MeshComp(MeshGeneration::Terrain(12923952u, 64, 64)));
+    Mesh* terrainMesh = MeshGeneration::Terrain(12923952u, 256, 256);
+    terrainMesh->addShader("model");
+    plane->addComponent(new MeshComp(terrainMesh));
     addGameobject(plane);
 
-    plane->setPosition(glm::vec3(0, -3, 0));
-    plane->setScale(glm::vec3(90, 10, 90));
+    Gameobject* sphere = new Gameobject("Sphere");
+    Mesh* sphereMesh = MeshGeneration::Sphere(32, 32);
+    sphereMesh->addShader("model");
+    sphere->addComponent(new MeshComp(sphereMesh));
+    addGameobject(sphere);
+
+    Gameobject* cube = new Gameobject("Cube");
+    Mesh* cubeMesh = MeshGeneration::Cube();
+    cubeMesh->addShader("model");
+    cube->addComponent(new MeshComp(cubeMesh));
+    addGameobject(cube);
+
+    std::string path = "resources/textures/cubemaps/sky/";
+    std::vector<std::string> faces = {
+        path + "right.jpg",
+        path + "left.jpg",
+        path + "top.jpg",
+        path + "bottom.jpg",
+        path + "front.jpg",
+        path + "back.jpg"
+    };
+    Gameobject* skyBox = new Gameobject("SkyBox");
+    Mesh* skyBoxMesh = MeshGeneration::SkyMap();
+    skyBoxMesh->addShader("skyBox");
+    skyBoxMesh->updateTexture(Texture(faces));
+    skyBox->addComponent(new MeshComp(skyBoxMesh));
+    addGameobject(skyBox);
+
+    sphere->setPosition(glm::vec3(0, 3, 0));
+    cube->setPosition(glm::vec3(0, -3, 0));
+
+    float worldSize = 1200.0f;
+    plane->setPosition(glm::vec3(0, -50, 0));
+    plane->setScale(glm::vec3(worldSize, 50, worldSize));
+    
+
 }
 
 void TheLonelyTree::update(){
@@ -97,7 +137,7 @@ void TheLonelyTree::update(){
         numLights++;
         RenderManager::instance.getShadersAccepting("pointLights")[0]->setInt("numPointLights", numLights);
     }
-    std::cout << "FPS: " << FPS() << std::endl;
+    // std::cout << "FPS: " << FPS() << std::endl;
 }
 
 void TheLonelyTree::lateUpdate() {}

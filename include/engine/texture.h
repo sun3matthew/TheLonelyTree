@@ -2,6 +2,7 @@
 #define TEXTURE_H
 
 #include <engine/texture_type.h>
+#include <vector>
 
 class Texture
 {
@@ -11,6 +12,7 @@ public:
 
     Texture(const char* path, TextureType type);
     Texture(const unsigned char* data, int width, int height, int nChannels, TextureType type);
+    Texture(std::vector<std::string> faces);
     // TODO add a destructor to clean up openGL
 
     void bind(int textureUnit);

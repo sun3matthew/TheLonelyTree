@@ -1,7 +1,10 @@
 
 #include <engine/gameobject.h>
 
-#include "glm/gtc/matrix_transform.hpp"
+#include <glm/gtc/matrix_transform.hpp>
+#include <stack>
+
+#define MAX_ITERATION 10000
 
 
 Gameobject::Gameobject()
@@ -27,6 +30,30 @@ Gameobject::~Gameobject(){
         delete child;
     }
     children.clear();
+}
+
+std::list<Gameobject*> Gameobject::getChildren(){
+    return children;
+}
+
+std::list<Gameobject*> Gameobject::getAllChildren(){
+    std::list<Gameobject*> allChildren;
+    std::stack<Gameobject*> gameobjects;
+    for(Gameobject* child : children){
+        gameobjects.push(child);
+    }
+
+    for(int i = 0; i < MAX_ITERATION && !gameobjects.empty(); i++){
+        assert(i != MAX_ITERATION - 1);
+        Gameobject* gameobject = gameobjects.top();
+        allChildren.push_back(gameobject);
+        gameobjects.pop();
+
+        for(Gameobject* child : gameobject->children){
+            gameobjects.push(child);
+        }
+    }
+    return std::move(allChildren);
 }
 
 void Gameobject::addComponent(Component* component){

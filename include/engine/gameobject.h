@@ -2,6 +2,7 @@
 #define GAMEOBJECT_H
 
 #include <list>
+#include <vector>
 #include <string>
 
 #include <engine/component.h>
@@ -24,6 +25,9 @@ class Gameobject{
         template <typename T>
         std::vector<T*> getComponents();
         void removeComponent(Component*);
+
+        std::list<Gameobject*> getChildren();
+        std::list<Gameobject*> getAllChildren();
 
         void setParent(Gameobject*);
 

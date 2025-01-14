@@ -79,7 +79,7 @@ const std::vector<Gameobject*> processMesh(tinygltf::Mesh &mesh, glm::mat4 &tran
         // std::cout << primitive.material << std::endl;
         // Extract indices
         
-        Mesh* generatedMesh = new Mesh("model", vertices, indices, mats[primitive.material]);
+        Mesh* generatedMesh = new Mesh(vertices, indices, mats[primitive.material]);
         Gameobject* gameobject = new Gameobject(mesh.name + " " + std::to_string(i));
         gameobject->addComponent(new MeshComp(generatedMesh));
         gameobjects.push_back(gameobject);
