@@ -6,7 +6,7 @@
 #include <tiny_gltf.h>
 
 #include <engine/gltf_loader.h>
-#include <engine/mesh_comp.h>
+#include <engine/render_object_component.h>
 #include <engine/mesh.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <vector>
@@ -81,7 +81,7 @@ const std::vector<Gameobject*> processMesh(tinygltf::Mesh &mesh, glm::mat4 &tran
         
         Mesh* generatedMesh = new Mesh(vertices, indices, mats[primitive.material]);
         Gameobject* gameobject = new Gameobject(mesh.name + " " + std::to_string(i));
-        gameobject->addComponent(new MeshComp(generatedMesh));
+        gameobject->addComponent(new RenderObjectComponent(generatedMesh));
         gameobjects.push_back(gameobject);
     }
     return gameobjects;

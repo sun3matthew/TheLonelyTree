@@ -61,8 +61,6 @@ public:
             vertices.push_back(vertex);
         }
 
-        std::cout << vertices.size() << std::endl;
-
         return new Mesh(std::move(vertices), {Texture::defaultDiffuse(), Texture::defaultSpecular(), Texture::defaultGlossy()});
     }
 

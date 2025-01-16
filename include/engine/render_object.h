@@ -7,8 +7,9 @@
 
 class RenderObject{
     public:
-        std::vector<std::string> shaderNames;
         glm::mat4 modelMatrix;
+
+        std::vector<std::string> shaderNames;
 
         RenderObject();
         virtual ~RenderObject() = default;
