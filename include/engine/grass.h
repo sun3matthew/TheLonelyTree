@@ -19,16 +19,13 @@ class Grass : public RenderObject{
     public:
         // mesh data
         std::vector<PrimitiveVertex> vertices;
-        
-        std::vector<glm::vec3> positions;
-
-        Grass(std::vector<PrimitiveVertex> vertices);
+        Grass();
         // TODO add destructor
 
         void drawCall(Shader* shader) override;
     private:
         //  render data
-        unsigned int VAO, VBO, instanceVBO;
+        unsigned int VAO, VBO;
 
         void setupMesh();
 };  

@@ -20,8 +20,11 @@ static char* readShaderFile(const char* filepath){
     fclose(file);
     return content;
 }
-
 Shader::Shader(std::string nameIn, const char* vertexPath, const char* fragmentPath, std::vector<std::string> canAcceptList)
+    : Shader(nameIn, vertexPath, nullptr, fragmentPath, std::move(canAcceptList))
+{}
+
+Shader::Shader(std::string nameIn, const char* vertexPath, const char* geometryPath, const char* fragmentPath, std::vector<std::string> canAcceptList)
     : name(nameIn)
 {
     for(std::string attribute : canAcceptList){
@@ -43,6 +46,20 @@ Shader::Shader(std::string nameIn, const char* vertexPath, const char* fragmentP
     }
     free(vertexShaderSource);
 
+    unsigned int geometryShader;
+    if(geometryPath){
+        char *geometryShaderSource = readShaderFile(geometryPath);
+        geometryShader = glCreateShader(GL_GEOMETRY_SHADER);
+        glShaderSource(geometryShader, 1, &geometryShaderSource, NULL);
+        glCompileShader(geometryShader);
+        glGetShaderiv(geometryShader, GL_COMPILE_STATUS, &success);
+        if(!success){
+            glGetShaderInfoLog(geometryShader, 512, NULL, infoLog);
+            std::cout << "ERROR::SHADER::GEOMETRY::COMPILATION_FAILED\n" << infoLog << std::endl;
+        }
+        free(geometryShaderSource);
+    }
+
     char *fragmentShaderSource = readShaderFile(fragmentPath);
     unsigned int fragmentShader;
     fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
@@ -57,6 +74,8 @@ Shader::Shader(std::string nameIn, const char* vertexPath, const char* fragmentP
 
     ID = glCreateProgram();
     glAttachShader(ID, vertexShader);
+    if (geometryPath)
+        glAttachShader(ID, geometryShader);
     glAttachShader(ID, fragmentShader);
     glLinkProgram(ID);
     glGetProgramiv(ID, GL_LINK_STATUS, &success);
@@ -66,6 +85,8 @@ Shader::Shader(std::string nameIn, const char* vertexPath, const char* fragmentP
     }
 
     glDeleteShader(fragmentShader); 
+    if (geometryPath)
+        glDeleteShader(geometryShader);
     glDeleteShader(vertexShader);
 }
 

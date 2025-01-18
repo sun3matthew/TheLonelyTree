@@ -37,7 +37,7 @@ void TheLonelyTree::start(){
         new Shader("skyBox", "resources/shaders/skybox.vert", "resources/shaders/skybox.frag",
             std::vector<std::string>{"cameraSkyBox"}));
     RenderManager::instance.addShader(
-        new Shader("grass", "resources/shaders/grass.vert", "resources/shaders/grass.frag",
+        new Shader("grass", "resources/shaders/grass.vert", "resources/shaders/grass.geom", "resources/shaders/grass.frag",
             std::vector<std::string>{"camera", "dirLight"}));
 
     Gameobject* camera = new Gameobject("Camera");
@@ -79,11 +79,12 @@ void TheLonelyTree::start(){
     plane->setScale(glm::vec3(worldSize, 50, worldSize));
     
 
-    Gameobject* sphere = new Gameobject("Sphere");
-    Mesh* sphereMesh = MeshGeneration::Sphere(32, 32);
-    sphereMesh->addShader("model");
-    sphere->addComponent(new RenderObjectComponent(sphereMesh));
-    addGameobject(sphere);
+    // Gameobject* sphere = new Gameobject("Sphere");
+    // Mesh* sphereMesh = MeshGeneration::Sphere(32, 32);
+    // sphereMesh->addShader("model");
+    // sphere->addComponent(new RenderObjectComponent(sphereMesh));
+    // addGameobject(sphere);
+    // sphere->setPosition(glm::vec3(0, 3, 0));
 
     Gameobject* cube = new Gameobject("Cube");
     Mesh* cubeMesh = MeshGeneration::Cube();
@@ -92,17 +93,7 @@ void TheLonelyTree::start(){
     addGameobject(cube);
 
     Gameobject* grass = new Gameobject("Grass");
-    PrimitiveVertex pos1;
-    pos1.Position = glm::vec3(-0.5, -0.5, 0);
-    pos1.Normal = glm::vec3(1, 0, 1);
-    PrimitiveVertex pos2;
-    pos2.Position = glm::vec3(0.5, -0.5, 0);
-    pos2.Normal = glm::vec3(1, 0, 1);
-    PrimitiveVertex pos3;
-    pos3.Position = glm::vec3(0, 0.5, 0);
-    pos3.Normal = glm::vec3(1, 0, 1);
-    std::vector<PrimitiveVertex> vertices = {pos1, pos2, pos3};
-    Grass* grassMesh = new Grass(vertices);
+    Grass* grassMesh = new Grass();
     grassMesh->addShader("grass");
     grass->addComponent(new RenderObjectComponent(grassMesh));
     addGameobject(grass);
@@ -123,10 +114,7 @@ void TheLonelyTree::start(){
     skyBox->addComponent(new RenderObjectComponent(skyBoxMesh));
     addGameobject(skyBox);
 
-    sphere->setPosition(glm::vec3(0, 3, 0));
     cube->setPosition(glm::vec3(0, -3, 0));
-
-
 }
 
 void TheLonelyTree::update(){

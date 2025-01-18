@@ -16,6 +16,7 @@ public:
   
     // constructor reads and builds the shader
     Shader(std::string nameIn, const char* vertexPath, const char* fragmentPath, std::vector<std::string> canAcceptList);
+    Shader(std::string nameIn, const char* vertexPath, const char* geometryPath, const char* fragmentPath, std::vector<std::string> canAcceptList);
     // use/activate the shader
     void use();
     // utility uniform functions

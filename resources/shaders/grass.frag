@@ -56,4 +56,5 @@ void main()
     // vec3 result 
 
     FragColor = vec4(BaseColor, 1.0);
+    // FragColor = vec4(1.0);
 }
