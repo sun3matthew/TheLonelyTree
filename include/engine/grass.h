@@ -26,6 +26,7 @@ class Grass : public RenderObject{
     private:
         //  render data
         unsigned int VAO, VBO;
+        float time;
 
         void setupMesh();
 };  

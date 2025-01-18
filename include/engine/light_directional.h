@@ -10,6 +10,7 @@ class LightDirectional : public Light{
         void update() override;
 
     private:
+        float angle;
         glm::vec3 direction;
 };
 

@@ -3,14 +3,38 @@
 #include <engine/grass.h>
 #include <string>
 
+#include <PerlinNoise.hpp>
+
 Grass::Grass(){
+    time = 0;
     // for(int i = 0; i < 10000; i++){
     //     positions.push_back(glm::vec3(i / 100, i % 100, 0));
     // }
-    for(int x = 0; x < 4000; x++){
-        for(int y = 0; y < 4000; y++){
+
+    const siv::PerlinNoise perlin{ 12923952u };
+
+    // for(int x = 0; x < 1000; x++){
+    //     float sampleX = (x / 1000.0) * 256;
+    //     for(int y = 0; y < 1000; y++){
+    //         float sampleY = (y / 1000.0) * 256;
+    //         float noise = perlin.octave2D_01((x * 0.08), (y * 0.08), 16);
+
+    //         PrimitiveVertex vertex;
+    //         vertex.Position = glm::vec3(x * 1.0, (noise * 50) - 50, y * 1.0);
+    //         vertices.push_back(vertex);
+    //         // positions.push_back(glm::vec3(x * 4, 0, y * 4));
+    //     }
+    // }
+    for(int x = 0; x < 1000; x++){
+        float sampleX = x / 1000.0f * 256;
+        for(int y = 0; y < 1000; y++){
+            float sampleY = y / 1000.0f * 256;
+            float noise = perlin.octave2D_01((sampleX * 0.02), (sampleY * 0.02), 16);
+
             PrimitiveVertex vertex;
-            vertex.Position = glm::vec3(x * 0.1, 0, y * 0.1);
+            // vertex.Position = glm::vec3((x / 256.0) * 1000, (noise * 50) - 50, (y / 256.0) * 1000);
+            // vertex.Position = glm::vec3((x / 256.0) * 1000, 0, (y / 256.0) * 1000);
+            vertex.Position = glm::vec3(x/2.0, (noise * 50) - 50, y/2.0);
             vertices.push_back(vertex);
             // positions.push_back(glm::vec3(x * 4, 0, y * 4));
         }
@@ -49,6 +73,8 @@ void Grass::setupMesh()
 void Grass::drawCall(Shader* shader) 
 {
     shader->use();
+    time += 0.1;
+    shader->setFloat("time", time);
 
     glBindVertexArray(VAO);
     // Specify the mode, starting index, vertex count, and instance count

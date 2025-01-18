@@ -4,9 +4,13 @@
 
 LightDirectional::LightDirectional(glm::vec3 dir, glm::vec3 amb, glm::vec3 diff, glm::vec3 spec)
     : Light(amb, diff, spec), direction(dir)
-{}
+{
+    angle = 0;
+}
 
 void LightDirectional::update(){
+    angle += 0.02;
+    direction = glm::vec3(cos(angle), sin(angle), 0);
     std::vector<Shader*> shaders = RenderManager::instance.getShadersAccepting("dirLight");
     for(Shader* shader : shaders){
         shader->use();

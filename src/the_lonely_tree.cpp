@@ -53,8 +53,8 @@ void TheLonelyTree::start(){
     Gameobject* directionalLight = new Gameobject("Directional Light");
     directionalLight->addComponent(new LightDirectional(
         glm::vec3(-3.0f, -1.0f, -0.0f),
-        glm::vec3(0.35f, 0.35f, 0.35f),
-        glm::vec3(0.65f, 0.65f, 0.65f),
+        glm::vec3(0.45f, 0.45f, 0.45f),
+        glm::vec3(0.25f, 0.25f, 0.25f),
         glm::vec3(0.9f, 0.9f, 0.9f)));
     addGameobject(directionalLight);
 
@@ -74,8 +74,8 @@ void TheLonelyTree::start(){
     terrainMesh->addShader("model");
     plane->addComponent(new RenderObjectComponent(terrainMesh));
     addGameobject(plane);
-    float worldSize = 1200.0f;
-    plane->setPosition(glm::vec3(0, -50, 0));
+    float worldSize = 500.0f;
+    plane->setPosition(glm::vec3(worldSize/2, -50, worldSize/2));
     plane->setScale(glm::vec3(worldSize, 50, worldSize));
     
 

@@ -118,7 +118,7 @@ public:
             for (unsigned int x = 0; x <= xSegments; ++x){
                 float xSegment = (float)x / (float)xSegments;
                 float ySegment = (float)y / (float)ySegments;
-                float noise = perlin.octave2D_01((x * 0.08), (y * 0.08), 16);
+                float noise = perlin.octave2D_01((x * 0.02), (y * 0.02), 16);
 
                 Vertex vertex;
                 vertex.Position = glm::vec3(xSegment - 0.5f, noise, ySegment - 0.5f);

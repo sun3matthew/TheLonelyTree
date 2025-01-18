@@ -1,7 +1,7 @@
 #version 330 core
 
 layout(points) in;
-layout(triangle_strip, max_vertices = 3) out;
+layout(triangle_strip, max_vertices = 15) out;
 
 uniform mat4 view;
 uniform mat4 projection;
@@ -10,31 +10,50 @@ uniform mat4 projection;
 // in vec3 position;
 
 in float randomHash[];
+in float clumpColor[];
+in vec3 tipPosition[];
+in vec2 facing[];
+in vec3 bezierPoint[];
 
-out vec3 BaseColor;  // Example output for the fragment shader
+out vec3 FragPos;
+out vec3 BaseColor; 
+out vec3 Normal;  
 
 void main() {
     // mat4 model = mat4(1);
     // model = projection * view * model;
     mat4 model = projection * view;
 
-    float segmentSize = 0.5;
-    float grassWidth = 0.2;
-    vec3 grassDirection = vec3(0, 1.0, 0);
+    float segmentSize = 1.1 + (clumpColor[0] * 0.4) + (randomHash[0] * 0.2);
+    float grassWidth = 0.15;
     vec3 segmentPosition = vec3(gl_in[0].gl_Position); 
-    for(int i = 0; i < 1; i++){
-        BaseColor = vec3(i / 7.0, 0.0, 0.0); // Red
+    float colorDarkness = 0.6 + (clumpColor[0] * 0.2) + (randomHash[0] * 0.2);
+    vec3 color = vec3(0.5, 0.61, 0.24) * colorDarkness;
 
-        gl_Position = model * (vec4(segmentPosition, 1.0) + vec4(grassWidth, 0, 0.0, 0.0));
+    vec3 grassOrt = vec3(-facing[0].y, 0, facing[0].x);
+    for(int i = 0; i < 7; i++){
+        float t = (i + 1) / 7.0;
+
+        // BaseColor = (0.5*(t) + 0.5) * color;
+        BaseColor = (0.5*(t) + 0.5) * color;
+        vec3 dx = 2*bezierPoint[0] + 2*t*(tipPosition[0]-2*bezierPoint[0]);
+        // Normal = normalize(cross(dx, grassOrt));
+        Normal = normalize(cross(grassOrt, dx));
+        // Normal = normalize(cross(grassOrt, dx));
+
+        FragPos = segmentPosition + grassOrt * grassWidth;
+        gl_Position = model * vec4(FragPos, 1.0);
+        // gl_Position = model * (vec4(segmentPosition, 1.0) + vec4(grassOrt,0) * grassWidth);
         EmitVertex();
 
-        gl_Position = model * (vec4(segmentPosition, 1.0) - vec4(grassWidth, 0, 0.0, 0.0));
+        FragPos = segmentPosition - grassOrt * grassWidth;
+        gl_Position = model * vec4(FragPos, 1.0);
+        // gl_Position = model * (vec4(segmentPosition, 1.0) - vec4(grassOrt,0) * grassWidth);
         EmitVertex();
 
-        segmentPosition += grassDirection * segmentSize;
+        segmentPosition += (t*2*bezierPoint[0] + t*t*(tipPosition[0]-2*bezierPoint[0])) * segmentSize;
     }
-    // BaseColor = vec3(1, 0.0, 0.0); // Red
-    BaseColor = vec3(randomHash[0], 0.0, 0.0); // Red
+    BaseColor = color;
     gl_Position = model * (vec4(segmentPosition, 1.0));
     EmitVertex();
     
