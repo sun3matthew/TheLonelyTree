@@ -31,12 +31,12 @@ vec3 CalcDirLight(DirectionalLight light, vec3 norm, vec3 viewDir){
     vec3 diffuse = light.lightingData.diffuse * BaseColor;
     diffuse *= max(dot(norm, lightDir), 0.0);
 
-    // vec3 specular = light.lightingData.specular * vec3(1.0, 1.0, 1.0);
-    // vec3 reflectDir = reflect(-lightDir, norm);
-    // specular *= pow(max(dot(viewDir, reflectDir), 0.0), 64);
+    vec3 specular = light.lightingData.specular * vec3(1.0, 1.0, 1.0);
+    vec3 reflectDir = reflect(-lightDir, norm);
+    specular *= pow(max(dot(viewDir, reflectDir), 0.0), 32);
 
-    // return ambient + diffuse + specular;
-    return ambient + diffuse;
+    return ambient + diffuse * 0.6 + specular * 0.2;
+    // return ambient + diffuse;
 }
 
 void main()

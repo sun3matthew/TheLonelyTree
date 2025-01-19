@@ -57,7 +57,7 @@ void main(){
     vec2 clumpDirection = normalize(vec2(2*random((minX) * (minY / 2)) - 1, 2*random(minX + 3.3) - 1));
     vec2 universalDirection = normalize(vec2(1,2));
     float clumpHeight = random(minX * minY) * 0.4 + 0.55 + 0.1 * (random(aPos.x * (aPos.z + 1) - 0.5));
-    // float clumpHeight = 1;
+    clumpHeight *= 2;
     clumpColor = random((minX + 4) * minY);
     
     facing = normalize(vec2(aPos.x - minX, aPos.z - minY));
@@ -77,13 +77,14 @@ void main(){
 
 
 
-    float tiltPointT = 0.82;
-    float tiltAmount = 0.56;
+    float tiltPointT = 0.76;
+    // float tiltAmount = 0.56;
+    float tiltAmount = 0.6;
     // tiltAmount *= clumpHeight;
-    // vec3 tiltPoint = tiltPointT * tipPosition;
-    // vec3 grassNormal = normalize(cross(cross(tipPosition, vec3(0, 1, 0)),tipPosition));
-    // bezierPoint = tiltPoint + grassNormal * tiltAmount;
-    bezierPoint = (tiltPointT * tipPosition) + (normalize(cross(cross(tipPosition, vec3(0, 1, 0)),tipPosition))) * tiltAmount;
+    vec3 tiltPoint = tiltPointT * tipPosition;
+    vec3 grassNormal = normalize(cross(cross(tipPosition, vec3(0, 1, 0)),tipPosition));
+    bezierPoint = tiltPoint + grassNormal * tiltAmount;
+    // bezierPoint = (tiltPointT * tipPosition) + (normalize(cross(cross(tipPosition, vec3(0, 1, 0)),tipPosition))) * tiltAmount;
 
     float clumpAmt = 0.3 * randomHash;
     gl_Position = vec4(aPos - vec3(facing.x * clumpAmt, 0, facing.y * clumpAmt), 1.0)
