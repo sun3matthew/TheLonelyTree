@@ -79,7 +79,7 @@ void Camera::updateCameraVectors() {
 
 void Camera::update(){
     glm::mat4 view = GetViewMatrix();
-    glm::mat4 projection = glm::perspective(glm::radians(Zoom), 800.0f / 600.0f, 0.1f, 1000.0f);
+    glm::mat4 projection = glm::perspective(glm::radians(Zoom), 800.0f / 600.0f, 0.1f, 8000.0f);
 
     std::vector<Shader*> shaders = RenderManager::instance.getShadersAccepting("camera");
     for(Shader* shader : shaders){

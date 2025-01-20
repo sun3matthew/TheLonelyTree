@@ -79,31 +79,8 @@ void Mesh::drawCall(Shader* shader)
 
     shader->setMat4("model", glm::value_ptr(modelMatrix));
 
-    // unsigned int diffuseNr = 1;
-    // unsigned int specularNr = 1;
-    // unsigned int glossyNr = 1;
-    // unsigned int glossyNr = 1;
     for(unsigned int i = 0; i < textures.size(); i++)
-    {
-        // glActiveTexture(GL_TEXTURE0 + i); // activate proper texture unit before binding
-        std::string number;
-        // std::string name = textures[i].type;
-
-        TextureType type = textures[i].type;
-        // if(type == TextureType::Diffuse)
-        //     number = std::to_string(diffuseNr++);
-        // else if(type == TextureType::Specular)
-        //     number = std::to_string(specularNr++);
-        // else if(type == TextureType::Glossy)
-        //     number = std::to_string(glossyNr++);
-        // else if(type == TextureType::CubeMap
-        //     number = std::to_string(glossyNr++);
-
-        number = "1";
-        shader->setInt(("material." + TextureTypeToString(type) + number).c_str(), i);
-        textures[i].bind(i);
-        // glBindTexture(GL_TEXTURE_2D, textures[i].getID());
-    }
+        shader->setTexture(&textures[i], i);
     glActiveTexture(GL_TEXTURE0);
 
     // draw mesh

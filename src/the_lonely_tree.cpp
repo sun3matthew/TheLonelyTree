@@ -17,6 +17,8 @@
 #include <engine/light_directional.h>
 #include <engine/light_spot.h>
 
+#include <world_generation.h>
+
 // Camera 
 TheLonelyTree::TheLonelyTree()
 {
@@ -70,13 +72,13 @@ void TheLonelyTree::start(){
     // backpack->setScale(glm::vec3(0.01f));
 
     Gameobject* plane = new Gameobject("Plane");
-    Mesh* terrainMesh = MeshGeneration::Terrain(12923952u, 256, 256);
+    Mesh* terrainMesh = WorldGeneration::createWorld(12923952u, 120, 1024, 4);
     terrainMesh->addShader("model");
     plane->addComponent(new RenderObjectComponent(terrainMesh));
     addGameobject(plane);
-    float worldSize = 500.0f;
-    plane->setPosition(glm::vec3(worldSize/2, -50, worldSize/2));
-    plane->setScale(glm::vec3(worldSize, 50, worldSize));
+    // float worldSize = 500.0f;
+    // plane->setPosition(glm::vec3(worldSize/2, -50, worldSize/2));
+    // plane->setScale(glm::vec3(worldSize, 50, worldSize));
     
 
     // Gameobject* sphere = new Gameobject("Sphere");

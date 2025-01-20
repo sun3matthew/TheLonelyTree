@@ -2,6 +2,7 @@
 #define SHADER_H
 
 #include <string>
+#include <engine/texture.h>
 #include <unordered_set>
 
 class Shader
@@ -25,6 +26,7 @@ public:
     void setFloat(const std::string &name, float value) const;
     void setVec3(const std::string &name, float x, float y, float z) const;
     void setMat4(const std::string &name, float *value) const;
+    void setTexture(Texture* texture, int textureID) const;
 
     int getID();
     std::string getName();

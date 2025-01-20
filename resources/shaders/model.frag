@@ -1,11 +1,9 @@
 #version 330 core
 
 
-struct Material {
-    sampler2D diffuse1;
-    sampler2D specular1;
-    sampler2D glossy1;
-}; 
+uniform sampler2D diffuse;
+uniform sampler2D specular;
+uniform sampler2D glossy;
 
 struct LightingData {
     vec3 ambient;
@@ -29,7 +27,6 @@ uniform DirectionalLight dirLight;
 uniform int numPointLights;
 uniform PointLight pointLights[MAX_POINT_LIGHTS];
 
-uniform Material material;
 uniform vec3 viewPos;
 
 in vec3 Normal;
@@ -41,14 +38,14 @@ out vec4 FragColor;
 vec3 CalcDirLight(DirectionalLight light, vec3 norm, vec3 viewDir){
     vec3 lightDir = normalize(-light.direction.xyz);
 
-    vec3 ambient = light.lightingData.ambient * vec3(texture(material.diffuse1, TexCoords));
+    vec3 ambient = light.lightingData.ambient * vec3(texture(diffuse, TexCoords));
 
-    vec3 diffuse = light.lightingData.diffuse * vec3(texture(material.diffuse1, TexCoords));
+    vec3 diffuse = light.lightingData.diffuse * vec3(texture(diffuse, TexCoords));
     diffuse *= max(dot(norm, lightDir), 0.0);
 
-    vec3 specular = light.lightingData.specular * vec3(texture(material.specular1, TexCoords));
+    vec3 specular = light.lightingData.specular * vec3(texture(specular, TexCoords));
     vec3 reflectDir = reflect(-lightDir, norm);
-    float glossy = float(texture(material.glossy1, TexCoords)) * 100;
+    float glossy = float(texture(glossy, TexCoords)) * 100;
     specular *= pow(max(dot(viewDir, reflectDir), 0.0), 64);
 
     return ambient + diffuse + specular;
@@ -57,14 +54,14 @@ vec3 CalcDirLight(DirectionalLight light, vec3 norm, vec3 viewDir){
 vec3 CalcPointLight(PointLight light, vec3 norm, vec3 FragPos, vec3 viewDir){
     vec3 lightDir = normalize(light.position - FragPos);
 
-    vec3 ambient = light.lightingData.ambient * vec3(texture(material.diffuse1, TexCoords));
+    vec3 ambient = light.lightingData.ambient * vec3(texture(diffuse, TexCoords));
 
-    vec3 diffuse = light.lightingData.diffuse * vec3(texture(material.diffuse1, TexCoords));
+    vec3 diffuse = light.lightingData.diffuse * vec3(texture(diffuse, TexCoords));
     diffuse *= max(dot(norm, lightDir), 0.0);
 
-    vec3 specular = light.lightingData.specular * vec3(texture(material.specular1, TexCoords));
+    vec3 specular = light.lightingData.specular * vec3(texture(specular, TexCoords));
     vec3 reflectDir = reflect(-lightDir, norm);
-    float glossy = float(texture(material.glossy1, TexCoords)) * 100;
+    float glossy = float(texture(glossy, TexCoords)) * 100;
     specular *= pow(max(dot(viewDir, reflectDir), 0.0), glossy);
 
     float distance = length(light.position - FragPos);
@@ -82,7 +79,7 @@ void main()
     for(int i = 0; i < numPointLights; i++)
         result += CalcPointLight(pointLights[i], norm, FragPos, viewDir);    
 
-    float a = vec4(texture(material.diffuse1, TexCoords)).a;
+    float a = vec4(texture(diffuse, TexCoords)).a;
 
     if(a < 0.1){
         discard;

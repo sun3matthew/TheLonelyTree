@@ -12,18 +12,20 @@
 
 struct PrimitiveVertex {
     glm::vec3 Position;
-    glm::vec3 Normal;
 };
 
 class Grass : public RenderObject{
     public:
         // mesh data
         std::vector<PrimitiveVertex> vertices;
+
         Grass();
-        // TODO add destructor
+        ~Grass();
 
         void drawCall(Shader* shader) override;
     private:
+
+        Texture* perlinLane;
         //  render data
         unsigned int VAO, VBO;
         float time;

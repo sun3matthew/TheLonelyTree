@@ -1,18 +1,14 @@
 #version 330 core
 
-#define GRID_SIZE 2
+#define GRID_SIZE 6
 
 layout (location = 0) in vec3 aPos;
-layout (location = 1) in vec3 aNormal;
 
 uniform mat4 view;
 uniform mat4 projection;
 uniform float time;
 
-// out VS_OUT {
-//     float randomHash;
-// } vs_out;  // Output block to pass data to the next stage
-// out float tiltAngle;
+uniform sampler2D perlin_lane;
 
 out float randomHash;
 out float clumpColor;
@@ -21,10 +17,8 @@ out vec2 facing;
 out vec3 tipPosition;
 out vec3 bezierPoint;
 
-// out vec3 position;
-// out vec3 Normal;
-// out vec3 FragPos;
-// out vec3 BaseColor;
+out float perlinValue;
+
 float random(float seed) {
     return fract(sin(seed) * 843758.5453123);
 }
@@ -54,22 +48,31 @@ void main(){
         }
     }
 
-    vec2 clumpDirection = normalize(vec2(2*random((minX) * (minY / 2)) - 1, 2*random(minX + 3.3) - 1));
     vec2 universalDirection = normalize(vec2(1,2));
+
+    ivec2 texSize = textureSize(perlin_lane, 0);
+    // vec2 texCoords = vec2(aPos.x/texSize.y, aPos.z/texSize.y);
+    vec2 texCoords = vec2(aPos.x/512/0.5, aPos.z/512/0.5) - universalDirection * (time / 10);
+    float perlin = texture(perlin_lane, texCoords).r;
+    perlinValue = perlin;
+
+    vec2 clumpDirection = normalize(vec2(2*random((minX) * (minY / 2)) - 1, 2*random(minX + 3.3) - 1));
     float clumpHeight = random(minX * minY) * 0.4 + 0.55 + 0.1 * (random(aPos.x * (aPos.z + 1) - 0.5));
-    clumpHeight *= 2;
+    clumpHeight *= 2.4;
     clumpColor = random((minX + 4) * minY);
     
-    facing = normalize(vec2(aPos.x - minX, aPos.z - minY));
-    facing = normalize((facing * 0.2 + clumpDirection * 0.3 + universalDirection * 0.4));
-    // facing = clumpDirection;
+    float perlinTilt = pow(perlinValue + 0.3, 1.6);
 
-    // float tilt = 0.4 + 0.2 * (1 - (sqrt(minDist) / (GRID_SIZE * 3)));
+    facing = normalize(vec2(aPos.x - minX, aPos.z - minY));
+    facing = normalize((facing * 0.1 + clumpDirection * 0.1 + perlinTilt * universalDirection * 0.8));
+
     randomHash = random((aPos.x + 3003) * (aPos.z + 23));
 
     float tilt = 0.4 + 0.3 * (1 - (sqrt(minDist) / (GRID_SIZE * 2)));
     tilt += (randomHash - 0.5) * 0.4;
-    tilt += (sin(time + 10000 * randomHash) * 2 - 1) * 0.04 * randomHash;
+    tilt += (sin(time * (0.2 + 0.3 * randomHash) + 10000 * randomHash)) * 0.04 * randomHash;
+    tilt += perlinValue * 0.05;
+
 
     vec3 grassPosXZ = vec3(facing.x, 0, facing.y) * cos(tilt);
     float grassPosXZDist = length(grassPosXZ);
@@ -78,21 +81,11 @@ void main(){
 
 
     float tiltPointT = 0.76;
-    // float tiltAmount = 0.56;
-    float tiltAmount = 0.6;
-    // tiltAmount *= clumpHeight;
-    vec3 tiltPoint = tiltPointT * tipPosition;
-    vec3 grassNormal = normalize(cross(cross(tipPosition, vec3(0, 1, 0)),tipPosition));
-    bezierPoint = tiltPoint + grassNormal * tiltAmount;
-    // bezierPoint = (tiltPointT * tipPosition) + (normalize(cross(cross(tipPosition, vec3(0, 1, 0)),tipPosition))) * tiltAmount;
+    float tiltAmount = 0.5;
+    bezierPoint = (tiltPointT * tipPosition) + (normalize(cross(cross(tipPosition, vec3(0, 1, 0)),tipPosition))) * tiltAmount;
 
-    float clumpAmt = 0.3 * randomHash;
-    gl_Position = vec4(aPos - vec3(facing.x * clumpAmt, 0, facing.y * clumpAmt), 1.0)
+    float clumpAmt = 0.2 * randomHash;
+    gl_Position = vec4((1.0 - clumpAmt) * aPos + (clumpAmt) * vec3(minX, aPos.y, minY) , 1.0)
         +0.2 * vec4(random(aPos.x + aPos.z), 0, random(aPos.z - 2 * aPos.z), 0);
-
-    // randomHash = 0;
-    // tipPosition = vec3(1.0);
-    // bezierPoint = vec3(1.0);
-    // gl_Position = vec4(aPos, 1.0);
 }
 
