@@ -26,18 +26,16 @@ const float ZOOM = 45.0f;
 class Camera : public Component{
 public:
     // Camera Attributes
-    glm::vec3 Position, Front, Up, Right, WorldUp;
+    glm::vec3 Front, Up, Right, WorldUp;
     // Euler Angles
     float Yaw, Pitch;
     // Camera options
     float MovementSpeed, MouseSensitivity, Zoom;
 
     // Constructors
-    Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f),
-           glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f),
+    Camera(glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f),
            float yaw = YAW, float pitch = PITCH);
-    Camera(float posX, float posY, float posZ,
-           float upX, float upY, float upZ,
+    Camera(float upX, float upY, float upZ,
            float yaw, float pitch);
 
     // View matrix

@@ -42,15 +42,17 @@ void TheLonelyTree::start(){
         new Shader("grass", "resources/shaders/grass.vert", "resources/shaders/grass.geom", "resources/shaders/grass.frag",
             std::vector<std::string>{"camera", "dirLight"}));
 
+    float worldSize = 1024 * 9;
+
     Gameobject* camera = new Gameobject("Camera");
     this->camera = new Camera(
-        glm::vec3(0.0f, 0.0f, 0.0f),
         glm::vec3(0.0f, 1.0f, 0.0f),
         0.0f,
         0.0f
         );
     camera->addComponent(this->camera);
     addGameobject(camera);
+    camera->setPosition(glm::vec3(worldSize/2, 400, worldSize/2));
 
     Gameobject* directionalLight = new Gameobject("Directional Light");
     directionalLight->addComponent(new LightDirectional(
@@ -72,7 +74,7 @@ void TheLonelyTree::start(){
     // backpack->setScale(glm::vec3(0.01f));
 
     Gameobject* plane = new Gameobject("Plane");
-    Mesh* terrainMesh = WorldGeneration::createWorld(12923952u, 120, 1024, 4);
+    Mesh* terrainMesh = WorldGeneration::createWorld(12923952u, 120, worldSize, 4 * 4);
     terrainMesh->addShader("model");
     plane->addComponent(new RenderObjectComponent(terrainMesh));
     addGameobject(plane);
@@ -88,11 +90,12 @@ void TheLonelyTree::start(){
     // addGameobject(sphere);
     // sphere->setPosition(glm::vec3(0, 3, 0));
 
-    Gameobject* cube = new Gameobject("Cube");
-    Mesh* cubeMesh = MeshGeneration::Cube();
-    cubeMesh->addShader("model");
-    cube->addComponent(new RenderObjectComponent(cubeMesh));
-    addGameobject(cube);
+    // Gameobject* cube = new Gameobject("Cube");
+    // Mesh* cubeMesh = MeshGeneration::Cube();
+    // cubeMesh->addShader("model");
+    // cube->addComponent(new RenderObjectComponent(cubeMesh));
+    // addGameobject(cube);
+    // cube->setPosition(glm::vec3(0, -3, 0));
 
     Gameobject* grass = new Gameobject("Grass");
     Grass* grassMesh = new Grass();
@@ -116,7 +119,6 @@ void TheLonelyTree::start(){
     skyBox->addComponent(new RenderObjectComponent(skyBoxMesh));
     addGameobject(skyBox);
 
-    cube->setPosition(glm::vec3(0, -3, 0));
 }
 
 void TheLonelyTree::update(){
@@ -137,7 +139,7 @@ void TheLonelyTree::update(){
     if (Input::getKeyUp(KeyCode::KEY_SPACE)){
         Gameobject* gameobject = new Gameobject();
         gameobject->addComponent(new LightSpot(
-            camera->Position,
+            camera->getGameobject()->getPosition(),
             glm::vec3(1.0f, 0.09f, 0.032f),
             numLights,
             glm::vec3(0.15f, 0.15f, 0.15f),

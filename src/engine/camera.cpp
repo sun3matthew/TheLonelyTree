@@ -1,42 +1,44 @@
 #include <engine/camera.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <engine/render_manager.h>
+#include <engine/gameobject.h>
 
 // Constructor with vectors
-Camera::Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitch)
+Camera::Camera(glm::vec3 up, float yaw, float pitch)
     : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED),
       MouseSensitivity(SENSITIVITY), Zoom(ZOOM),
-      Position(position), WorldUp(up), Yaw(yaw), Pitch(pitch) {
+      WorldUp(up), Yaw(yaw), Pitch(pitch) {
     updateCameraVectors();
 }
 
 // Constructor with scalar values
-Camera::Camera(float posX, float posY, float posZ,
-               float upX, float upY, float upZ,
+Camera::Camera(float upX, float upY, float upZ,
                float yaw, float pitch)
     : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED),
       MouseSensitivity(SENSITIVITY), Zoom(ZOOM),
-      Position(glm::vec3(posX, posY, posZ)),
       WorldUp(glm::vec3(upX, upY, upZ)), Yaw(yaw), Pitch(pitch) {
     updateCameraVectors();
 }
 
 // View matrix
 glm::mat4 Camera::GetViewMatrix() {
-    return glm::lookAt(Position, Position + Front, Up);
+    glm::vec3 position = gameobject->getPosition();
+    return glm::lookAt(position, position + Front, Up);
 }
 
 // Keyboard input
 void Camera::ProcessKeyboard(Camera_Movement direction, float deltaTime) {
     float velocity = MovementSpeed * deltaTime;
+    glm::vec3 position = gameobject->getPosition();
     if (direction == FORWARD)
-        Position += Front * velocity;
+        position += Front * velocity;
     if (direction == BACKWARD)
-        Position -= Front * velocity;
+        position -= Front * velocity;
     if (direction == LEFT)
-        Position -= Right * velocity;
+        position -= Right * velocity;
     if (direction == RIGHT)
-        Position += Right * velocity;
+        position += Right * velocity;
+    gameobject->setPosition(position);
 }
 
 // Mouse movement
@@ -79,14 +81,16 @@ void Camera::updateCameraVectors() {
 
 void Camera::update(){
     glm::mat4 view = GetViewMatrix();
-    glm::mat4 projection = glm::perspective(glm::radians(Zoom), 800.0f / 600.0f, 0.1f, 8000.0f);
+    glm::mat4 projection = glm::perspective(glm::radians(Zoom), 800.0f / 600.0f, 10.0f, 5000.0f);
 
     std::vector<Shader*> shaders = RenderManager::instance.getShadersAccepting("camera");
+    glm::vec3 position = gameobject->getPosition();
+
     for(Shader* shader : shaders){
         shader->use();
         shader->setMat4("view", glm::value_ptr(view));
         shader->setMat4("projection", glm::value_ptr(projection));
-        shader->setVec3("viewPos", Position.x, Position.y, Position.z);
+        shader->setVec3("viewPos", position.x, position.y, position.z);
     }
 
     shaders = RenderManager::instance.getShadersAccepting("cameraSkyBox");

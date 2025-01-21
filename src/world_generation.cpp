@@ -2,15 +2,31 @@
 #include <world_generation.h>
 #include <vector>
 #include <iostream>
+#include <engine/constants.h>
 
 unsigned int WorldGeneration::seed = 0;
 siv::PerlinNoise WorldGeneration::seededPerlin;
 float WorldGeneration::height = 0;
 float WorldGeneration::size = 0;
 
+#define NOISE_AMT 0.002
+#define HILL_SIZE 240 * 2
+#define CRATER_W 120
+
 float WorldGeneration::getHeightAt(float x, float y){
-    float noise = seededPerlin.octave2D_01((x * 0.003), (y * 0.003), 16);
-    return (noise - 1) * height;
+    x -= size / 2;
+    y -= size / 2;
+    float noise = seededPerlin.octave2D_01((x * NOISE_AMT), (y * NOISE_AMT), 2);
+
+    float bell = (3 * height) * pow(E, - ((x * x)/(2 * HILL_SIZE * HILL_SIZE) + (y*y)/(2 * HILL_SIZE * HILL_SIZE)));
+
+    float craterHeight = 4 * height;
+    float exp = (sqrt(x*x + y*y) - (size/2))/CRATER_W;
+    float crater = craterHeight * pow(E, - (exp*exp));
+    if(crater > craterHeight * 0.95)
+        crater = craterHeight * 0.95;
+
+    return bell + crater + (noise - 1) * height;
 }
 
 Mesh* WorldGeneration::createWorld(unsigned int seedIn, float heightIn, float sizeIn, float density){
@@ -87,7 +103,7 @@ Mesh* WorldGeneration::createWorld(unsigned int seedIn, float heightIn, float si
     // std::cout << segments << std::endl;
 
     return new Mesh(std::move(vertices), std::move(indices)
-        ,std::vector<Texture>{Texture::diffuse(0x60, 0x5D, 0x53), Texture::specular(0, 0, 0), Texture::defaultGlossy()}
+        ,std::vector<Texture>{Texture::diffuse(0x30, 0x2D, 0x33), Texture::specular(0, 0, 0), Texture::defaultGlossy()}
     );
 }
 
