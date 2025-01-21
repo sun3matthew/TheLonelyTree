@@ -30,6 +30,21 @@ Grass::Grass(){
     }
 
 
+    // generate textures
+
+    // int horizontalResolution = 16;
+
+    // int vainSize = horizontalResolution / 6;
+    // std::vector<unsigned char> specularMap;
+    // unsigned char specularBase = 0x92;
+    // unsigned char specularHighlight = 0x32;
+    // for(int i = 0; i < horizontalResolution; i++){
+    //     if(abs(horizontalResolution/2 - i) < vainSize/2)
+    //         specularMap.emplace_back(specularHighlight);
+    //     else
+    //         specularMap.emplace_back(specularBase);
+    // }
+
     // for(float x = 0; x < worldSize; x += density){
     //     for(float y = 0; y < worldSize; y += density){
     //         PrimitiveVertex vertex;

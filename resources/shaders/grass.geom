@@ -24,6 +24,7 @@ in float perlinValue[];
 out vec3 FragPos;
 out vec3 BaseColor; 
 out vec3 Normal;  
+out vec2 TexCoords;
 
 void main() {
     if(randomHash[0] != 0.0){
@@ -36,7 +37,7 @@ void main() {
         float segmentSize = 1.1 + (clumpColor[0] * 0.4) + (randomHash[0] * 0.2);
         segmentSize *= 42;
         // segmentSize = 1.0;
-        float grassWidth = 0.35;
+        float grassWidth = 0.95;
         vec3 segmentPosition = vec3(gl_in[0].gl_Position); 
         float colorDarkness = 0.6 + (clumpColor[0] * 0.4) + (randomHash[0] * 0.2);
         vec3 color = vec3(0.5, 0.61, 0.24) * colorDarkness;
@@ -70,18 +71,26 @@ void main() {
             BaseColor *= (perlinValue[0] * 0.25) + 0.75;
             // BaseColor = vec3(orthogonalCorrection);
             vec3 dx = 2*bezierPoint[0] + 2*t*(tipPosition[0]-2*bezierPoint[0]);
-            Normal = normalize(cross(grassOrt, dx));
+            vec3 baseNormal = normalize(cross(grassOrt, dx));
 
+            TexCoords = vec2(0, t);
+            Normal = baseNormal + grassOrt / 8;
             FragPos = segmentPosition + grassOrtModified * (grassWidth + (1 - t) * grassWidth);
             gl_Position = model * vec4(FragPos, 1.0);
             EmitVertex();
 
+            TexCoords = vec2(1, t);
+            Normal = baseNormal - grassOrt / 8;
             FragPos = segmentPosition - grassOrtModified * (grassWidth + (1 - t) * grassWidth);
             gl_Position = model * vec4(FragPos, 1.0);
             EmitVertex();
 
             segmentPosition =  vec3(gl_in[0].gl_Position) + (t*2*bezierPoint[0] + t*t*(tipPosition[0]-2*bezierPoint[0])) * segmentSize;
         }
+        vec3 dx = 2*bezierPoint[0] + 2*(tipPosition[0]-2*bezierPoint[0]);
+        TexCoords = vec2(0.5, 1);
+        Normal = normalize(cross(grassOrt, dx));
+        FragPos = segmentPosition;
         BaseColor = color;
         gl_Position = model * (gl_in[0].gl_Position + segmentSize * vec4(tipPosition[0], 0.0));
         EmitVertex();

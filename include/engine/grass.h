@@ -18,6 +18,7 @@ class Grass : public RenderObject{
     public:
         // mesh data
         std::vector<PrimitiveVertex> vertices;
+        std::vector<Texture> textures;
 
         Grass();
         ~Grass();

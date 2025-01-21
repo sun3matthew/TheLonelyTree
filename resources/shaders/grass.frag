@@ -12,14 +12,17 @@ struct DirectionalLight {
 };
 
 uniform DirectionalLight dirLight; 
-
-// uniform Material material;
 uniform vec3 viewPos;
 
+
+uniform sampler2D diffuse;
+uniform sampler2D specular;
+uniform sampler2D normal;
 
 in vec3 Normal;
 in vec3 BaseColor;
 in vec3 FragPos;
+in vec2 TexCoords;
 
 out vec4 FragColor;
 
@@ -31,12 +34,14 @@ vec3 CalcDirLight(DirectionalLight light, vec3 norm, vec3 viewDir){
     vec3 diffuse = light.lightingData.diffuse * BaseColor;
     diffuse *= max(dot(norm, lightDir), 0.0);
 
-    vec3 specular = light.lightingData.specular * vec3(1.0, 1.0, 1.0);
+    float specularAmount = 0.8;
+    if(abs(TexCoords.x - 0.5) < 0.15)
+        specularAmount = 0.1;
+    vec3 specular = light.lightingData.specular * specularAmount;
     vec3 reflectDir = reflect(-lightDir, norm);
     specular *= pow(max(dot(viewDir, reflectDir), 0.0), 16);
 
     return ambient + diffuse * 0.6 + specular * 0.13;
-    // return ambient + diffuse;
 }
 
 void main()
