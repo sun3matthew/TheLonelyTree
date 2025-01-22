@@ -19,8 +19,8 @@ Grass::Grass(){
     float center = worldSize/2;
 
     float distToOuter = 100;
-    for(float r = 0.1; r < worldSize/2 * 0.95; r += (r + 500) / 80){
-        float rInc = (r + 1000) / 500;
+    for(float r = 0.1; r < worldSize/2 * 0.99; r += (r + 500) / 120){
+        float rInc = (r + 500) / 80;
         float offset = r / 100;
         for(float t = 0; t <= 1; t += 0.004 / pow(r,0.4)){
             float randR = r + sin(t * 10000) * rInc;
@@ -39,7 +39,7 @@ Grass::Grass(){
         if (rInc < 0.1)
             rInc = 0.1;
         float offset = r / 100;
-        for(float t = 0; t <= 1; t += 0.005 / pow(r,0.4)){
+        for(float t = 0; t <= 1; t += 0.01 / pow(r,0.4)){
             float x = r * cos(t * TAU + offset) + center;
             float y = r * sin(t * TAU + offset) + center;
 

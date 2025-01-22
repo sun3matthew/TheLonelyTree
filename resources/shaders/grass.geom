@@ -38,10 +38,10 @@ void main() {
         mat4 model = projection * view;
 
         float segmentSize = 1.1 + (clumpColor[0] * 0.4) + (randomHash[0] * 0.2);
-        segmentSize *= 12;
+        segmentSize *= 24;
         // segmentSize = 1.0;
 
-        float grassWidth = 0.1;
+        float grassWidth = 0.35;
         vec3 segmentPosition = vec3(gl_in[0].gl_Position); 
         float colorDarkness = 0.6 + (clumpColor[0] * 0.4) + (randomHash[0] * 0.2);
         vec3 color = vec3(0.5, 0.61, 0.24) * colorDarkness;
@@ -58,7 +58,7 @@ void main() {
         // float orthogonalCorrection = abs(dot(viewDir, normalize(grassOrt)));
         // vec3 grassOrtModified = (orthogonalCorrection) * vec3(facing[0].x, 0, facing[0].y) + (1 - orthogonalCorrection) * grassOrt;
 
-        int lod = int(length(worldCenter - segmentPosition) / 400);
+        int lod = int(length(worldCenter - segmentPosition) / 600);
         if (lod > 2)
             lod = 2;
         

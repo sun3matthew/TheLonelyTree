@@ -10,23 +10,21 @@ float WorldGeneration::height = 0;
 float WorldGeneration::size = 0;
 
 #define NOISE_AMT 0.002
-#define HILL_SIZE 220
-#define CRATER_W 30
+#define HILL_SIZE 800
 
 float WorldGeneration::getHeightAt(float x, float y){
     x -= size / 2;
     y -= size / 2;
     float noise = seededPerlin.octave2D_01((x * NOISE_AMT), (y * NOISE_AMT), 2);
 
-    float bell = (3 * height) * pow(E, - ((x * x)/(2 * HILL_SIZE * HILL_SIZE) + (y*y)/(2 * HILL_SIZE * HILL_SIZE)));
+    float bell = (6 * height) * pow(E, - ((x * x)/(2 * HILL_SIZE * HILL_SIZE) + (y*y)/(2 * HILL_SIZE * HILL_SIZE)));
 
-    float craterHeight = 5 * height;
-    float exp = (sqrt(x*x + y*y) - (size/2))/CRATER_W;
-    float crater = craterHeight * pow(E, - (exp*exp));
-    if(crater > craterHeight * 0.95)
-        crater = craterHeight * 0.95;
-
-    return bell + crater + (noise - 1) * height;
+    float distToCenter = sqrt(x*x + y*y) / (size / 2);
+    distToCenter = 1 - distToCenter;
+    if(distToCenter < 0){
+        return -height * 1000;
+    }
+    return bell + (noise - 1) * height * 1.5 * distToCenter;
 }
 
 Mesh* WorldGeneration::createWorld(unsigned int seedIn, float heightIn, float sizeIn, float density){

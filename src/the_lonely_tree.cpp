@@ -42,7 +42,7 @@ void TheLonelyTree::start(){
         new Shader("grass", "resources/shaders/grass.vert", "resources/shaders/grass.geom", "resources/shaders/grass.frag",
             std::vector<std::string>{"camera", "dirLight"}));
 
-    float worldSize = 1024 * 8;
+    float worldSize = 1024 * 5;
 
     Gameobject* camera = new Gameobject("Camera");
     this->camera = new Camera(
@@ -73,14 +73,20 @@ void TheLonelyTree::start(){
     // addGameobject(backpack);
     // backpack->setScale(glm::vec3(0.01f));
 
-    Gameobject* plane = new Gameobject("Plane");
+    Gameobject* world = new Gameobject("World");
     Mesh* terrainMesh = WorldGeneration::createWorld(12923952u, 60, worldSize, 4 * 2);
     terrainMesh->addShader("model");
-    plane->addComponent(new RenderObjectComponent(terrainMesh));
-    addGameobject(plane);
+    world->addComponent(new RenderObjectComponent(terrainMesh));
+    addGameobject(world);
+
+    Gameobject* water = new Gameobject("Water");
+    Mesh* waterMesh = MeshGeneration::Plane(64, 64);
+    waterMesh->addShader("model");
+    water->addComponent(new RenderObjectComponent(waterMesh));
+    addGameobject(water);
+    water->setScale(glm::vec3(worldSize * 8, 1, worldSize * 8));
     // float worldSize = 500.0f;
     // plane->setPosition(glm::vec3(worldSize/2, -50, worldSize/2));
-    // plane->setScale(glm::vec3(worldSize, 50, worldSize));
     
 
     // Gameobject* sphere = new Gameobject("Sphere");

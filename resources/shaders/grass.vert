@@ -1,6 +1,6 @@
 #version 330 core
 
-#define GRID_SIZE 8
+#define GRID_SIZE 16
 
 layout (location = 0) in vec3 aPos;
 
@@ -101,7 +101,7 @@ void main(){
 
     // CULL
     // ! BAD CODE the tipPosition * X should be ~ segment height
-    vec3 grassTip = gl_Position.xyz + tipPosition * 20;
+    vec3 grassTip = gl_Position.xyz + tipPosition * 40;
     mat4 viewProjection = projection * view;
     vec4 frustumPlanes[6];
     for (int i = 0; i < 6; i++) {
