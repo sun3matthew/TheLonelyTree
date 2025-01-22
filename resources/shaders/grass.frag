@@ -35,8 +35,9 @@ vec3 CalcDirLight(DirectionalLight light, vec3 norm, vec3 viewDir){
     diffuse *= max(dot(norm, lightDir), 0.0);
 
     float specularAmount = 0.8;
-    if(abs(TexCoords.x - 0.5) < 0.15)
-        specularAmount = 0.1;
+    if(abs(TexCoords.x - 0.5) < 0.12){
+        specularAmount = 0.3;
+    }
     vec3 specular = light.lightingData.specular * specularAmount;
     vec3 reflectDir = reflect(-lightDir, norm);
     specular *= pow(max(dot(viewDir, reflectDir), 0.0), 16);

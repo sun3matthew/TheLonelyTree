@@ -10,8 +10,8 @@ float WorldGeneration::height = 0;
 float WorldGeneration::size = 0;
 
 #define NOISE_AMT 0.002
-#define HILL_SIZE 240 * 2
-#define CRATER_W 120
+#define HILL_SIZE 220
+#define CRATER_W 30
 
 float WorldGeneration::getHeightAt(float x, float y){
     x -= size / 2;
@@ -20,7 +20,7 @@ float WorldGeneration::getHeightAt(float x, float y){
 
     float bell = (3 * height) * pow(E, - ((x * x)/(2 * HILL_SIZE * HILL_SIZE) + (y*y)/(2 * HILL_SIZE * HILL_SIZE)));
 
-    float craterHeight = 4 * height;
+    float craterHeight = 5 * height;
     float exp = (sqrt(x*x + y*y) - (size/2))/CRATER_W;
     float crater = craterHeight * pow(E, - (exp*exp));
     if(crater > craterHeight * 0.95)

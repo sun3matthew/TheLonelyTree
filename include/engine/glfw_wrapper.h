@@ -19,6 +19,9 @@ class GLFWWrapper{
         virtual ~GLFWWrapper();
 
         static float lastX, lastY;
+        static GLFWWrapper* instance;
+
+        float getDeltaTime();
     protected:
         Gameobject* find(std::string);
         void addGameobject(Gameobject*);
@@ -30,7 +33,6 @@ class GLFWWrapper{
 
         int createWindow(int width, int height, const char* title);
         int FPS();
-        float getDeltaTime();
 
         void lockCursor(bool lock);
     private:

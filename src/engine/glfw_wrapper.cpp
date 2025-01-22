@@ -5,6 +5,7 @@
 
 float GLFWWrapper::lastX = 0.0f;
 float GLFWWrapper::lastY = 0.0f;
+GLFWWrapper* GLFWWrapper::instance = nullptr;
 
 GLFWWrapper::GLFWWrapper(){
     if (!glfwInit()){
@@ -22,6 +23,8 @@ GLFWWrapper::GLFWWrapper(){
     fps = 0;
     fpsCounter = 0;
     fpsLastTime = 0.0;
+
+    GLFWWrapper::instance = this;
 }
 
 GLFWWrapper::~GLFWWrapper(){
