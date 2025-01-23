@@ -3,6 +3,7 @@
 #include <engine/mesh.h>
 #include <string>
 
+// #include <iostream>
 // Maybe look into using pointer..? but tbh you shouldn't be loading meshes during play
 Mesh::Mesh(std::vector<Vertex> verticesIn, 
            std::vector<unsigned int> indicesIn, 
@@ -13,6 +14,15 @@ Mesh::Mesh(std::vector<Vertex> verticesIn,
 {
     if(indices.size() == 0)
         indices = generateIndices(vertices);
+    // if(vertices[0].Tangent.x < -1)
+    //     ComputeTangents(vertices, indices);
+
+    // for(Vertex vertex : vertices){
+    //     std::cout << vertex.Normal.x << "," << vertex.Normal.y << "," << vertex.Normal.z << std::endl;
+    //     std::cout << vertex.Tangent.x << "," << vertex.Tangent.y << "," << vertex.Tangent.z << std::endl;
+    //     std::cout << vertex.Bitangent.x << "," << vertex.Bitangent.y << "," << vertex.Bitangent.z << std::endl;
+    //     std::cout << std::endl;
+    // }
     setupMesh();
 }
 
@@ -29,6 +39,45 @@ Mesh::Mesh(std::vector<Vertex> verticesIn,
 Mesh::Mesh(std::vector<Vertex> verticesIn)
     : Mesh(std::move(verticesIn), {}, {})
 {}
+
+void Mesh::ComputeTangents(std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices) {
+    // Initialize tangents and bitangents
+    for (auto& vertex : vertices) {
+        vertex.Tangent = glm::vec3(0.0f);
+        vertex.Bitangent = glm::vec3(0.0f);
+    }
+
+    for (size_t i = 0; i < indices.size(); i += 3) {
+        Vertex& v0 = vertices[indices[i]];
+        Vertex& v1 = vertices[indices[i + 1]];
+        Vertex& v2 = vertices[indices[i + 2]];
+
+        glm::vec3 edge1 = v1.Position - v0.Position;
+        glm::vec3 edge2 = v2.Position - v0.Position;
+
+        glm::vec2 deltaUV1 = v1.TexCoords - v0.TexCoords;
+        glm::vec2 deltaUV2 = v2.TexCoords - v0.TexCoords;
+
+        float det = deltaUV1.x * deltaUV2.y - deltaUV1.y * deltaUV2.x;
+        float f = (det == 0.0f) ? 0.0f : 1.0f / det;
+
+        glm::vec3 tangent = f * (deltaUV2.y * edge1 - deltaUV1.y * edge2);
+        glm::vec3 bitangent = f * (-deltaUV2.x * edge1 + deltaUV1.x * edge2);
+
+        v0.Tangent += tangent;
+        v1.Tangent += tangent;
+        v2.Tangent += tangent;
+
+        v0.Bitangent += bitangent;
+        v1.Bitangent += bitangent;
+        v2.Bitangent += bitangent;
+    }
+
+    for (auto& vertex : vertices) {
+        vertex.Tangent = glm::normalize(vertex.Tangent);
+        vertex.Bitangent = glm::normalize(vertex.Bitangent);
+    }
+}
 
 // Helper function to generate default indices
 std::vector<unsigned int> Mesh::generateIndices(const std::vector<Vertex>& vertices) {
@@ -69,6 +118,10 @@ void Mesh::setupMesh()
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Normal));
     glEnableVertexAttribArray(2);	
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, TexCoords));
+    glEnableVertexAttribArray(3);	
+    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Tangent));
+    glEnableVertexAttribArray(4);	
+    glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Bitangent));
 
     glBindVertexArray(0);
 }

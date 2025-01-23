@@ -6,11 +6,22 @@
 Texture Texture::defaultDiffuse(){
     return Texture((const unsigned char[]) {0xFF, 0xFF, 0xFF}, 1, 1, 3, TextureType::Diffuse);
 }
+Texture Texture::defaultNormal(){
+    return Texture((const unsigned char[]) {0x80, 0x80, 0xFF}, 1, 1, 3, TextureType::Normal);
+}
 Texture Texture::defaultSpecular(){
     return Texture((const unsigned char[]) {0xFF, 0xFF, 0xFF}, 1, 1, 3, TextureType::Specular);
 }
 Texture Texture::defaultGlossy(){
     return Texture((const unsigned char[]) {0xFF}, 1, 1, 1, TextureType::Glossy);
+}
+std::vector<Texture> Texture::defaultTextures(){
+    return {
+        Texture::defaultDiffuse(),
+        Texture::defaultNormal(),
+        Texture::defaultSpecular(),
+        Texture::defaultGlossy()
+    };
 }
 
 Texture Texture::diffuse(unsigned char r, unsigned char g, unsigned char b){

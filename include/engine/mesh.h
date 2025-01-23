@@ -14,6 +14,8 @@ struct Vertex {
     glm::vec3 Position;
     glm::vec3 Normal;
     glm::vec2 TexCoords;
+    glm::vec3 Tangent = glm::vec3(-2);
+    glm::vec3 Bitangent = glm::vec3(-2);
 };
 
 class Mesh : public RenderObject{
@@ -37,6 +39,8 @@ class Mesh : public RenderObject{
         unsigned int VAO, VBO, EBO;
 
         std::vector<unsigned int> generateIndices(const std::vector<Vertex>&);
+        void ComputeTangents(std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices);
+
         void setupMesh();
 };  
 

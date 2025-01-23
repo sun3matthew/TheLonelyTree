@@ -23,8 +23,10 @@ public:
     int getNrChannels();
 
     static Texture defaultDiffuse();
+    static Texture defaultNormal();
     static Texture defaultSpecular();
     static Texture defaultGlossy();
+    static std::vector<Texture> defaultTextures();
 
     static Texture diffuse(unsigned char r, unsigned char g, unsigned char b);
     static Texture specular(unsigned char r, unsigned char g, unsigned char b);

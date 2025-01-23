@@ -10,7 +10,7 @@ float WorldGeneration::height = 0;
 float WorldGeneration::size = 0;
 
 #define NOISE_AMT 0.002
-#define HILL_SIZE 800
+#define HILL_SIZE 600
 
 float WorldGeneration::getHeightAt(float x, float y){
     x -= size / 2;
@@ -24,7 +24,7 @@ float WorldGeneration::getHeightAt(float x, float y){
     if(distToCenter < 0){
         return -height * 1000;
     }
-    return bell + (noise - 1) * height * 1.5 * distToCenter;
+    return bell + (noise - 1) * height * 1.8 * distToCenter;
 }
 
 Mesh* WorldGeneration::createWorld(unsigned int seedIn, float heightIn, float sizeIn, float density){
@@ -101,7 +101,7 @@ Mesh* WorldGeneration::createWorld(unsigned int seedIn, float heightIn, float si
     // std::cout << segments << std::endl;
 
     return new Mesh(std::move(vertices), std::move(indices)
-        ,std::vector<Texture>{Texture::diffuse(0x30, 0x2D, 0x33), Texture::specular(0, 0, 0), Texture::defaultGlossy()}
+        ,std::vector<Texture>{Texture::diffuse(0x30, 0x2D, 0x33), Texture::specular(0, 0, 0), Texture::defaultGlossy(), Texture::defaultNormal()}
     );
 }
 

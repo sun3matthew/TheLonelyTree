@@ -62,16 +62,17 @@ void TheLonelyTree::start(){
         glm::vec3(0.9f, 0.9f, 0.9f)));
     addGameobject(directionalLight);
 
-    // Gameobject* backpack = GLTFLoader::loadMesh("resources/models/backpack/scene.gltf");
-    // std::list<Gameobject*> allChildren = backpack->getAllChildren();
-    // for(Gameobject* child : allChildren){
-    //     RenderObjectComponent* meshComp = child -> getComponent<RenderObjectComponent>();
-    //     if(meshComp){
-    //         meshComp->getMesh()->addShader("model");
-    //     }
-    // }
-    // addGameobject(backpack);
-    // backpack->setScale(glm::vec3(0.01f));
+    Gameobject* tree = GLTFLoader::loadMesh("resources/models/tree/scene.gltf");
+    std::list<Gameobject*> allChildren = tree->getAllChildren();
+    for(Gameobject* child : allChildren){
+        RenderObjectComponent* meshComp = child -> getComponent<RenderObjectComponent>();
+        if(meshComp){
+            meshComp->getRenderObject()->addShader("model");
+        }
+    }
+    addGameobject(tree);
+    tree->setScale(glm::vec3(0.4f));
+    tree->setPosition(glm::vec3(worldSize / 2, 300, worldSize / 2));
 
     Gameobject* world = new Gameobject("World");
     Mesh* terrainMesh = WorldGeneration::createWorld(12923952u, 60, worldSize, 4 * 2);
@@ -79,12 +80,13 @@ void TheLonelyTree::start(){
     world->addComponent(new RenderObjectComponent(terrainMesh));
     addGameobject(world);
 
-    Gameobject* water = new Gameobject("Water");
-    Mesh* waterMesh = MeshGeneration::Plane(64, 64);
-    waterMesh->addShader("model");
-    water->addComponent(new RenderObjectComponent(waterMesh));
-    addGameobject(water);
-    water->setScale(glm::vec3(worldSize * 8, 1, worldSize * 8));
+    // Gameobject* water = new Gameobject("Water");
+    // Mesh* waterMesh = MeshGeneration::Plane(64, 64);
+    // waterMesh->addShader("model");
+    // water->addComponent(new RenderObjectComponent(waterMesh));
+    // addGameobject(water);
+    // water->setScale(glm::vec3(worldSize * 8, 1, worldSize * 8));
+
     // float worldSize = 500.0f;
     // plane->setPosition(glm::vec3(worldSize/2, -50, worldSize/2));
     
@@ -94,14 +96,14 @@ void TheLonelyTree::start(){
     // sphereMesh->addShader("model");
     // sphere->addComponent(new RenderObjectComponent(sphereMesh));
     // addGameobject(sphere);
-    // sphere->setPosition(glm::vec3(0, 3, 0));
+    // sphere->setPosition(glm::vec3(worldSize/2, 3, worldSize/2));
 
     // Gameobject* cube = new Gameobject("Cube");
     // Mesh* cubeMesh = MeshGeneration::Cube();
     // cubeMesh->addShader("model");
     // cube->addComponent(new RenderObjectComponent(cubeMesh));
     // addGameobject(cube);
-    // cube->setPosition(glm::vec3(0, -3, 0));
+    // cube->setPosition(glm::vec3(worldSize/2, -3, worldSize/2));
 
     Gameobject* grass = new Gameobject("Grass");
     Grass* grassMesh = new Grass();

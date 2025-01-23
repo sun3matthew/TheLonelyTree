@@ -4,6 +4,7 @@
 uniform sampler2D diffuse;
 uniform sampler2D specular;
 uniform sampler2D glossy;
+uniform sampler2D normal;
 
 struct LightingData {
     vec3 ambient;
@@ -32,6 +33,8 @@ uniform vec3 viewPos;
 in vec3 Normal;
 in vec3 FragPos;
 in vec2 TexCoords;
+in mat3 TBN;
+
 
 out vec4 FragColor;
 
@@ -49,6 +52,7 @@ vec3 CalcDirLight(DirectionalLight light, vec3 norm, vec3 viewDir){
     specular *= pow(max(dot(viewDir, reflectDir), 0.0), 64);
 
     return ambient + diffuse + specular;
+    // return ambient + diffuse;
 }
 
 vec3 CalcPointLight(PointLight light, vec3 norm, vec3 FragPos, vec3 viewDir){
@@ -72,7 +76,11 @@ vec3 CalcPointLight(PointLight light, vec3 norm, vec3 FragPos, vec3 viewDir){
 
 void main()
 {
-    vec3 norm = normalize(Normal);
+    // vec3 norm = normalize(Normal);
+    vec3 norm = texture(normal, TexCoords).rgb;
+    norm = norm * 2.0 - 1.0;   
+    norm = normalize(TBN * norm); 
+
     vec3 viewDir = normalize(viewPos - FragPos);
 
     vec3 result = CalcDirLight(dirLight, norm, viewDir);
@@ -81,7 +89,7 @@ void main()
 
     float a = vec4(texture(diffuse, TexCoords)).a;
 
-    if(a < 0.1){
+    if(a < 0.8){
         discard;
     }
     FragColor = vec4(result, a);

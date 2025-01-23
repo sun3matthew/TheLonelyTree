@@ -202,6 +202,20 @@ Gameobject* GLTFLoader::loadMesh(const char* path){
             currentMat.push_back(Texture::defaultGlossy());
         }
 
+        int normalTexIndex = material.normalTexture.index; // Get the normal texture index
+        if (normalTexIndex >= 0) {
+            tinygltf::Image &image = model.images[model.textures[normalTexIndex].source];
+
+            assert(image.bits == 8);
+            assert(image.component == 4); // Normal maps are usually stored as RGBA
+
+            unsigned char* imagePtr = reinterpret_cast<unsigned char*>(image.image.data());
+            currentMat.push_back(Texture(imagePtr, image.width, image.height, 4, TextureType::Normal));
+        }else{
+            currentMat.push_back(Texture::defaultNormal());
+        }
+
+
         materials.push_back(currentMat);
 
         // int normalTexIndex = material.normalTexture.index;

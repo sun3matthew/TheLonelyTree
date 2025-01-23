@@ -38,18 +38,21 @@ void main() {
         mat4 model = projection * view;
 
         float segmentSize = 1.1 + (clumpColor[0] * 0.4) + (randomHash[0] * 0.2);
-        segmentSize *= 24;
+        segmentSize *= 31;
         // segmentSize = 1.0;
+
 
         float grassWidth = 0.35;
         vec3 segmentPosition = vec3(gl_in[0].gl_Position); 
-        float colorDarkness = 0.6 + (clumpColor[0] * 0.4) + (randomHash[0] * 0.2);
+
+        float distToCamera = length(viewPos - segmentPosition);
+
+        float colorDarkness = 0.6 + (clumpColor[0] * 0.4) + (randomHash[0] * 0.2) - distToCamera / 10000;
         vec3 color = vec3(0.5, 0.61, 0.24) * colorDarkness;
         // color = debugColor[0] * colorDarkness;
 
         vec3 grassOrt = vec3(-facing[0].y, 0, facing[0].x);
 
-        float distToCamera = length(viewPos - segmentPosition);
         grassWidth += distToCamera / 1700 * 0.15;
         // segmentSize *= (1 + distToCamera/4000);
 
@@ -57,6 +60,15 @@ void main() {
         // viewDir = vec3(viewDir.x, 0, viewDir.z);
         // float orthogonalCorrection = abs(dot(viewDir, normalize(grassOrt)));
         // vec3 grassOrtModified = (orthogonalCorrection) * vec3(facing[0].x, 0, facing[0].y) + (1 - orthogonalCorrection) * grassOrt;
+
+        float treeScale = (length(worldCenter - segmentPosition) - 100) / 300;
+        if(treeScale < 0.3)
+            treeScale = 0.3;
+        if(treeScale > 1)
+            treeScale = 1;
+        segmentSize *= treeScale;
+        grassWidth *= treeScale;
+
 
         int lod = int(length(worldCenter - segmentPosition) / 600);
         if (lod > 2)
@@ -83,13 +95,13 @@ void main() {
             vec3 baseNormal = normalize(cross(grassOrt, dx));
 
             TexCoords = vec2(0, t);
-            Normal = baseNormal + grassOrt / 8;
+            Normal = baseNormal + grassOrt / 4;
             FragPos = segmentPosition + grassOrtModified * (grassWidth + (1 - t) * grassWidth);
             gl_Position = model * vec4(FragPos, 1.0);
             EmitVertex();
 
             TexCoords = vec2(1, t);
-            Normal = baseNormal - grassOrt / 8;
+            Normal = baseNormal - grassOrt / 4;
             FragPos = segmentPosition - grassOrtModified * (grassWidth + (1 - t) * grassWidth);
             gl_Position = model * vec4(FragPos, 1.0);
             EmitVertex();

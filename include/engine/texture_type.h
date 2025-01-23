@@ -7,6 +7,7 @@ enum class TextureType {
     Diffuse = 0,
     Specular,
     Glossy,
+    Normal,
     CubeMap,
     PerlinLane,
     MAX_TYPES
@@ -20,6 +21,8 @@ inline std::string TextureTypeToString(TextureType textureType){
             return "specular";
         case TextureType::Glossy:
             return "glossy";
+        case TextureType::Normal:
+            return "normal";
         case TextureType::CubeMap:
             return "cube_map";
         case TextureType::PerlinLane:
