@@ -70,14 +70,14 @@ void main(){
     float perlinTilt = pow(perlinValue + 0.3, 1.6);
 
     facing = normalize(vec2(aPos.x - minX, aPos.z - minY)) + 0.8 * normalize(vec2(random(hash(aPos.x, aPos.z + 1)) - 0.5, random(hash(aPos.x, aPos.z)) - 0.5));
-    facing = normalize((facing * 0.2 + clumpDirection * 0.3 + perlinTilt * universalDirection * 0.2));
+    facing = normalize((facing * 0.2 + clumpDirection * 0.3 + perlinTilt * universalDirection * 0.00));
 
     randomHash = random(hash((aPos.x + 3003), (aPos.z + 23)));
 
     float tilt = 0.4 + 0.3 * (1 - (sqrt(minDist) / (GRID_SIZE * GRID_SIZE / 2)));
     tilt += (randomHash - 0.5) * 0.4;
-    tilt += (sin(time * (0.2 + 0.3 * randomHash) + 10000 * randomHash)) * 0.02 * randomHash;
-    tilt += perlinValue * 0.05;
+    tilt += (sin(time * (0.2 + 0.3 * randomHash) + 10000 * randomHash)) * 0.01 * randomHash;
+    // tilt += perlinValue * 0.01;
 
 
     vec3 grassPosXZ = vec3(facing.x, 0, facing.y) * cos(tilt);

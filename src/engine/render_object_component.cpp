@@ -13,7 +13,9 @@ RenderObjectComponent::~RenderObjectComponent(){
 
 void RenderObjectComponent::update(){
     renderObject->modelMatrix = gameobject->getModelMatrix();
-    RenderManager::instance.addToBuffer(renderObject);
+    for(auto& [i, shaderNames] : renderObject->shaderNames){
+        RenderManager::instance.addToBuffer(i, renderObject);
+    }
 }
 
 void RenderObjectComponent::updateRenderObject(RenderObject* newRenderObject){

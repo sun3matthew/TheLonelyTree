@@ -1,6 +1,7 @@
 #include <engine/texture.h>
 #include <glad/glad.h>
 #include <stb/stb_image.h>
+#include <engine/glfw_wrapper.h>
 #include <iostream>
 
 Texture Texture::defaultDiffuse(){
@@ -20,7 +21,8 @@ std::vector<Texture> Texture::defaultTextures(){
         Texture::defaultDiffuse(),
         Texture::defaultNormal(),
         Texture::defaultSpecular(),
-        Texture::defaultGlossy()
+        Texture::defaultGlossy(),
+        GLFWWrapper::instance->getShadowMap() // ! poor design
     };
 }
 
@@ -90,6 +92,23 @@ Texture::Texture(const unsigned char* data, int w, int h, int nC, TextureType te
 
     glBindTexture(GL_TEXTURE_2D, 0);
 } 
+
+// ! Depth Texture
+Texture::Texture(int w, int h, unsigned int channelType, TextureType textureType) 
+    : width(w), height(h), nChannels(-1), type(textureType)
+{
+    glGenTextures(1, &ID);
+    glBindTexture(GL_TEXTURE_2D, ID);
+    glTexImage2D(GL_TEXTURE_2D, 0, channelType, 
+                width, height, 0, channelType, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+    float borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+    glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);  
+}
 
 Texture::Texture(std::vector<std::string> faces)
 {

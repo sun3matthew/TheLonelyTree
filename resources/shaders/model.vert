@@ -8,18 +8,20 @@ layout (location = 4) in vec3 aBitangent;
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
+uniform mat4 lightSpaceMatrix;
 
-out vec3 Normal;
 out vec3 FragPos;
 out vec2 TexCoords;
+out vec4 FragPosLightSpace;
 out mat3 TBN;
 
 
 void main(){
-    gl_Position = projection * view * model * vec4(aPos, 1.0);
-    Normal = mat3(transpose(inverse(model))) * aNormal;  
-    FragPos = vec3(model * vec4(aPos, 1.0));
     TexCoords = aTexCoords;
+
+    FragPos = vec3(model * vec4(aPos, 1.0));
+    FragPosLightSpace = lightSpaceMatrix * vec4(FragPos, 1.0);
+    gl_Position = projection * view * vec4(FragPos, 1.0);
 
     vec3 T = normalize(vec3(model * vec4(aTangent,   0.0)));
     vec3 B = normalize(vec3(model * vec4(aBitangent, 0.0)));

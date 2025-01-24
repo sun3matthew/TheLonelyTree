@@ -10,6 +10,7 @@ enum class TextureType {
     Normal,
     CubeMap,
     PerlinLane,
+    ShadowMap,
     MAX_TYPES
 };
 
@@ -27,6 +28,8 @@ inline std::string TextureTypeToString(TextureType textureType){
             return "cube_map";
         case TextureType::PerlinLane:
             return "perlin_lane";
+        case TextureType::ShadowMap:
+            return "shadow_map";
         default:
             return "unknown";
     }

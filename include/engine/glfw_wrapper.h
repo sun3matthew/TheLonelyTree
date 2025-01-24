@@ -7,6 +7,7 @@
 
 #include <engine/gameobject.h>
 #include <engine/render_manager.h>
+#include <engine/texture.h>
 
 #include <list>
 #include <string>
@@ -19,9 +20,13 @@ class GLFWWrapper{
         virtual ~GLFWWrapper();
 
         static float lastX, lastY;
+        static float width, height; // ! Bad design
         static GLFWWrapper* instance;
 
         float getDeltaTime();
+
+        Texture getShadowMap(){return *shadowMap;}
+        Texture* getShadowMapPtr(){return shadowMap;} // ! even worse design
     protected:
         Gameobject* find(std::string);
         void addGameobject(Gameobject*);
@@ -35,11 +40,13 @@ class GLFWWrapper{
         int FPS();
 
         void lockCursor(bool lock);
+
+        Texture* shadowMap;
     private:
         std::list<Gameobject*> gameobjects;
         
-
         GLFWwindow* window;
+        
 
         double fpsLastTime;
         int fpsCounter;

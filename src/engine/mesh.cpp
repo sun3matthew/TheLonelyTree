@@ -3,6 +3,8 @@
 #include <engine/mesh.h>
 #include <string>
 
+#include <engine/glfw_wrapper.h>
+
 // #include <iostream>
 // Maybe look into using pointer..? but tbh you shouldn't be loading meshes during play
 Mesh::Mesh(std::vector<Vertex> verticesIn, 
@@ -126,15 +128,21 @@ void Mesh::setupMesh()
     glBindVertexArray(0);
 }
 
+#include <iostream>
 void Mesh::drawCall(Shader* shader) 
 {
     shader->use();
 
-    shader->setMat4("model", glm::value_ptr(modelMatrix));
+    if (shader->canAcceptAttribute("model")){
+        shader->setMat4("model", modelMatrix);
+    }
 
-    for(unsigned int i = 0; i < textures.size(); i++)
-        shader->setTexture(&textures[i], i);
-    glActiveTexture(GL_TEXTURE0);
+    if (shader->canAcceptAttribute("meshTextures")){
+        for(unsigned int i = 0; i < textures.size(); i++)
+            shader->setTexture(&textures[i], i);
+        glActiveTexture(GL_TEXTURE0);
+    }
+
 
     // draw mesh
     glBindVertexArray(VAO);

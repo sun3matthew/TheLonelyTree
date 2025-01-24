@@ -6,6 +6,7 @@
 #include <engine/input.h>
 #include <engine/mesh_generation.h>
 #include <engine/texture_type.h>
+#include <engine/frame_buffer_generation.h>
 
 #include <engine/gltf_loader.h>
 #include <engine/render_object_component.h>
@@ -19,28 +20,41 @@
 
 #include <world_generation.h>
 
+#include <iostream>
+
 // Camera 
 TheLonelyTree::TheLonelyTree()
 {
+    TheLonelyTree::instance = this;
+
     createWindow(800 * 1.5f, 600 * 1.5f, "The Lonely Tree");
     lockCursor(true);
+
+    // TODO turn these into enums
+    RenderManager::instance.addShader(
+        new Shader("shadowMap", "resources/shaders/shadowMap.vert", "resources/shaders/shadowMap.frag",
+            std::vector<std::string>{"dirLightCamera", "model", "meshTextures"}));
+    RenderManager::instance.addShader(
+        new Shader("model", "resources/shaders/model.vert", "resources/shaders/model.frag",
+            std::vector<std::string>{"camera", "dirLightCamera", "dirLight", "pointLights", "model", "meshTextures"}));
+    RenderManager::instance.addShader(
+        new Shader("skyBox", "resources/shaders/skybox.vert", "resources/shaders/skybox.frag",
+            std::vector<std::string>{"cameraSkyBox", "meshTextures"}));
+    RenderManager::instance.addShader(
+        new Shader("grass", "resources/shaders/grass.vert", "resources/shaders/grass.geom", "resources/shaders/grass.frag",
+            std::vector<std::string>{"camera", "dirLight", "dirLightCamera"}));
+
+    shadowMap = new Texture(1024 * 6, 1024 * 6, GL_DEPTH_COMPONENT, TextureType::ShadowMap);
+    RenderManager::instance.addFrameBuffer(FrameBufferGeneration::ShadowMap(shadowMap->getWidth(), shadowMap->getHeight(), shadowMap->getID()));
 }
 
 TheLonelyTree::~TheLonelyTree(){
+    delete shadowMap;
 }
 
 void TheLonelyTree::start(){
     numLights = 0;
 
-    RenderManager::instance.addShader(
-        new Shader("model", "resources/shaders/model.vert", "resources/shaders/model.frag",
-            std::vector<std::string>{"camera", "dirLight", "pointLights"}));
-    RenderManager::instance.addShader(
-        new Shader("skyBox", "resources/shaders/skybox.vert", "resources/shaders/skybox.frag",
-            std::vector<std::string>{"cameraSkyBox"}));
-    RenderManager::instance.addShader(
-        new Shader("grass", "resources/shaders/grass.vert", "resources/shaders/grass.geom", "resources/shaders/grass.frag",
-            std::vector<std::string>{"camera", "dirLight"}));
 
     float worldSize = 1024 * 5;
 
@@ -55,11 +69,19 @@ void TheLonelyTree::start(){
     camera->setPosition(glm::vec3(worldSize/2, 400, worldSize/2));
 
     Gameobject* directionalLight = new Gameobject("Directional Light");
-    directionalLight->addComponent(new LightDirectional(
+    LightDirectional *light = 
+    // new LightDirectional(
+    //     glm::vec3(0.0f, 0.0f, 0.0f),
+    //     glm::vec3(0.15f, 0.15f, 0.15f),
+    //     glm::vec3(0.8f, 0.8f, 0.8f),
+    //     glm::vec3(0.8f, 0.8f, 0.8f));
+    new LightDirectional(
         glm::vec3(-3.0f, -1.0f, -0.0f),
-        glm::vec3(0.45f, 0.45f, 0.45f),
-        glm::vec3(0.25f, 0.25f, 0.25f),
-        glm::vec3(0.9f, 0.9f, 0.9f)));
+        glm::vec3(0.30f, 0.30f, 0.30f),
+        glm::vec3(0.40f, 0.40f, 0.40f),
+        glm::vec3(0.9f, 0.9f, 0.9f));
+    light->setWorldSize(worldSize);
+    directionalLight->addComponent(light);
     addGameobject(directionalLight);
 
     Gameobject* tree = GLTFLoader::loadMesh("resources/models/tree/scene.gltf");
@@ -68,15 +90,17 @@ void TheLonelyTree::start(){
         RenderObjectComponent* meshComp = child -> getComponent<RenderObjectComponent>();
         if(meshComp){
             meshComp->getRenderObject()->addShader("model");
+            meshComp->getRenderObject()->addShader(1, "shadowMap");
         }
     }
     addGameobject(tree);
-    tree->setScale(glm::vec3(0.4f));
+    tree->setScale(glm::vec3(0.6f));
     tree->setPosition(glm::vec3(worldSize / 2, 300, worldSize / 2));
 
     Gameobject* world = new Gameobject("World");
     Mesh* terrainMesh = WorldGeneration::createWorld(12923952u, 60, worldSize, 4 * 2);
     terrainMesh->addShader("model");
+    terrainMesh->addShader(1, "shadowMap");
     world->addComponent(new RenderObjectComponent(terrainMesh));
     addGameobject(world);
 
@@ -94,16 +118,21 @@ void TheLonelyTree::start(){
     // Gameobject* sphere = new Gameobject("Sphere");
     // Mesh* sphereMesh = MeshGeneration::Sphere(32, 32);
     // sphereMesh->addShader("model");
+    // sphereMesh->addShader(1, "shadowMap");
     // sphere->addComponent(new RenderObjectComponent(sphereMesh));
     // addGameobject(sphere);
-    // sphere->setPosition(glm::vec3(worldSize/2, 3, worldSize/2));
+    // sphere->setPosition(glm::vec3(worldSize/2 + 100, 450, worldSize/2));
+    // sphere->setScale(glm::vec3(90.0f));
 
-    // Gameobject* cube = new Gameobject("Cube");
-    // Mesh* cubeMesh = MeshGeneration::Cube();
-    // cubeMesh->addShader("model");
-    // cube->addComponent(new RenderObjectComponent(cubeMesh));
-    // addGameobject(cube);
-    // cube->setPosition(glm::vec3(worldSize/2, -3, worldSize/2));
+    // ! Cube bugged
+    Gameobject* cube = new Gameobject("Cube");
+    Mesh* cubeMesh = MeshGeneration::Cube();
+    cubeMesh->addShader("model");
+    cubeMesh->addShader(1, "shadowMap");
+    cube->addComponent(new RenderObjectComponent(cubeMesh));
+    addGameobject(cube);
+    cube->setPosition(glm::vec3(worldSize/2 - 100, 340, worldSize/2));
+    cube->setScale(glm::vec3(60.0f));
 
     Gameobject* grass = new Gameobject("Grass");
     Grass* grassMesh = new Grass();

@@ -108,6 +108,7 @@ void Grass::drawCall(Shader* shader)
     shader->setVec3("worldCenter", WorldGeneration::worldSize()/2.0, 0.0, WorldGeneration::worldSize()/2.0);
 
     shader->setTexture(perlinLane, 0);
+    shader->setTexture(GLFWWrapper::instance->getShadowMapPtr(), 1);
 
     glBindVertexArray(VAO);
     glDrawArrays(GL_POINTS, 0, vertices.size());

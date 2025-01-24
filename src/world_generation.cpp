@@ -3,6 +3,7 @@
 #include <vector>
 #include <iostream>
 #include <engine/constants.h>
+#include <engine/glfw_wrapper.h>
 
 unsigned int WorldGeneration::seed = 0;
 siv::PerlinNoise WorldGeneration::seededPerlin;
@@ -101,7 +102,8 @@ Mesh* WorldGeneration::createWorld(unsigned int seedIn, float heightIn, float si
     // std::cout << segments << std::endl;
 
     return new Mesh(std::move(vertices), std::move(indices)
-        ,std::vector<Texture>{Texture::diffuse(0x30, 0x2D, 0x33), Texture::specular(0, 0, 0), Texture::defaultGlossy(), Texture::defaultNormal()}
+        ,std::vector<Texture>{Texture::diffuse(0x60, 0x6D, 0x83), Texture::specular(0, 0, 0), Texture::defaultGlossy(), Texture::defaultNormal(), GLFWWrapper::instance->getShadowMap()}
+        // ,std::vector<Texture>{Texture::diffuse(0x30, 0x2D, 0x33), Texture::specular(0, 0, 0), Texture::defaultGlossy(), Texture::defaultNormal()}
     );
 }
 

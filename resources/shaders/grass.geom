@@ -5,6 +5,8 @@ layout(triangle_strip, max_vertices = 15) out;
 
 uniform mat4 view;
 uniform mat4 projection;
+uniform mat4 lightSpaceMatrix;
+
 uniform float time;
 
 uniform vec3 viewPos;
@@ -26,6 +28,7 @@ out vec3 FragPos;
 out vec3 BaseColor; 
 out vec3 Normal;  
 out vec2 TexCoords;
+out vec4 FragPosLightSpace;
 
 void main() {
     if(randomHash[0] != 0.0){
@@ -38,11 +41,11 @@ void main() {
         mat4 model = projection * view;
 
         float segmentSize = 1.1 + (clumpColor[0] * 0.4) + (randomHash[0] * 0.2);
-        segmentSize *= 31;
+        segmentSize *= 24;
         // segmentSize = 1.0;
 
 
-        float grassWidth = 0.35;
+        float grassWidth = 0.55;
         vec3 segmentPosition = vec3(gl_in[0].gl_Position); 
 
         float distToCamera = length(viewPos - segmentPosition);
@@ -86,7 +89,7 @@ void main() {
             // float blend = abs(dot(viewDir, vec3(0, 1, 0)));
             // if(dot(grassOrt, grassOrtModified) < 0)
             //     grassOrt = -grassOrt;
-            // grassOrtModified = grassOrt;
+            grassOrtModified = grassOrt; // !
 
             BaseColor = (0.5*(t) + 0.5) * color;
             // BaseColor *= (perlinValue[0] * 0.25) + 0.75;
@@ -97,12 +100,14 @@ void main() {
             TexCoords = vec2(0, t);
             Normal = baseNormal + grassOrt / 4;
             FragPos = segmentPosition + grassOrtModified * (grassWidth + (1 - t) * grassWidth);
+            FragPosLightSpace = lightSpaceMatrix * vec4(FragPos, 1.0);
             gl_Position = model * vec4(FragPos, 1.0);
             EmitVertex();
 
             TexCoords = vec2(1, t);
             Normal = baseNormal - grassOrt / 4;
             FragPos = segmentPosition - grassOrtModified * (grassWidth + (1 - t) * grassWidth);
+            FragPosLightSpace = lightSpaceMatrix * vec4(FragPos, 1.0);
             gl_Position = model * vec4(FragPos, 1.0);
             EmitVertex();
 
@@ -112,6 +117,7 @@ void main() {
         TexCoords = vec2(0.5, 1);
         Normal = normalize(cross(grassOrt, dx));
         FragPos = segmentPosition;
+        FragPosLightSpace = lightSpaceMatrix * vec4(FragPos, 1.0);
         BaseColor = color;
         gl_Position = model * (gl_in[0].gl_Position + segmentSize * vec4(tipPosition[0], 0.0));
         EmitVertex();

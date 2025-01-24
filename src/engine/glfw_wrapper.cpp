@@ -5,6 +5,8 @@
 
 float GLFWWrapper::lastX = 0.0f;
 float GLFWWrapper::lastY = 0.0f;
+float GLFWWrapper::width = 0.0f;
+float GLFWWrapper::height = 0.0f;
 GLFWWrapper* GLFWWrapper::instance = nullptr;
 
 GLFWWrapper::GLFWWrapper(){
@@ -38,10 +40,13 @@ GLFWWrapper::~GLFWWrapper(){
 }
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height){
-    glViewport(0, 0, width, height);
-
     GLFWWrapper::lastX = width / 2.0f;
     GLFWWrapper::lastY = height / 2.0f;
+
+    GLFWWrapper::width = width;
+    GLFWWrapper::height = width;
+
+    RenderManager::instance.updateFrameBuffer(0, {0, GLFWWrapper::width, GLFWWrapper::height, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT});
 }
 
 int GLFWWrapper::createWindow(int width, int height, const char* title){
@@ -58,8 +63,10 @@ int GLFWWrapper::createWindow(int width, int height, const char* title){
     }
 
     glViewport(0, 0, width * 2, height * 2);
+    GLFWWrapper::width = width * 2;
+    GLFWWrapper::height = height * 2;
 
-
+    RenderManager::instance.addFrameBuffer({0, GLFWWrapper::width, GLFWWrapper::height, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT});
 
     lastX = width / 2.0f;
     lastY = height / 2.0f;
@@ -74,7 +81,6 @@ int GLFWWrapper::createWindow(int width, int height, const char* title){
     glEnable(GL_BLEND);
     glDepthFunc(GL_LEQUAL);  
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
     return 0;
 }
 
@@ -129,9 +135,6 @@ int GLFWWrapper::run(){
 
     // TODO Investigate if you should essentially render the last frame and then while it is rendering to the double buffer, do the current frame processing, then swap the buffers.
     while(!glfwWindowShouldClose(window)){
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
         update();
         for(Gameobject* gameobject : gameobjects)
             gameobject->update();
