@@ -9,15 +9,15 @@ class RenderObject{
     public:
         glm::mat4 modelMatrix;
 
-        std::unordered_map<int, std::vector<std::string>> shaderNames;
+        std::unordered_map<std::string, std::vector<std::string>> shaderNames;
 
         RenderObject();
         virtual ~RenderObject() = default;
 
         void addShader(std::string shaderName);
-        void addShader(int i, std::string shaderName);
+        void addShader(std::string frameBufferName, std::string shaderName);
 
-        void draw(int);
+        void draw(std::string);
         virtual void drawCall(Shader*) = 0;
 };
 

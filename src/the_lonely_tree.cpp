@@ -32,6 +32,9 @@ TheLonelyTree::TheLonelyTree()
 
     // TODO turn these into enums
     RenderManager::instance.addShader(
+        new Shader("screen", "resources/shaders/screen.vert", "resources/shaders/screen.frag",
+            std::vector<std::string>{"meshTextures"}));
+    RenderManager::instance.addShader(
         new Shader("shadowMap", "resources/shaders/shadowMap.vert", "resources/shaders/shadowMap.frag",
             std::vector<std::string>{"dirLightCamera", "model", "meshTextures"}));
     RenderManager::instance.addShader(
@@ -44,12 +47,17 @@ TheLonelyTree::TheLonelyTree()
         new Shader("grass", "resources/shaders/grass.vert", "resources/shaders/grass.geom", "resources/shaders/grass.frag",
             std::vector<std::string>{"camera", "dirLight", "dirLightCamera"}));
 
-    shadowMap = new Texture(1024 * 6, 1024 * 6, GL_DEPTH_COMPONENT, TextureType::ShadowMap);
-    RenderManager::instance.addFrameBuffer(FrameBufferGeneration::ShadowMap(shadowMap->getWidth(), shadowMap->getHeight(), shadowMap->getID()));
+    RenderManager::instance.addFrameBuffer(FrameBufferGeneration::BaseFrameBuffer(FRAME_BUFFER, GLFWWrapper::width, GLFWWrapper::height));
+    RenderManager::instance.addFrameBuffer(FrameBufferGeneration::ShadowMap(SHADOW_BUFFER, 1024 * 6, 1024 * 6));
+
+    // Check framebuffer status
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+        std::cerr << "Framebuffer not complete!" << std::endl;
+    }
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 TheLonelyTree::~TheLonelyTree(){
-    delete shadowMap;
 }
 
 void TheLonelyTree::start(){
@@ -57,6 +65,13 @@ void TheLonelyTree::start(){
 
 
     float worldSize = 1024 * 5;
+
+    Gameobject* screenQuad = new Gameobject("Screen Quad");
+    Mesh* screenQuadMesh = MeshGeneration::ScreenQuad();
+    screenQuadMesh->textures.push_back(RenderManager::instance.getFrameBuffer(FRAME_BUFFER).textures[0]);
+    screenQuadMesh->addShader(BASE_FAME_BUFFER, "screen");
+    screenQuad->addComponent(new RenderObjectComponent(screenQuadMesh));
+    addGameobject(screenQuad);
 
     Gameobject* camera = new Gameobject("Camera");
     this->camera = new Camera(
@@ -69,14 +84,8 @@ void TheLonelyTree::start(){
     camera->setPosition(glm::vec3(worldSize/2, 400, worldSize/2));
 
     Gameobject* directionalLight = new Gameobject("Directional Light");
-    LightDirectional *light = 
-    // new LightDirectional(
-    //     glm::vec3(0.0f, 0.0f, 0.0f),
-    //     glm::vec3(0.15f, 0.15f, 0.15f),
-    //     glm::vec3(0.8f, 0.8f, 0.8f),
-    //     glm::vec3(0.8f, 0.8f, 0.8f));
-    new LightDirectional(
-        glm::vec3(-3.0f, -1.0f, -0.0f),
+    LightDirectional *light = new LightDirectional(
+        glm::vec3(0.0f, 0.0f, 0.0f),
         glm::vec3(0.30f, 0.30f, 0.30f),
         glm::vec3(0.40f, 0.40f, 0.40f),
         glm::vec3(0.9f, 0.9f, 0.9f));
@@ -89,8 +98,9 @@ void TheLonelyTree::start(){
     for(Gameobject* child : allChildren){
         RenderObjectComponent* meshComp = child -> getComponent<RenderObjectComponent>();
         if(meshComp){
-            meshComp->getRenderObject()->addShader("model");
-            meshComp->getRenderObject()->addShader(1, "shadowMap");
+            Mesh* mesh = static_cast<Mesh*>(meshComp->getRenderObject());
+            mesh->addShader(FRAME_BUFFER, "model");
+            mesh->addShader(SHADOW_BUFFER, "shadowMap");
         }
     }
     addGameobject(tree);
@@ -99,8 +109,9 @@ void TheLonelyTree::start(){
 
     Gameobject* world = new Gameobject("World");
     Mesh* terrainMesh = WorldGeneration::createWorld(12923952u, 60, worldSize, 4 * 2);
-    terrainMesh->addShader("model");
-    terrainMesh->addShader(1, "shadowMap");
+    terrainMesh->updateTexture(Texture::diffuse(0x50, 0x4D, 0x53));
+    terrainMesh->addShader(FRAME_BUFFER, "model");
+    terrainMesh->addShader(SHADOW_BUFFER, "shadowMap");
     world->addComponent(new RenderObjectComponent(terrainMesh));
     addGameobject(world);
 
@@ -127,16 +138,16 @@ void TheLonelyTree::start(){
     // ! Cube bugged
     Gameobject* cube = new Gameobject("Cube");
     Mesh* cubeMesh = MeshGeneration::Cube();
-    cubeMesh->addShader("model");
-    cubeMesh->addShader(1, "shadowMap");
+    cubeMesh->addShader(FRAME_BUFFER, "model");
+    cubeMesh->addShader(SHADOW_BUFFER, "shadowMap");
     cube->addComponent(new RenderObjectComponent(cubeMesh));
     addGameobject(cube);
-    cube->setPosition(glm::vec3(worldSize/2 - 100, 340, worldSize/2));
-    cube->setScale(glm::vec3(60.0f));
+    cube->setPosition(glm::vec3(worldSize/2 - 200, 360, worldSize/2));
+    cube->setScale(glm::vec3(90.0f));
 
     Gameobject* grass = new Gameobject("Grass");
     Grass* grassMesh = new Grass();
-    grassMesh->addShader("grass");
+    grassMesh->addShader(FRAME_BUFFER, "grass");
     grass->addComponent(new RenderObjectComponent(grassMesh));
     addGameobject(grass);
 
@@ -151,11 +162,10 @@ void TheLonelyTree::start(){
     };
     Gameobject* skyBox = new Gameobject("SkyBox");
     Mesh* skyBoxMesh = MeshGeneration::SkyMap();
-    skyBoxMesh->addShader("skyBox");
+    skyBoxMesh->addShader(FRAME_BUFFER, "skyBox");
     skyBoxMesh->updateTexture(Texture(faces));
     skyBox->addComponent(new RenderObjectComponent(skyBoxMesh));
     addGameobject(skyBox);
-
 }
 
 void TheLonelyTree::update(){

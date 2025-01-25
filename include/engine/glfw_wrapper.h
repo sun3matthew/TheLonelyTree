@@ -24,9 +24,6 @@ class GLFWWrapper{
         static GLFWWrapper* instance;
 
         float getDeltaTime();
-
-        Texture getShadowMap(){return *shadowMap;}
-        Texture* getShadowMapPtr(){return shadowMap;} // ! even worse design
     protected:
         Gameobject* find(std::string);
         void addGameobject(Gameobject*);
@@ -41,7 +38,6 @@ class GLFWWrapper{
 
         void lockCursor(bool lock);
 
-        Texture* shadowMap;
     private:
         std::list<Gameobject*> gameobjects;
         

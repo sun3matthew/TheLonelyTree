@@ -2,18 +2,19 @@
 #include <engine/render_manager.h>
 #include <cassert>
 
+
 RenderObject::RenderObject(){}
 
 void RenderObject::addShader(std::string shaderName){
-    shaderNames[0].push_back(shaderName);
+    shaderNames[BASE_FAME_BUFFER].push_back(shaderName);
 }
-void RenderObject::addShader(int i, std::string shaderName){
-    shaderNames[i].push_back(shaderName);
+void RenderObject::addShader(std::string frameBufferName, std::string shaderName){
+    shaderNames[frameBufferName].push_back(shaderName);
 }
 
-void RenderObject::draw(int i){
-    assert(shaderNames.find(i) != shaderNames.end());
-    for(std::string shaderName : shaderNames[i]){
+void RenderObject::draw(std::string frameBufferName){
+    assert(shaderNames.find(frameBufferName) != shaderNames.end());
+    for(std::string shaderName : shaderNames[frameBufferName]){
         drawCall(RenderManager::instance.getShader(shaderName));
     }
 }

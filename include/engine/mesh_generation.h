@@ -45,7 +45,7 @@ public:
             }
         }
 
-        return new Mesh(std::move(vertices), std::move(indices), {Texture::defaultDiffuse(), Texture::defaultSpecular(), Texture::defaultGlossy()});
+        return new Mesh(std::move(vertices), std::move(indices), Texture::defaultTextures());
     }
 
     static Mesh* Cube(){
@@ -60,7 +60,7 @@ public:
             vertices.push_back(vertex);
         }
 
-        return new Mesh(std::move(vertices), {Texture::defaultDiffuse(), Texture::defaultSpecular(), Texture::defaultGlossy()});
+        return new Mesh(std::move(vertices), Texture::defaultTextures());
     }
 
     static Mesh* SkyMap(){
@@ -105,7 +105,19 @@ public:
             }
         }
 
-        return new Mesh(std::move(vertices), std::move(indices), {Texture::defaultDiffuse(), Texture::defaultSpecular(), Texture::defaultGlossy()});
+        return new Mesh(std::move(vertices), std::move(indices), Texture::defaultTextures());
+    }
+
+    static Mesh* ScreenQuad(){
+        std::vector<Vertex> vertices;
+        std::vector<unsigned int> indices;
+        vertices.push_back({glm::vec3(-1, -1, 0), glm::vec3(0, 0, 1), glm::vec2(0, 0)});
+        vertices.push_back({glm::vec3(1, -1, 0), glm::vec3(0, 0, 1), glm::vec2(1, 0)});
+        vertices.push_back({glm::vec3(1, 1, 0), glm::vec3(0, 0, 1), glm::vec2(1, 1)});
+        vertices.push_back({glm::vec3(-1, 1, 0), glm::vec3(0, 0, 1), glm::vec2(0, 1)});
+        indices = {0, 1, 2, 0, 2, 3};
+
+        return new Mesh(std::move(vertices), std::move(indices), {});
     }
 private:
     // Private constructor to prevent instantiation

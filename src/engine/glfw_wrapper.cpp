@@ -3,6 +3,7 @@
 #include <iostream>
 #include <engine/input.h>
 
+
 float GLFWWrapper::lastX = 0.0f;
 float GLFWWrapper::lastY = 0.0f;
 float GLFWWrapper::width = 0.0f;
@@ -46,7 +47,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height){
     GLFWWrapper::width = width;
     GLFWWrapper::height = width;
 
-    RenderManager::instance.updateFrameBuffer(0, {0, GLFWWrapper::width, GLFWWrapper::height, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT});
+    RenderManager::instance.updateFrameBuffer(0, GLFWWrapper::width, GLFWWrapper::height);
 }
 
 int GLFWWrapper::createWindow(int width, int height, const char* title){
@@ -66,7 +67,8 @@ int GLFWWrapper::createWindow(int width, int height, const char* title){
     GLFWWrapper::width = width * 2;
     GLFWWrapper::height = height * 2;
 
-    RenderManager::instance.addFrameBuffer({0, GLFWWrapper::width, GLFWWrapper::height, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT});
+    // Base Frame Buffer
+    RenderManager::instance.addFrameBuffer({"base", {}, 0, GLFWWrapper::width, GLFWWrapper::height, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT});
 
     lastX = width / 2.0f;
     lastY = height / 2.0f;

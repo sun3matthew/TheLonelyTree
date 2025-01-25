@@ -2,6 +2,7 @@
 
 #include <glad/glad.h> 
 
+
 // TODO Free this at game end.
 RenderManager RenderManager::instance;
 
@@ -32,12 +33,22 @@ Shader* RenderManager::getShader(std::string name){
 }
 
 void RenderManager::addFrameBuffer(FrameBuffer frameBuffer){
+    renderOrder.insert({frameBuffer.name, frameBuffers.size()});
+
     frameBuffers.push_back(frameBuffer);
     renderBuffer.push_back(std::vector<RenderObject*>());
 }
 
-void RenderManager::updateFrameBuffer(int i, FrameBuffer frameBuffer){
-    frameBuffers[i] = frameBuffer;
+void RenderManager::updateFrameBuffer(int i, int width, int height){
+    frameBuffers[i].width = width;
+    frameBuffers[i].height = height;
+}
+
+FrameBuffer RenderManager::getFrameBuffer(int i){
+    return frameBuffers[i];
+}
+FrameBuffer RenderManager::getFrameBuffer(std::string layerName){
+    return frameBuffers[renderOrder[layerName]];
 }
 
 void RenderManager::activateFrameBuffer(int i){
@@ -47,15 +58,22 @@ void RenderManager::activateFrameBuffer(int i){
     glClear(frameBuffer.clearFlags);
 }
 
-//! For frame buffers only, 0 takes default.
-void RenderManager::addToBuffer(int i, RenderObject* renderObject){
-    renderBuffer[i].push_back(renderObject);
+void RenderManager::addToBuffer(std::string layer, RenderObject* renderObject){
+    assert(renderOrder.find(layer) != renderOrder.end());
+
+    renderBuffer[renderOrder[layer]].push_back(renderObject);
 }
 
 void RenderManager::draw(int i){
     activateFrameBuffer(i);
     for(RenderObject* renderObject : renderBuffer[i])
-        renderObject->draw(i);
+        renderObject->draw(frameBuffers[i].name);
+}
+
+void RenderManager::draw(std::string layer){
+    assert(renderOrder.find(layer) != renderOrder.end());
+
+    draw(renderOrder[layer]);
 }
 
 void RenderManager::addToBuffer(RenderObject* renderObject){

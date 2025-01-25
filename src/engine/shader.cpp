@@ -132,8 +132,8 @@ void Shader::setMat4(const std::string &name, glm::mat4 value) const{
 }
 
 void Shader::setTexture(Texture* texture, int textureID) const{
-    glUniform1i(glGetUniformLocation(ID, TextureTypeToString(texture->type).c_str()), textureID);
     texture->bind(textureID);
+    glUniform1i(glGetUniformLocation(ID, TextureTypeToString(texture->type).c_str()), textureID);
 }
 
 int Shader::getID(){

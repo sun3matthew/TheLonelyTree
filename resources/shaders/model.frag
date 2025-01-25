@@ -6,7 +6,7 @@ uniform sampler2D specular;
 uniform sampler2D glossy;
 uniform sampler2D normal;
 
-uniform sampler2D shadow_map;
+uniform sampler2D depth_buffer;
 
 struct LightingData {
     vec3 ambient;
@@ -42,18 +42,18 @@ out vec4 FragColor;
 float ShadowCalculation(vec4 fragPosLightSpace, vec3 normal, vec3 lightDir){
     vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
     projCoords = projCoords * 0.5 + 0.5;
-    float closestDepth = texture(shadow_map, projCoords.xy).r; 
+    float closestDepth = texture(depth_buffer, projCoords.xy).r; 
     float currentDepth = projCoords.z;
     float bias = max(0.05 * (1.0 - dot(normal, lightDir)), 0.005);  
     bias /= 5;
 
     float shadow = 0.0;
-    vec2 texelSize = 1.0 / textureSize(shadow_map, 0);
+    vec2 texelSize = 1.0 / textureSize(depth_buffer, 0);
     for(int x = -1; x <= 1; ++x)
     {
         for(int y = -1; y <= 1; ++y)
         {
-            float pcfDepth = texture(shadow_map, projCoords.xy + vec2(x, y) * texelSize).r; 
+            float pcfDepth = texture(depth_buffer, projCoords.xy + vec2(x, y) * texelSize).r; 
             shadow += currentDepth - bias > pcfDepth ? 1.0 : 0.0;        
         }    
     }
@@ -80,7 +80,6 @@ vec3 CalcDirLight(DirectionalLight light, vec3 norm, vec3 viewDir){
     specular *= pow(max(dot(viewDir, reflectDir), 0.0), 64);
 
     float shadow = ShadowCalculation(FragPosLightSpace, norm, lightDir);
-    // shadow = 0.0;
 
     return ambient + (1.0 - shadow) * (diffuse + specular);
     // return ambient + diffuse;
@@ -124,5 +123,5 @@ void main()
     }
     FragColor = vec4(result, a);
 
-    // FragColor = vec4(texture(shadow_map, TexCoords).rrr, 1.0);
+    // FragColor = vec4(texture(depth_buffer, TexCoords).rrr, 1.0);
 }  

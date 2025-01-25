@@ -10,6 +10,8 @@
 #include <engine/glfw_wrapper.h>
 #include <iostream>
 
+#include <engine/render_manager.h>
+
 Grass::Grass(){
     time = 0;
 
@@ -108,7 +110,7 @@ void Grass::drawCall(Shader* shader)
     shader->setVec3("worldCenter", WorldGeneration::worldSize()/2.0, 0.0, WorldGeneration::worldSize()/2.0);
 
     shader->setTexture(perlinLane, 0);
-    shader->setTexture(GLFWWrapper::instance->getShadowMapPtr(), 1);
+    shader->setTexture(&RenderManager::instance.getFrameBuffer(SHADOW_BUFFER).textures[0], 1);
 
     glBindVertexArray(VAO);
     glDrawArrays(GL_POINTS, 0, vertices.size());

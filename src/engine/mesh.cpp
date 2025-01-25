@@ -128,7 +128,6 @@ void Mesh::setupMesh()
     glBindVertexArray(0);
 }
 
-#include <iostream>
 void Mesh::drawCall(Shader* shader) 
 {
     shader->use();
@@ -137,12 +136,9 @@ void Mesh::drawCall(Shader* shader)
         shader->setMat4("model", modelMatrix);
     }
 
-    if (shader->canAcceptAttribute("meshTextures")){
+    if (shader->canAcceptAttribute("meshTextures"))
         for(unsigned int i = 0; i < textures.size(); i++)
             shader->setTexture(&textures[i], i);
-        glActiveTexture(GL_TEXTURE0);
-    }
-
 
     // draw mesh
     glBindVertexArray(VAO);

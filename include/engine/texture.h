@@ -13,7 +13,7 @@ public:
     Texture(const char* path, TextureType type);
     Texture(const unsigned char* data, int width, int height, int nChannels, TextureType type);
     Texture(std::vector<std::string> faces);
-    Texture(int w, int h, unsigned int type, TextureType textureType);
+    Texture(int w, int h, unsigned int channelType, unsigned int channelCompType, TextureType textureType);
     // TODO add a destructor to clean up openGL
 
     void bind(int textureUnit);
@@ -27,6 +27,7 @@ public:
     static Texture defaultNormal();
     static Texture defaultSpecular();
     static Texture defaultGlossy();
+    static Texture defaultShadow();
     static std::vector<Texture> defaultTextures();
 
     static Texture diffuse(unsigned char r, unsigned char g, unsigned char b);

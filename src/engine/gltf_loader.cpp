@@ -80,6 +80,8 @@ const std::vector<Gameobject*> processMesh(tinygltf::Mesh &mesh, glm::mat4 &tran
         // Extract indices
         
         Mesh* generatedMesh = new Mesh(vertices, indices, mats[primitive.material]);
+        generatedMesh->textures.push_back(Texture::defaultShadow());
+
         Gameobject* gameobject = new Gameobject(mesh.name + " " + std::to_string(i));
         gameobject->addComponent(new RenderObjectComponent(generatedMesh));
         gameobjects.push_back(gameobject);

@@ -15,10 +15,7 @@ uniform DirectionalLight dirLight;
 uniform vec3 viewPos;
 
 
-uniform sampler2D diffuse;
-uniform sampler2D specular;
-uniform sampler2D normal;
-uniform sampler2D shadow_map;
+uniform sampler2D depth_buffer;
 
 in vec3 Normal;
 in vec3 BaseColor;
@@ -31,7 +28,7 @@ out vec4 FragColor;
 float ShadowCalculation(vec4 fragPosLightSpace, vec3 normal, vec3 lightDir){
     vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
     projCoords = projCoords * 0.5 + 0.5;
-    float closestDepth = texture(shadow_map, projCoords.xy).r; 
+    float closestDepth = texture(depth_buffer, projCoords.xy).r; 
     float currentDepth = projCoords.z;
     float bias = max(0.05 * (1.0 - dot(normal, lightDir)), 0.005);  
     bias /= 5;

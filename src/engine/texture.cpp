@@ -16,13 +16,16 @@ Texture Texture::defaultSpecular(){
 Texture Texture::defaultGlossy(){
     return Texture((const unsigned char[]) {0xFF}, 1, 1, 1, TextureType::Glossy);
 }
+Texture Texture::defaultShadow(){
+    return RenderManager::instance.getFrameBuffer(SHADOW_BUFFER).textures[0]; // !BAD DESIGN
+}
 std::vector<Texture> Texture::defaultTextures(){
     return {
         Texture::defaultDiffuse(),
         Texture::defaultNormal(),
         Texture::defaultSpecular(),
         Texture::defaultGlossy(),
-        GLFWWrapper::instance->getShadowMap() // ! poor design
+        Texture::defaultShadow()
     };
 }
 
@@ -93,21 +96,25 @@ Texture::Texture(const unsigned char* data, int w, int h, int nC, TextureType te
     glBindTexture(GL_TEXTURE_2D, 0);
 } 
 
-// ! Depth Texture
-Texture::Texture(int w, int h, unsigned int channelType, TextureType textureType) 
+Texture::Texture(int w, int h, unsigned int channelType, unsigned int channelCompType, TextureType textureType) 
     : width(w), height(h), nChannels(-1), type(textureType)
 {
+
     glGenTextures(1, &ID);
     glBindTexture(GL_TEXTURE_2D, ID);
-    glTexImage2D(GL_TEXTURE_2D, 0, channelType, 
-                width, height, 0, channelType, GL_FLOAT, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexImage2D(GL_TEXTURE_2D, 0, channelType, width, height, 0, channelType, channelCompType, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-    float borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-    glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);  
+    // ! Bad Design
+    if(textureType == TextureType::DepthBuffer){
+        float borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+        glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);  
+    }
+
+    glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 Texture::Texture(std::vector<std::string> faces)
