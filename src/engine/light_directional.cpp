@@ -42,6 +42,7 @@ void LightDirectional::update(){
     shaders = RenderManager::instance.getShadersAccepting("dirLightPosition");
     for(Shader* shader : shaders){
         shader->use();
-        shader->setVec3("dirLightPosition", lookAt.x, lookAt.y, lookAt.z);
+        // shader->setVec3("dirLightPosition", lookAt.x, lookAt.y, lookAt.z);
+        shader->setVec3("dirLightDirection", direction.x, direction.y, direction.z);
     }
 }

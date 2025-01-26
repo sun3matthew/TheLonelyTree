@@ -80,7 +80,7 @@ void Camera::updateCameraVectors() {
 }
 
 void Camera::update(){
-    float near_plane = 1.0f, far_plane = 5000.0f;
+    float near_plane = 10.0f, far_plane = 5000.0f;
 
     glm::mat4 view = GetViewMatrix();
     glm::mat4 projection = glm::perspective(glm::radians(Zoom), 800.0f / 600.0f, near_plane, far_plane);
