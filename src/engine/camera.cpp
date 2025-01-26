@@ -80,8 +80,10 @@ void Camera::updateCameraVectors() {
 }
 
 void Camera::update(){
+    float near_plane = 1.0f, far_plane = 5000.0f;
+
     glm::mat4 view = GetViewMatrix();
-    glm::mat4 projection = glm::perspective(glm::radians(Zoom), 800.0f / 600.0f, 10.0f, 5000.0f);
+    glm::mat4 projection = glm::perspective(glm::radians(Zoom), 800.0f / 600.0f, near_plane, far_plane);
 
     std::vector<Shader*> shaders = RenderManager::instance.getShadersAccepting("camera");
     glm::vec3 position = gameobject->getPosition();
@@ -100,4 +102,14 @@ void Camera::update(){
         shader->setMat4("view", glm::value_ptr(viewSkyBox));
         shader->setMat4("projection", glm::value_ptr(projection));
     }
+
+    shaders = RenderManager::instance.getShadersAccepting("screenSpaceData");
+    for(Shader* shader : shaders){
+        shader->use();
+        shader->setMat4("projection", projection);
+        shader->setMat4("invProjection", glm::inverse(projection));
+        shader->setFloat("near", near_plane);
+        shader->setFloat("far", far_plane);
+    }
+
 }

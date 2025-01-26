@@ -28,12 +28,20 @@ void LightDirectional::update(){
     glm::mat4 lightProjection = glm::ortho(-1000.0f, 1000.0f, -1000.0f, 1000.0f, near_plane, far_plane);
 
     glm::vec3 lookAt = glm::vec3(worldSize / 2, 300.0f, worldSize / 2);
-    glm::mat4 lightView = glm::lookAt(lookAt - direction * 1500.0f, lookAt, glm::vec3(0.0, 1.0, 0.0));
+    glm::vec3 lightPos = direction * 1500.0f;
+    glm::mat4 lightView = glm::lookAt(lookAt - lightPos, lookAt, glm::vec3(0.0, 1.0, 0.0));
     glm::mat4 lightSpaceMatrix = lightProjection * lightView; 
 
     shaders = RenderManager::instance.getShadersAccepting("dirLightCamera");
     for(Shader* shader : shaders){
         shader->use();
         shader->setMat4("lightSpaceMatrix", lightSpaceMatrix);
+    }
+
+
+    shaders = RenderManager::instance.getShadersAccepting("dirLightPosition");
+    for(Shader* shader : shaders){
+        shader->use();
+        shader->setVec3("dirLightPosition", lookAt.x, lookAt.y, lookAt.z);
     }
 }

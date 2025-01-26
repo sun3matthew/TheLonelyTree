@@ -33,7 +33,7 @@ TheLonelyTree::TheLonelyTree()
     // TODO turn these into enums
     RenderManager::instance.addShader(
         new Shader("screen", "resources/shaders/screen.vert", "resources/shaders/screen.frag",
-            std::vector<std::string>{"meshTextures"}));
+            std::vector<std::string>{"meshTextures", "dirLightPosition", "screenSpaceData"}));
     RenderManager::instance.addShader(
         new Shader("shadowMap", "resources/shaders/shadowMap.vert", "resources/shaders/shadowMap.frag",
             std::vector<std::string>{"dirLightCamera", "model", "meshTextures"}));
@@ -69,6 +69,7 @@ void TheLonelyTree::start(){
     Gameobject* screenQuad = new Gameobject("Screen Quad");
     Mesh* screenQuadMesh = MeshGeneration::ScreenQuad();
     screenQuadMesh->textures.push_back(RenderManager::instance.getFrameBuffer(FRAME_BUFFER).textures[0]);
+    screenQuadMesh->textures.push_back(RenderManager::instance.getFrameBuffer(FRAME_BUFFER).textures[1]);
     screenQuadMesh->addShader(BASE_FAME_BUFFER, "screen");
     screenQuad->addComponent(new RenderObjectComponent(screenQuadMesh));
     addGameobject(screenQuad);
