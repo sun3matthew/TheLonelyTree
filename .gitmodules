@@ -10,3 +10,6 @@
 [submodule "external/PerlinNoise"]
 	path = external/PerlinNoise
 	url = https://github.com/Reputeless/PerlinNoise.git
+[submodule "external/http"]
+	path = external/http
+	url = https://github.com/yhirose/cpp-httplib.git

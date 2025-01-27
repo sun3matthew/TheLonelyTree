@@ -21,6 +21,27 @@
 #include <world_generation.h>
 
 #include <iostream>
+#include <engine/http_client.h>
+
+#include <sstream>
+#include <chrono>
+#include <iomanip>
+#include <ctime>
+
+std::string getCurrentDateTime() {
+    // Get the current time
+    auto now = std::chrono::system_clock::now();
+    std::time_t currentTime = std::chrono::system_clock::to_time_t(now);
+
+    // Convert to local time
+    std::tm localTime = *std::localtime(&currentTime);
+
+    // Create a string stream
+    std::ostringstream dateTimeStream;
+    dateTimeStream << std::put_time(&localTime, "%Y-%m-%d %H:%M:%S");
+
+    return dateTimeStream.str(); // Return the string representation
+}
 
 // Camera 
 TheLonelyTree::TheLonelyTree()
@@ -61,6 +82,22 @@ TheLonelyTree::~TheLonelyTree(){
 }
 
 void TheLonelyTree::start(){
+    // std::string url = "https://7sqvdwegyf.execute-api.us-west-2.amazonaws.com";
+    // std::string dataPath = "/default/the-lonely-tree";
+    // HttpClient client(url, dataPath);
+
+    // std::string key = "exampleKey";
+    // std::string value = getCurrentDateTime();
+
+    // if(client.write(key, value)){
+    //     std::cout << "Write successful" << std::endl;
+    // }else{
+    //     std::cout << "Write failed" << std::endl;
+    // }
+
+    // std::string readValue = client.read(key);
+    // std::cout << "Read value: " << readValue << std::endl;
+
     numLights = 0;
 
 
