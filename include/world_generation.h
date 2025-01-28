@@ -9,7 +9,7 @@ class WorldGeneration {
 public:
     // Static methods
     static float getHeightAt(float x, float y);
-    static Mesh* createWorld(unsigned int seedIn, float heightIn, float sizeIn, float densityIn);
+    static Mesh* createWorld(unsigned int seedIn, float heightIn, float sizeIn, float densityIn, float perlinNoiseAmt);
 
     static float worldSize();
 private:

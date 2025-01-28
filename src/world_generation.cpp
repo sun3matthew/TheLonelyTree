@@ -28,7 +28,7 @@ float WorldGeneration::getHeightAt(float x, float y){
     return bell + (noise - 1) * height * 1.8 * distToCenter;
 }
 
-Mesh* WorldGeneration::createWorld(unsigned int seedIn, float heightIn, float sizeIn, float density){
+Mesh* WorldGeneration::createWorld(unsigned int seedIn, float heightIn, float sizeIn, float density, float perlinNoiseAmt){
     seededPerlin = siv::PerlinNoise{seedIn};
 
     seed = seedIn;
@@ -44,6 +44,14 @@ Mesh* WorldGeneration::createWorld(unsigned int seedIn, float heightIn, float si
         for (float x = 0; x <= size; x += density){
             Vertex vertex;
             vertex.Position = glm::vec3(x, getHeightAt(x, y), y);
+
+            if (perlinNoiseAmt > 0){
+                // float randomNoise = seededPerlin.octave2D_01((x * perlinNoiseAmt), (y * perlinNoiseAmt), 20);
+                float randomNoise = rand() % 1000 / 1000.0;
+                randomNoise += 0.01;
+                vertex.Position.y += randomNoise * 90;
+            }
+
             vertex.Normal = glm::vec3(0, 0, 0);
             vertex.TexCoords = glm::vec2(x/size, y / size);
             vertices.push_back(vertex);

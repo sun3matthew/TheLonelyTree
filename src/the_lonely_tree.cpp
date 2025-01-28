@@ -67,6 +67,9 @@ TheLonelyTree::TheLonelyTree()
     RenderManager::instance.addShader(
         new Shader("grass", "resources/shaders/grass.vert", "resources/shaders/grass.geom", "resources/shaders/grass.frag",
             std::vector<std::string>{"camera", "dirLight", "dirLightCamera"}));
+    RenderManager::instance.addShader(
+        new Shader("shadowMap", "resources/shaders/shadowMap.vert", "resources/shaders/shadowMap.frag",
+            std::vector<std::string>{"dirLightCamera", "model", "meshTextures"}));
 
     RenderManager::instance.addFrameBuffer(FrameBufferGeneration::BaseFrameBuffer(FRAME_BUFFER, GLFWWrapper::width, GLFWWrapper::height));
     RenderManager::instance.addFrameBuffer(FrameBufferGeneration::ShadowMap(SHADOW_BUFFER, 1024 * 6, 1024 * 6));
@@ -144,13 +147,23 @@ void TheLonelyTree::start(){
     tree->setScale(glm::vec3(0.6f));
     tree->setPosition(glm::vec3(worldSize / 2, 300, worldSize / 2));
 
+    int seed = 12923952u;
+
+    Gameobject* world2 = new Gameobject("World");
+    Mesh* terrainMesh2 = WorldGeneration::createWorld(seed, 60, worldSize, 4, 10);
+    terrainMesh2->updateTexture(Texture::diffuse(0x50, 0x4D, 0x53));
+    terrainMesh2->addShader(SHADOW_BUFFER, "shadowMap");
+    world2->addComponent(new RenderObjectComponent(terrainMesh2));
+    addGameobject(world2);
+
     Gameobject* world = new Gameobject("World");
-    Mesh* terrainMesh = WorldGeneration::createWorld(12923952u, 60, worldSize, 4 * 2);
+    Mesh* terrainMesh = WorldGeneration::createWorld(seed, 60, worldSize, 4 * 2, 0);
     terrainMesh->updateTexture(Texture::diffuse(0x50, 0x4D, 0x53));
     terrainMesh->addShader(FRAME_BUFFER, "model");
     terrainMesh->addShader(SHADOW_BUFFER, "shadowMap");
     world->addComponent(new RenderObjectComponent(terrainMesh));
     addGameobject(world);
+
 
     // Gameobject* water = new Gameobject("Water");
     // Mesh* waterMesh = MeshGeneration::Plane(64, 64);

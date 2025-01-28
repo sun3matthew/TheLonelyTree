@@ -9,10 +9,10 @@
 LightDirectional::LightDirectional(glm::vec3 dir, glm::vec3 amb, glm::vec3 diff, glm::vec3 spec)
     : Light(amb, diff, spec), direction(dir)
 {
-    angle = 3.1415 * 1.2;
+    angle = 3.1415 * 0.8;
 }
 void LightDirectional::update(){
-    angle += 0.01 * GLFWWrapper::instance->getDeltaTime();
+    angle += 0.11 * GLFWWrapper::instance->getDeltaTime();
     // std::cout << angle << std::endl;
     direction = glm::vec3(cos(angle), sin(angle), 0);
     std::vector<Shader*> shaders = RenderManager::instance.getShadersAccepting("dirLight");
@@ -25,7 +25,7 @@ void LightDirectional::update(){
     }
 
     float near_plane = 1.0f, far_plane = 3000.5f;
-    glm::mat4 lightProjection = glm::ortho(-1000.0f, 1000.0f, -1000.0f, 1000.0f, near_plane, far_plane);
+    glm::mat4 lightProjection = glm::ortho(-2500.0f, 2500.0f, -2500.0f, 2500.0f, near_plane, far_plane);
 
     glm::vec3 lookAt = glm::vec3(worldSize / 2, 300.0f, worldSize / 2);
     glm::mat4 lightView = glm::lookAt(lookAt - direction * 1500.0f, lookAt, glm::vec3(0.0, 1.0, 0.0));
