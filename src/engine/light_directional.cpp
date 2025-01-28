@@ -36,4 +36,16 @@ void LightDirectional::update(){
         shader->use();
         shader->setMat4("lightSpaceMatrix", lightSpaceMatrix);
     }
+
+    shaders = RenderManager::instance.getShadersAccepting("dayTime");
+    float dayTime = sin(-angle) + 0.5;
+    if (dayTime < 0.0)
+        dayTime = 0.0;
+    if (dayTime > 1.0)
+        dayTime = 1.0;
+
+    for(Shader* shader : shaders){
+        shader->use();
+        shader->setFloat("day", dayTime);
+    }
 }

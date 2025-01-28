@@ -41,7 +41,7 @@ void main() {
         mat4 model = projection * view;
 
         float segmentSize = 1.1 + (clumpColor[0] * 0.4) + (randomHash[0] * 0.2);
-        segmentSize *= 24;
+        segmentSize *= 34;
         // segmentSize = 1.0;
 
 
@@ -50,7 +50,8 @@ void main() {
 
         float distToCamera = length(viewPos - segmentPosition);
 
-        float colorDarkness = 0.6 + (clumpColor[0] * 0.4) + (randomHash[0] * 0.2) - distToCamera / 10000;
+        // float colorDarkness = 0.6 + (clumpColor[0] * 0.4) + (randomHash[0] * 0.2) - distToCamera / 10000;
+        float colorDarkness = 0.6 + (clumpColor[0] * 0.4) + (randomHash[0] * 0.2);
         vec3 color = vec3(0.5, 0.61, 0.24) * colorDarkness;
         // color = debugColor[0] * colorDarkness;
 

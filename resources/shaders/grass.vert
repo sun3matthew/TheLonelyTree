@@ -53,11 +53,11 @@ void main(){
         }
     }
 
-    vec2 universalDirection = normalize(vec2(1,2));
+    vec2 universalDirection = normalize(vec2(3,1));
 
     ivec2 texSize = textureSize(perlin_lane, 0);
     // vec2 texCoords = vec2(aPos.x/texSize.y, aPos.z/texSize.y);
-    vec2 texCoords = vec2(aPos.x/2048, aPos.z/2048) - universalDirection * (time / 8);
+    vec2 texCoords = vec2(aPos.x/3048, aPos.z/3048) - universalDirection * (time / 12);
     float perlin = texture(perlin_lane, texCoords).r;
     perlinValue = perlin;
     // perlinValue = 0.0;
@@ -70,14 +70,14 @@ void main(){
     float perlinTilt = pow(perlinValue + 0.3, 1.6);
 
     facing = normalize(vec2(aPos.x - minX, aPos.z - minY)) + 0.8 * normalize(vec2(random(hash(aPos.x, aPos.z + 1)) - 0.5, random(hash(aPos.x, aPos.z)) - 0.5));
-    facing = normalize((facing * 0.2 + clumpDirection * 0.3 + perlinTilt * universalDirection * 0.00));
+    facing = normalize((facing * 0.2 + clumpDirection * 0.3 + perlinTilt * universalDirection * 0.05));
 
     randomHash = random(hash((aPos.x + 3003), (aPos.z + 23)));
 
     float tilt = 0.4 + 0.3 * (1 - (sqrt(minDist) / (GRID_SIZE * GRID_SIZE / 2)));
     tilt += (randomHash - 0.5) * 0.4;
     tilt += (sin(time * (0.2 + 0.3 * randomHash) + 10000 * randomHash)) * 0.01 * randomHash;
-    // tilt += perlinValue * 0.01;
+    tilt += perlinValue * 0.01;
 
 
     vec3 grassPosXZ = vec3(facing.x, 0, facing.y) * cos(tilt);
@@ -87,7 +87,7 @@ void main(){
 
 
     float tiltPointT = 0.76;
-    float tiltAmount = 0.6; // TODO influence this
+    float tiltAmount = 0.65; // TODO influence this
     bezierPoint = (tiltPointT * tipPosition) + (normalize(cross(cross(tipPosition, vec3(0, 1, 0)),tipPosition))) * tiltAmount;
 
     float clumpAmt = 0.40 * randomHash;

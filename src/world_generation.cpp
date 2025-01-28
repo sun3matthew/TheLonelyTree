@@ -49,7 +49,7 @@ Mesh* WorldGeneration::createWorld(unsigned int seedIn, float heightIn, float si
                 // float randomNoise = seededPerlin.octave2D_01((x * perlinNoiseAmt), (y * perlinNoiseAmt), 20);
                 float randomNoise = rand() % 1000 / 1000.0;
                 randomNoise += 0.01;
-                vertex.Position.y += randomNoise * 90;
+                vertex.Position.y += randomNoise * 120;
             }
 
             vertex.Normal = glm::vec3(0, 0, 0);

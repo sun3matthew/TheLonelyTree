@@ -63,7 +63,7 @@ TheLonelyTree::TheLonelyTree()
             std::vector<std::string>{"camera", "dirLightCamera", "dirLight", "pointLights", "model", "meshTextures"}));
     RenderManager::instance.addShader(
         new Shader("skyBox", "resources/shaders/skybox.vert", "resources/shaders/skybox.frag",
-            std::vector<std::string>{"cameraSkyBox", "meshTextures"}));
+            std::vector<std::string>{"cameraSkyBox", "meshTextures", "dayTime"}));
     RenderManager::instance.addShader(
         new Shader("grass", "resources/shaders/grass.vert", "resources/shaders/grass.geom", "resources/shaders/grass.frag",
             std::vector<std::string>{"camera", "dirLight", "dirLightCamera"}));
@@ -126,7 +126,7 @@ void TheLonelyTree::start(){
     Gameobject* directionalLight = new Gameobject("Directional Light");
     LightDirectional *light = new LightDirectional(
         glm::vec3(0.0f, 0.0f, 0.0f),
-        glm::vec3(0.30f, 0.30f, 0.30f),
+        glm::vec3(0.25f, 0.25f, 0.25f),
         glm::vec3(0.40f, 0.40f, 0.40f),
         glm::vec3(0.9f, 0.9f, 0.9f));
     light->setWorldSize(worldSize);
@@ -186,14 +186,14 @@ void TheLonelyTree::start(){
     // sphere->setScale(glm::vec3(90.0f));
 
     // ! Cube bugged
-    Gameobject* cube = new Gameobject("Cube");
-    Mesh* cubeMesh = MeshGeneration::Cube();
-    cubeMesh->addShader(FRAME_BUFFER, "model");
-    cubeMesh->addShader(SHADOW_BUFFER, "shadowMap");
-    cube->addComponent(new RenderObjectComponent(cubeMesh));
-    addGameobject(cube);
-    cube->setPosition(glm::vec3(worldSize/2 - 200, 360, worldSize/2));
-    cube->setScale(glm::vec3(90.0f));
+    // Gameobject* cube = new Gameobject("Cube");
+    // Mesh* cubeMesh = MeshGeneration::Cube();
+    // cubeMesh->addShader(FRAME_BUFFER, "model");
+    // cubeMesh->addShader(SHADOW_BUFFER, "shadowMap");
+    // cube->addComponent(new RenderObjectComponent(cubeMesh));
+    // addGameobject(cube);
+    // cube->setPosition(glm::vec3(worldSize/2 - 200, 360, worldSize/2));
+    // cube->setScale(glm::vec3(90.0f));
 
     Gameobject* grass = new Gameobject("Grass");
     Grass* grassMesh = new Grass();
