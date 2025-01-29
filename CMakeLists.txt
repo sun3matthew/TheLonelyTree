@@ -11,8 +11,28 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 # Find all source files in src/
 file(GLOB_RECURSE SRC_FILES ${CMAKE_SOURCE_DIR}/src/*.cpp ${CMAKE_SOURCE_DIR}/src/*.c)
 
-# Add executable target
-add_executable(${PROJECT_NAME} ${SRC_FILES})
+# macOS specific settings
+if ( BUILD_TARGET STREQUAL "OSX" )
+    message("Building for OSX target")
+    add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${SRC_FILES})
+    set_target_properties(${CUR_TARGET} PROPERTIES
+        BUNDLE True
+        # MACOSX_BUNDLE_GUI_IDENTIFIER my.domain.style.identifier.${PROJECT_NAME}
+        MACOSX_BUNDLE_BUNDLE_NAME ${PROJECT_NAME}
+        MACOSX_BUNDLE_BUNDLE_VERSION "0.1"
+        MACOSX_BUNDLE_SHORT_VERSION_STRING "0.1"
+        MACOSX_BUNDLE_INFO_PLIST ${CMAKE_SOURCE_DIR}/Info.plist.in
+    )
+    
+    # Copy resources directory to the build folder
+    set(BUNDLE_RESOURCES_DIR "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.app/Contents/resources")
+    file(COPY ${CMAKE_SOURCE_DIR}/resources/ DESTINATION ${BUNDLE_RESOURCES_DIR})
+else ()
+    message("Building for Base target")
+
+    add_executable(${PROJECT_NAME} ${SRC_FILES})
+endif () 
+
 
 # Include directories
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/include )
@@ -25,8 +45,25 @@ set(TINYGLTF_INSTALL OFF CACHE INTERNAL "" FORCE)
 add_subdirectory(external/tinygltf)
 target_include_directories(${PROJECT_NAME} PRIVATE "external/tinygltf")
 
-find_package(OpenSSL REQUIRED)
-target_link_libraries(${PROJECT_NAME} PRIVATE OpenSSL::SSL)
+if ( BUILD_TARGET STREQUAL "OSX" )
+    set(OPENSSL_USE_STATIC_LIBS ON)
+    find_package(OpenSSL REQUIRED)
+
+    # Assuming OpenSSL was found correctly
+    set(OPENSSL_LIBS ${OPENSSL_LIBRARIES})
+    set(OPENSSL_INCLUDE_DIR ${OPENSSL_INCLUDE_DIR})
+
+    # Copy OpenSSL libraries to the app's Frameworks directory
+    set(APP_FRAMEWORKS_DIR "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.app/Contents/Frameworks")
+    file(COPY ${OPENSSL_LIBS} DESTINATION ${APP_FRAMEWORKS_DIR})
+
+    # Link OpenSSL to your app
+    target_link_libraries(${PROJECT_NAME} PRIVATE ${OPENSSL_LIBS})
+
+else ()
+    find_package(OpenSSL REQUIRED)
+    target_link_libraries(${PROJECT_NAME} PRIVATE OpenSSL::SSL)
+endif ()
 
 add_library(glad STATIC external/glad/src/glad.c)
 target_include_directories(glad PUBLIC external/glad/include)
@@ -52,5 +89,3 @@ endif()
 # Compiler definitions
 target_compile_definitions(${PROJECT_NAME} PRIVATE GL_SILENCE_DEPRECATION)
 
-# Copy resources directory to the build folder
-file(COPY ${CMAKE_SOURCE_DIR}/resources/ DESTINATION ${CMAKE_BINARY_DIR}/resources)

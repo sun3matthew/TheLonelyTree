@@ -85,21 +85,21 @@ TheLonelyTree::~TheLonelyTree(){
 }
 
 void TheLonelyTree::start(){
-    // std::string url = "https://7sqvdwegyf.execute-api.us-west-2.amazonaws.com";
-    // std::string dataPath = "/default/the-lonely-tree";
-    // HttpClient client(url, dataPath);
+    std::string url = "https://7sqvdwegyf.execute-api.us-west-2.amazonaws.com";
+    std::string dataPath = "/default/the-lonely-tree";
+    HttpClient client(url, dataPath);
 
-    // std::string key = "exampleKey";
-    // std::string value = getCurrentDateTime();
+    std::string key = "exampleKey";
+    std::string value = getCurrentDateTime();
 
-    // if(client.write(key, value)){
-    //     std::cout << "Write successful" << std::endl;
-    // }else{
-    //     std::cout << "Write failed" << std::endl;
-    // }
+    if(client.write(key, value)){
+        std::cout << "Write successful" << std::endl;
+    }else{
+        std::cout << "Write failed" << std::endl;
+    }
 
-    // std::string readValue = client.read(key);
-    // std::cout << "Read value: " << readValue << std::endl;
+    std::string readValue = client.read(key);
+    std::cout << "Read value: " << readValue << std::endl;
 
     numLights = 0;
 
@@ -133,7 +133,7 @@ void TheLonelyTree::start(){
     directionalLight->addComponent(light);
     addGameobject(directionalLight);
 
-    Gameobject* tree = GLTFLoader::loadMesh("resources/models/tree/scene.gltf");
+    Gameobject* tree = GLTFLoader::loadMesh("../resources/models/tree/scene.gltf");
     std::list<Gameobject*> allChildren = tree->getAllChildren();
     for(Gameobject* child : allChildren){
         RenderObjectComponent* meshComp = child -> getComponent<RenderObjectComponent>();
@@ -201,7 +201,7 @@ void TheLonelyTree::start(){
     grass->addComponent(new RenderObjectComponent(grassMesh));
     addGameobject(grass);
 
-    std::string path = "resources/textures/cubemaps/sky/";
+    std::string path = "../resources/textures/cubemaps/sky/";
     std::vector<std::string> faces = {
         path + "right.jpg",
         path + "left.jpg",
