@@ -5,12 +5,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 static char* readShaderFile(const char* filepath){
-    // prepend ../ to the filepath
-    char* newFilepath = (char*)malloc(strlen(filepath) + 4);
-    strcpy(newFilepath, "../");
-    strcat(newFilepath, filepath);
-
-    FILE* file = fopen(newFilepath, "r");
+    FILE* file = fopen(filepath, "r");
     if (!file) {
         fprintf(stderr, "Failed to open shader file: %s\n", filepath);
         return NULL;

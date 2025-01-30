@@ -19,6 +19,8 @@
 #include <engine/light_spot.h>
 
 #include <world_generation.h>
+#include <tree_manager.h>
+#include <tree_renderer_component.h>
 
 #include <iostream>
 #include <engine/http_client.h>
@@ -51,24 +53,30 @@ TheLonelyTree::TheLonelyTree()
     createWindow(800 * 1.5f, 600 * 1.5f, "The Lonely Tree");
     lockCursor(true);
 
+    // prepend ../ to the filepath
+    // char* newFilepath = (char*)malloc(strlen(filepath) + 4);
+    // strcpy(newFilepath, "../");
+    // strcat(newFilepath, filepath);
+
+
     // TODO turn these into enums
     RenderManager::instance.addShader(
-        new Shader("screen", "resources/shaders/screen.vert", "resources/shaders/screen.frag",
+        new Shader("screen", "../resources/shaders/screen.vert", "../resources/shaders/screen.frag",
             std::vector<std::string>{"meshTextures"}));
     RenderManager::instance.addShader(
-        new Shader("shadowMap", "resources/shaders/shadowMap.vert", "resources/shaders/shadowMap.frag",
+        new Shader("shadowMap", "../resources/shaders/shadowMap.vert", "../resources/shaders/shadowMap.frag",
             std::vector<std::string>{"dirLightCamera", "model", "meshTextures"}));
     RenderManager::instance.addShader(
-        new Shader("model", "resources/shaders/model.vert", "resources/shaders/model.frag",
+        new Shader("model", "../resources/shaders/model.vert", "../resources/shaders/model.frag",
             std::vector<std::string>{"camera", "dirLightCamera", "dirLight", "pointLights", "model", "meshTextures"}));
     RenderManager::instance.addShader(
-        new Shader("skyBox", "resources/shaders/skybox.vert", "resources/shaders/skybox.frag",
+        new Shader("skyBox", "../resources/shaders/skybox.vert", "../resources/shaders/skybox.frag",
             std::vector<std::string>{"cameraSkyBox", "meshTextures", "dayTime"}));
     RenderManager::instance.addShader(
-        new Shader("grass", "resources/shaders/grass.vert", "resources/shaders/grass.geom", "resources/shaders/grass.frag",
+        new Shader("grass", "../resources/shaders/grass.vert", "../resources/shaders/grass.geom", "../resources/shaders/grass.frag",
             std::vector<std::string>{"camera", "dirLight", "dirLightCamera"}));
     RenderManager::instance.addShader(
-        new Shader("shadowMap", "resources/shaders/shadowMap.vert", "resources/shaders/shadowMap.frag",
+        new Shader("shadowMap", "../resources/shaders/shadowMap.vert", "../resources/shaders/shadowMap.frag",
             std::vector<std::string>{"dirLightCamera", "model", "meshTextures"}));
 
     RenderManager::instance.addFrameBuffer(FrameBufferGeneration::BaseFrameBuffer(FRAME_BUFFER, GLFWWrapper::width, GLFWWrapper::height));
@@ -82,6 +90,8 @@ TheLonelyTree::TheLonelyTree()
 }
 
 TheLonelyTree::~TheLonelyTree(){
+    delete camera;
+    delete treeManager;
 }
 
 void TheLonelyTree::start(){
@@ -164,6 +174,20 @@ void TheLonelyTree::start(){
     world->addComponent(new RenderObjectComponent(terrainMesh));
     addGameobject(world);
 
+
+
+    Entry entry = Entry();
+    entry.date = "2021-09-01";
+    entry.name = "The Lonely Tree";
+    entry.data = "The Lonely Tree is a project that aims to create a procedurally generated tree that can be used in a variety of applications. The tree is generated using a combination of L-systems and Perlin noise to create a realistic looking tree. The tree is then rendered using OpenGL and GLSL to create a realistic 3D model. The tree can be viewed from any angle and can be used in a variety of applications such as games, simulations, and visualizations.";
+
+    treeManager = new TreeManager();
+    treeManager->rootBranch()->addShader(FRAME_BUFFER, "model");
+    treeManager->rootBranch()->addNode(glm::vec3(worldSize/2, 0, worldSize/2), glm::vec3(0, 1, 0), entry);
+
+    Gameobject* treeManager = new Gameobject("Tree Manager");
+    treeManager->addComponent(new TreeRendererComponent(this->treeManager));
+    addGameobject(treeManager);
 
     // Gameobject* water = new Gameobject("Water");
     // Mesh* waterMesh = MeshGeneration::Plane(64, 64);

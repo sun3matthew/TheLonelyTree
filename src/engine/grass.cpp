@@ -104,7 +104,6 @@ void Grass::setupMesh()
 
 void Grass::drawCall(Shader* shader) 
 {
-    shader->use();
     time += GLFWWrapper::instance->getDeltaTime() * 4;
     shader->setFloat("time", time);
     shader->setVec3("worldCenter", WorldGeneration::worldSize()/2.0, 0.0, WorldGeneration::worldSize()/2.0);

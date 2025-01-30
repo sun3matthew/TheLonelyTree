@@ -130,8 +130,6 @@ void Mesh::setupMesh()
 
 void Mesh::drawCall(Shader* shader) 
 {
-    shader->use();
-
     if (shader->canAcceptAttribute("model")){
         shader->setMat4("model", modelMatrix);
     }
@@ -144,4 +142,4 @@ void Mesh::drawCall(Shader* shader)
     glBindVertexArray(VAO);
     glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
-}  
+}

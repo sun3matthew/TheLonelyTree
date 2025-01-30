@@ -8,6 +8,8 @@
 #include <vector>
 #include <list>
 
+#include "tree_manager.h"
+
 class TheLonelyTree : public GLFWWrapper{
     public:
         TheLonelyTree* instance;
@@ -22,6 +24,8 @@ class TheLonelyTree : public GLFWWrapper{
     private:
         Camera* camera;
         int numLights;
+
+        TreeManager* treeManager;
 };  
 
 #endif

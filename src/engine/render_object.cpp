@@ -15,6 +15,8 @@ void RenderObject::addShader(std::string frameBufferName, std::string shaderName
 void RenderObject::draw(std::string frameBufferName){
     assert(shaderNames.find(frameBufferName) != shaderNames.end());
     for(std::string shaderName : shaderNames[frameBufferName]){
-        drawCall(RenderManager::instance.getShader(shaderName));
+        Shader* shader = RenderManager::instance.getShader(shaderName);
+        shader->use();
+        drawCall(shader);
     }
 }

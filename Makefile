@@ -33,7 +33,7 @@ run: build
 	cd $(BUILD_DIR) && ./$(PROJECT_NAME)
 
 run-lldb: build
-	lldb $(BUILD_DIR)/./$(PROJECT_NAME)
+	cd $(BUILD_DIR) && lldb ./$(PROJECT_NAME)
 
 # Clean the build files
 clean:
