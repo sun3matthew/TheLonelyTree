@@ -15,11 +15,13 @@ uniform DirectionalLight dirLight;
 uniform vec3 viewPos;
 
 uniform sampler2D depth_buffer;
+uniform sampler2D diffuse;
 
 in vec3 Normal;
 in vec3 FragPos;
 in vec2 TexCoords;
 in vec4 FragPosLightSpace;
+in vec3 Color;
 
 out vec4 FragColor;
 
@@ -42,7 +44,8 @@ float ShadowCalculation(vec4 fragPosLightSpace, vec3 normal, vec3 lightDir){
 vec3 CalcDirLight(DirectionalLight light, vec3 norm, vec3 viewDir){
     vec3 lightDir = normalize(-light.direction.xyz);
 
-    vec3 BaseColor = vec3(1.0);
+    // vec3 BaseColor = Color;
+    vec3 BaseColor = vec3(texture(diffuse, TexCoords));
 
     vec3 ambient = light.lightingData.ambient * BaseColor;
 
@@ -56,6 +59,7 @@ vec3 CalcDirLight(DirectionalLight light, vec3 norm, vec3 viewDir){
     vec3 specular = light.lightingData.specular * specularAmount;
     vec3 reflectDir = reflect(-lightDir, norm);
     specular *= pow(max(dot(viewDir, reflectDir), 0.0), 16);
+    specular = vec3(0.0);
 
     float shadow = ShadowCalculation(FragPosLightSpace, norm, lightDir);
 

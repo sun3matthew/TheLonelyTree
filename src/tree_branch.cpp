@@ -3,6 +3,7 @@
 #include "tree_branch.h"
 #include <engine/render_manager.h>
 
+
 #include <cassert>
 
 TreeBranch::TreeBranch(unsigned int id, TreeBranch* parentBranch, TreeNode* node){
@@ -10,6 +11,9 @@ TreeBranch::TreeBranch(unsigned int id, TreeBranch* parentBranch, TreeNode* node
 
     this->parentBranch = parentBranch;
     this->rootNode = node;
+
+
+    textures.push_back(Texture("../resources/textures/tree/Diffuse.jpeg", TextureType::Diffuse));
 
 
     glGenVertexArrays(1, &VAO);
@@ -24,7 +28,7 @@ TreeBranch::TreeBranch(unsigned int id, TreeBranch* parentBranch, TreeNode* node
     glEnableVertexAttribArray(1);	
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(TreeVertex), (void*)offsetof(TreeVertex, direction));
     glEnableVertexAttribArray(2);	
-    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(TreeVertex), (void*)offsetof(TreeVertex, parentVector));
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(TreeVertex), (void*)offsetof(TreeVertex, parentPosition));
     glEnableVertexAttribArray(3);	
     glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(TreeVertex), (void*)offsetof(TreeVertex, parentDirection));
 
@@ -60,9 +64,11 @@ void TreeBranch::drawCall(Shader* shader){
     // shader->setVec3("worldCenter", WorldGeneration::worldSize()/2.0, 0.0, WorldGeneration::worldSize()/2.0);
 
     // shader->setTexture(perlinLane, 0);
-    std::cout << "Drawing tree branch" << std::endl;
 
     shader->setTexture(&RenderManager::instance.getFrameBuffer(SHADOW_BUFFER).textures[0], 0);
+    for (int i = 0; i < textures.size(); i++){
+        shader->setTexture(&textures[i], i + 1);
+    }
 
     glBindVertexArray(VAO);
     glDrawArrays(GL_POINTS, 0, vertices.size());
@@ -77,9 +83,16 @@ TreeNode* TreeBranch::getNode(int idx){
         return nullptr;
     return nodes[idx];
 }
+
+// ! Only safe for one scope/ non vertices
+TreeVertex* TreeBranch::getVertex(int idx){ 
+    if(idx < 0 || idx >= vertices.size())
+        return nullptr;
+    return &vertices[idx];
+}
 void TreeBranch::addNode(glm::vec3 direction, float magnitude, Entry entry){
     vertices.push_back(TreeVertex());
-    nodes.push_back(new TreeNode(this, &vertices.back(), direction, magnitude, entry));
+    nodes.push_back(new TreeNode(this, vertices.size() - 1, direction, magnitude, entry));
     writeDataToGPU();
 }
 

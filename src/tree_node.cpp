@@ -2,17 +2,25 @@
 #include <tree_branch.h>
 #include <cassert>
 
-TreeNode::TreeNode(TreeBranch* associatedBranch, TreeVertex* vertex, glm::vec3 direction, float magnitude, Entry entry){
+#include <iostream>
+TreeNode::TreeNode(TreeBranch* associatedBranch, int idx, glm::vec3 direction, float magnitude, Entry entry){
     this->associatedBranch = associatedBranch;
-    this->vertex = vertex;
+    this->index = idx;
 
     this->localDirection = glm::normalize(direction);
     this->magnitude = magnitude;
 
     this->entry = entry;
 
-    //TODO if 0 then get attachment node from parent
-    recalculateVertex(associatedBranch->getNode(associatedBranch->getNumNodes() - 1));
+    if(idx == 0){
+        if (associatedBranch->getParentBranch() == nullptr){
+            recalculateVertex(nullptr);
+        }else{
+            recalculateVertex(associatedBranch->getRootNode());
+        }
+    }else{
+        recalculateVertex(associatedBranch->getNode(associatedBranch->getNumNodes() - 1));
+    }
 }
 
 TreeNode::~TreeNode(){
@@ -20,13 +28,19 @@ TreeNode::~TreeNode(){
 }
 
 void TreeNode::recalculateVertex(TreeNode* parent){
+    TreeVertex* vertex = associatedBranch->getVertex(index);
     if (parent == nullptr){
-        vertex->direction = localDirection;
-        vertex->position = glm::vec3(0.0f);
-        return;
+        vertex->parentDirection = glm::vec3(0, 1, 0) * magnitude;
+        vertex->parentPosition = glm::vec3(0.0f);
+    }else{
+        TreeVertex* parentVertex = parent->associatedBranch->getVertex(parent->index);
+
+        vertex->parentDirection = parentVertex->direction;
+        vertex->parentPosition = parentVertex->position;
     }
-    vertex->direction = glm::normalize(parent->vertex->direction + localDirection);
-    vertex->position = parent->vertex->position + vertex->direction * magnitude;
+
+    vertex->direction = glm::normalize(vertex->parentDirection + localDirection * magnitude) * magnitude;
+    vertex->position = vertex->parentPosition + vertex->direction;
 }
 
 void TreeNode::updateDirection(glm::vec3 direction){

@@ -5,6 +5,8 @@
 #include <engine/render_object.h>
 #include "tree_node.h"
 
+#include <engine/texture.h>
+
 class TreeBranch : public RenderObject{
 public:
     TreeBranch(unsigned int ID, TreeBranch* parentBranch, TreeNode* node);
@@ -15,6 +17,7 @@ public:
 
     int getNumNodes();
     TreeNode* getNode(int idx);
+    TreeVertex* getVertex(int idx);
     void addNode(glm::vec3 direction, float magnitude, Entry entry);
 
     unsigned int getID();
@@ -22,6 +25,7 @@ public:
 
     void drawCall(Shader* shader) override;
     void writeDataToGPU();
+
 private:
     unsigned int ID;
     unsigned int VAO, VBO;
@@ -30,6 +34,8 @@ private:
     TreeNode* rootNode;
     std::vector<TreeNode*> nodes;
     std::vector<TreeVertex> vertices;
+
+    std::vector<Texture>      textures;
 };
 
 

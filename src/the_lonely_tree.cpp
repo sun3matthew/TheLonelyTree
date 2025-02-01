@@ -93,26 +93,26 @@ TheLonelyTree::TheLonelyTree()
 }
 
 TheLonelyTree::~TheLonelyTree(){
-    delete camera;
+    // delete camera; //! Do not delete, just a reference to a component
     delete treeManager;
 }
 
 void TheLonelyTree::start(){
-    std::string url = "https://7sqvdwegyf.execute-api.us-west-2.amazonaws.com";
-    std::string dataPath = "/default/the-lonely-tree";
-    HttpClient client(url, dataPath);
+    // std::string url = "https://7sqvdwegyf.execute-api.us-west-2.amazonaws.com";
+    // std::string dataPath = "/default/the-lonely-tree";
+    // HttpClient client(url, dataPath);
 
-    std::string key = "exampleKey";
-    std::string value = getCurrentDateTime();
+    // std::string key = "exampleKey";
+    // std::string value = getCurrentDateTime();
 
-    if(client.write(key, value)){
-        std::cout << "Write successful" << std::endl;
-    }else{
-        std::cout << "Write failed" << std::endl;
-    }
+    // if(client.write(key, value)){
+    //     std::cout << "Write successful" << std::endl;
+    // }else{
+    //     std::cout << "Write failed" << std::endl;
+    // }
 
-    std::string readValue = client.read(key);
-    std::cout << "Read value: " << readValue << std::endl;
+    // std::string readValue = client.read(key);
+    // std::cout << "Read value: " << readValue << std::endl;
 
     numLights = 0;
 
@@ -126,15 +126,15 @@ void TheLonelyTree::start(){
     screenQuad->addComponent(new RenderObjectComponent(screenQuadMesh));
     addGameobject(screenQuad);
 
-    Gameobject* camera = new Gameobject("Camera");
+    Gameobject* cameraGameobject = new Gameobject("Camera");
     this->camera = new Camera(
         glm::vec3(0.0f, 1.0f, 0.0f),
         0.0f,
         0.0f
         );
-    camera->addComponent(this->camera);
-    addGameobject(camera);
-    camera->setPosition(glm::vec3(worldSize/2, 400, worldSize/2));
+    cameraGameobject->addComponent(this->camera);
+    addGameobject(cameraGameobject);
+    cameraGameobject->setPosition(glm::vec3(worldSize/2, 400, worldSize/2));
 
     Gameobject* directionalLight = new Gameobject("Directional Light");
     LightDirectional *light = new LightDirectional(
@@ -169,13 +169,13 @@ void TheLonelyTree::start(){
     // world2->addComponent(new RenderObjectComponent(terrainMesh2));
     // addGameobject(world2);
 
-    // Gameobject* world = new Gameobject("World");
-    // Mesh* terrainMesh = WorldGeneration::createWorld(seed, 60, worldSize, 4 * 2, 0);
-    // terrainMesh->updateTexture(Texture::diffuse(0x50, 0x4D, 0x53));
-    // terrainMesh->addShader(FRAME_BUFFER, "model");
-    // terrainMesh->addShader(SHADOW_BUFFER, "shadowMap");
-    // world->addComponent(new RenderObjectComponent(terrainMesh));
-    // addGameobject(world);
+    Gameobject* world = new Gameobject("World");
+    Mesh* terrainMesh = WorldGeneration::createWorld(seed, 60, worldSize, 4 * 2, 0);
+    terrainMesh->updateTexture(Texture::diffuse(0x50, 0x4D, 0x53));
+    terrainMesh->addShader(FRAME_BUFFER, "model");
+    terrainMesh->addShader(SHADOW_BUFFER, "shadowMap");
+    world->addComponent(new RenderObjectComponent(terrainMesh));
+    addGameobject(world);
 
 
 
@@ -186,13 +186,77 @@ void TheLonelyTree::start(){
 
     treeManager = new TreeManager();
     treeManager->rootBranch()->addShader(FRAME_BUFFER, "tree");
-    treeManager->rootBranch()->addNode(glm::vec3(0, 1, 0), 10, entry);
-    treeManager->rootBranch()->addNode(glm::vec3(0, 1, 1), 10, entry);
+    treeManager->rootBranch()->addShader(SHADOW_BUFFER, "shadowMap");
+    int numNodes = 100;
+    for (int i = 0; i < numNodes; i++){
+        glm::vec3 randomDirection = glm::vec3(
+            (rand() % 1000) / 1000.0f - 0.5f,
+            1,
+            (rand() % 1000) / 1000.0f - 0.5f
+        );
+        float dist = 0.10;
+        treeManager->rootBranch()->addNode(randomDirection, dist, entry);
+    }
+
+    std::stack <std::pair<TreeBranch*, int>> branchStack;
+    branchStack.push({treeManager->rootBranch(), 5});
+    while(!branchStack.empty()){
+        std::pair<TreeBranch*, int> branchPair = branchStack.top();
+        branchStack.pop();
+        TreeBranch* branch = branchPair.first;
+        int depth = branchPair.second;
+
+        if (depth > 0){
+            int numNodes = rand() % 50 + 50;
+            int numBranches = rand() % 3 + 1;
+            for(int i = 0; i < numBranches; i++){
+                // random node from 0 to numNodes
+                int randomNode = rand() % branch->getNumNodes();
+                TreeBranch* newBranch = treeManager->addBranch(branch->getID(), randomNode);
+                newBranch->addShader(FRAME_BUFFER, "tree");
+                newBranch->addShader(SHADOW_BUFFER, "shadowMap");
+                // glm::vec3 direction = glm::normalize(glm::vec3(0, 1, 1));
+                glm::vec3 direction = glm::normalize(glm::vec3(
+                    (rand() % 1000) / 1000.0f - 0.5f,
+                    1,
+                    (rand() % 1000) / 1000.0f - 0.5f
+                ));
+                for (int i = 0; i < numNodes; i++){
+                    glm::vec3 randomOffset = glm::vec3(
+                        (rand() % 1000) / 1000.0f - 0.5f,
+                        0,
+                        (rand() % 1000) / 1000.0f - 0.5f
+                    );
+                    float dist = 0.10;
+                    newBranch->addNode(direction + randomOffset, dist, entry);
+                }
+                branchStack.push({newBranch, depth - 1});
+            }
+        }
+    }
+
+
+    // TreeBranch* secondBranch =  treeManager->addBranch(treeManager->rootBranch()->getID(), 80);
+    // secondBranch->addShader(FRAME_BUFFER, "tree");
+    // secondBranch->addShader(SHADOW_BUFFER, "shadowMap");
+    // glm::vec3 direction = glm::normalize(glm::vec3(0, 1, 1));
+    // for (int i = 0; i < numNodes; i++){
+    //     glm::vec3 randomOffset = glm::vec3(
+    //         (rand() % 1000) / 1000.0f - 0.5f,
+    //         0,
+    //         (rand() % 1000) / 1000.0f - 0.5f
+    //     );
+    //     float dist = 0.10;
+    //     secondBranch->addNode(direction + randomOffset, dist, entry);
+    // }
+
+    // treeManager->rootBranch()->addNode(glm::vec3(0, 1, 1), 200, entry);
 
     Gameobject* treeManager = new Gameobject("Tree Manager");
     treeManager->addComponent(new TreeRendererComponent(this->treeManager));
     addGameobject(treeManager);
-    treeManager->setPosition(glm::vec3(worldSize/2, 0, worldSize/2));
+    treeManager->setPosition(glm::vec3(worldSize/2, 240, worldSize/2));
+    treeManager->setScale(glm::vec3(100.0f));
 
     // Gameobject* water = new Gameobject("Water");
     // Mesh* waterMesh = MeshGeneration::Plane(64, 64);
