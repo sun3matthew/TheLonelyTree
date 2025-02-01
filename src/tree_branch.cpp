@@ -1,6 +1,7 @@
 #include <glad/glad.h>
 
 #include "tree_branch.h"
+#include <engine/render_manager.h>
 
 #include <cassert>
 
@@ -20,6 +21,12 @@ TreeBranch::TreeBranch(unsigned int id, TreeBranch* parentBranch, TreeNode* node
 
     glEnableVertexAttribArray(0);	
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(TreeVertex), (void*)0);
+    glEnableVertexAttribArray(1);	
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(TreeVertex), (void*)offsetof(TreeVertex, direction));
+    glEnableVertexAttribArray(2);	
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(TreeVertex), (void*)offsetof(TreeVertex, parentVector));
+    glEnableVertexAttribArray(3);	
+    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(TreeVertex), (void*)offsetof(TreeVertex, parentDirection));
 
     glBindVertexArray(0);
 }
@@ -35,20 +42,27 @@ TreeBranch::~TreeBranch(){
     glDeleteBuffers(1, &VBO);
 }
 
+#include <iostream>
 void TreeBranch::writeDataToGPU(){
     glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(TreeVertex), &vertices[0], GL_STATIC_DRAW);  
+
+    // for(auto vertex : vertices){
+    //     std::cout << "Vertex: " << vertex.position.x << ", " << vertex.position.y << ", " << vertex.position.z << std::endl;
+    // }
 }
 
-#include <iostream>
 
 void TreeBranch::drawCall(Shader* shader){
+    shader->setMat4("model", modelMatrix);
     // shader->setFloat("time", time);
     // shader->setVec3("worldCenter", WorldGeneration::worldSize()/2.0, 0.0, WorldGeneration::worldSize()/2.0);
 
     // shader->setTexture(perlinLane, 0);
-    // shader->setTexture(&RenderManager::instance.getFrameBuffer(SHADOW_BUFFER).textures[0], 1);
+    std::cout << "Drawing tree branch" << std::endl;
+
+    shader->setTexture(&RenderManager::instance.getFrameBuffer(SHADOW_BUFFER).textures[0], 0);
 
     glBindVertexArray(VAO);
     glDrawArrays(GL_POINTS, 0, vertices.size());
@@ -58,10 +72,14 @@ void TreeBranch::drawCall(Shader* shader){
 TreeBranch* TreeBranch::getParentBranch(){ return parentBranch; }
 TreeNode* TreeBranch::getRootNode(){ return rootNode; }
 int TreeBranch::getNumNodes(){ return nodes.size(); }
-TreeNode* TreeBranch::getNode(int idx){ return nodes[idx]; }
-void TreeBranch::addNode(glm::vec3 position, glm::vec3 direction, Entry entry){
+TreeNode* TreeBranch::getNode(int idx){ 
+    if(idx < 0 || idx >= nodes.size())
+        return nullptr;
+    return nodes[idx];
+}
+void TreeBranch::addNode(glm::vec3 direction, float magnitude, Entry entry){
     vertices.push_back(TreeVertex());
-    nodes.push_back(new TreeNode(this, &vertices.back(), position, direction, entry));
+    nodes.push_back(new TreeNode(this, &vertices.back(), direction, magnitude, entry));
     writeDataToGPU();
 }
 

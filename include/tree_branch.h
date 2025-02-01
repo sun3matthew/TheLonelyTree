@@ -15,7 +15,7 @@ public:
 
     int getNumNodes();
     TreeNode* getNode(int idx);
-    void addNode(glm::vec3 position, glm::vec3 direction, Entry entry);
+    void addNode(glm::vec3 direction, float magnitude, Entry entry);
 
     unsigned int getID();
     void markForDeletion();

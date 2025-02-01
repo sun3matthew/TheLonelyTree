@@ -78,6 +78,9 @@ TheLonelyTree::TheLonelyTree()
     RenderManager::instance.addShader(
         new Shader("shadowMap", "../resources/shaders/shadowMap.vert", "../resources/shaders/shadowMap.frag",
             std::vector<std::string>{"dirLightCamera", "model", "meshTextures"}));
+    RenderManager::instance.addShader(
+        new Shader("tree", "../resources/shaders/tree.vert", "../resources/shaders/tree.geom", "../resources/shaders/tree.frag",
+            std::vector<std::string>{"camera", "dirLight", "dirLightCamera"}));
 
     RenderManager::instance.addFrameBuffer(FrameBufferGeneration::BaseFrameBuffer(FRAME_BUFFER, GLFWWrapper::width, GLFWWrapper::height));
     RenderManager::instance.addFrameBuffer(FrameBufferGeneration::ShadowMap(SHADOW_BUFFER, 1024 * 6, 1024 * 6));
@@ -143,36 +146,36 @@ void TheLonelyTree::start(){
     directionalLight->addComponent(light);
     addGameobject(directionalLight);
 
-    Gameobject* tree = GLTFLoader::loadMesh("../resources/models/tree/scene.gltf");
-    std::list<Gameobject*> allChildren = tree->getAllChildren();
-    for(Gameobject* child : allChildren){
-        RenderObjectComponent* meshComp = child -> getComponent<RenderObjectComponent>();
-        if(meshComp){
-            Mesh* mesh = static_cast<Mesh*>(meshComp->getRenderObject());
-            mesh->addShader(FRAME_BUFFER, "model");
-            mesh->addShader(SHADOW_BUFFER, "shadowMap");
-        }
-    }
-    addGameobject(tree);
-    tree->setScale(glm::vec3(0.6f));
-    tree->setPosition(glm::vec3(worldSize / 2, 300, worldSize / 2));
+    // Gameobject* tree = GLTFLoader::loadMesh("../resources/models/tree/scene.gltf");
+    // std::list<Gameobject*> allChildren = tree->getAllChildren();
+    // for(Gameobject* child : allChildren){
+    //     RenderObjectComponent* meshComp = child -> getComponent<RenderObjectComponent>();
+    //     if(meshComp){
+    //         Mesh* mesh = static_cast<Mesh*>(meshComp->getRenderObject());
+    //         mesh->addShader(FRAME_BUFFER, "model");
+    //         mesh->addShader(SHADOW_BUFFER, "shadowMap");
+    //     }
+    // }
+    // addGameobject(tree);
+    // tree->setScale(glm::vec3(0.6f));
+    // tree->setPosition(glm::vec3(worldSize / 2, 300, worldSize / 2));
 
     int seed = 12923952u;
 
-    Gameobject* world2 = new Gameobject("World");
-    Mesh* terrainMesh2 = WorldGeneration::createWorld(seed, 60, worldSize, 4, 10);
-    terrainMesh2->updateTexture(Texture::diffuse(0x50, 0x4D, 0x53));
-    terrainMesh2->addShader(SHADOW_BUFFER, "shadowMap");
-    world2->addComponent(new RenderObjectComponent(terrainMesh2));
-    addGameobject(world2);
+    // Gameobject* world2 = new Gameobject("World");
+    // Mesh* terrainMesh2 = WorldGeneration::createWorld(seed, 60, worldSize, 4, 10);
+    // terrainMesh2->updateTexture(Texture::diffuse(0x50, 0x4D, 0x53));
+    // terrainMesh2->addShader(SHADOW_BUFFER, "shadowMap");
+    // world2->addComponent(new RenderObjectComponent(terrainMesh2));
+    // addGameobject(world2);
 
-    Gameobject* world = new Gameobject("World");
-    Mesh* terrainMesh = WorldGeneration::createWorld(seed, 60, worldSize, 4 * 2, 0);
-    terrainMesh->updateTexture(Texture::diffuse(0x50, 0x4D, 0x53));
-    terrainMesh->addShader(FRAME_BUFFER, "model");
-    terrainMesh->addShader(SHADOW_BUFFER, "shadowMap");
-    world->addComponent(new RenderObjectComponent(terrainMesh));
-    addGameobject(world);
+    // Gameobject* world = new Gameobject("World");
+    // Mesh* terrainMesh = WorldGeneration::createWorld(seed, 60, worldSize, 4 * 2, 0);
+    // terrainMesh->updateTexture(Texture::diffuse(0x50, 0x4D, 0x53));
+    // terrainMesh->addShader(FRAME_BUFFER, "model");
+    // terrainMesh->addShader(SHADOW_BUFFER, "shadowMap");
+    // world->addComponent(new RenderObjectComponent(terrainMesh));
+    // addGameobject(world);
 
 
 
@@ -182,12 +185,14 @@ void TheLonelyTree::start(){
     entry.data = "The Lonely Tree is a project that aims to create a procedurally generated tree that can be used in a variety of applications. The tree is generated using a combination of L-systems and Perlin noise to create a realistic looking tree. The tree is then rendered using OpenGL and GLSL to create a realistic 3D model. The tree can be viewed from any angle and can be used in a variety of applications such as games, simulations, and visualizations.";
 
     treeManager = new TreeManager();
-    treeManager->rootBranch()->addShader(FRAME_BUFFER, "model");
-    treeManager->rootBranch()->addNode(glm::vec3(worldSize/2, 0, worldSize/2), glm::vec3(0, 1, 0), entry);
+    treeManager->rootBranch()->addShader(FRAME_BUFFER, "tree");
+    treeManager->rootBranch()->addNode(glm::vec3(0, 1, 0), 10, entry);
+    treeManager->rootBranch()->addNode(glm::vec3(0, 1, 1), 10, entry);
 
     Gameobject* treeManager = new Gameobject("Tree Manager");
     treeManager->addComponent(new TreeRendererComponent(this->treeManager));
     addGameobject(treeManager);
+    treeManager->setPosition(glm::vec3(worldSize/2, 0, worldSize/2));
 
     // Gameobject* water = new Gameobject("Water");
     // Mesh* waterMesh = MeshGeneration::Plane(64, 64);
@@ -219,11 +224,11 @@ void TheLonelyTree::start(){
     // cube->setPosition(glm::vec3(worldSize/2 - 200, 360, worldSize/2));
     // cube->setScale(glm::vec3(90.0f));
 
-    Gameobject* grass = new Gameobject("Grass");
-    Grass* grassMesh = new Grass();
-    grassMesh->addShader(FRAME_BUFFER, "grass");
-    grass->addComponent(new RenderObjectComponent(grassMesh));
-    addGameobject(grass);
+    // Gameobject* grass = new Gameobject("Grass");
+    // Grass* grassMesh = new Grass();
+    // grassMesh->addShader(FRAME_BUFFER, "grass");
+    // grass->addComponent(new RenderObjectComponent(grassMesh));
+    // addGameobject(grass);
 
     std::string path = "../resources/textures/cubemaps/sky/";
     std::vector<std::string> faces = {
