@@ -20,6 +20,7 @@ uniform float time;
 in vec3 tiltDirection[];
 in vec3 parentTiltDirection[];
 in vec3 parentPosition[];
+in int depth[];
 
 out vec3 FragPos;
 out vec3 Normal;  
@@ -59,11 +60,11 @@ void main() {
         float t = 2.0 * PI * lerp;
 
         // Color = vec3(lerp, 1 - lerp, lerp * lerp);
-        Color = vec3(lerp, 1 - lerp, lerp * lerp);
+        Color = vec3(depth[0] / 100.0);
 
         Normal = normalize(vec3(sin(t), 0, cos(t)));
 
-        float r = (10 - parentPosition[0].y) / 40;
+        float r = (10 - (0 - 1)) / 40.0;
         if (r < 0.0) r = 0.0;
         position = vec3(model * vec4(parametricRing(parentPosition[0], parentTiltDirection[0], t, r, r), 1.0));
         FragPos = position;
@@ -72,7 +73,7 @@ void main() {
         gl_Position = projection * view * vec4(position, 1.0);
         EmitVertex();
 
-        r = (10 - gl_in[0].gl_Position.y) / 40;
+        r = (10 - 0) / 40.0;
         if (r < 0.0) r = 0.0;
         position = vec3(model * vec4(parametricRing(vec3(gl_in[0].gl_Position), tiltDirection[0], t, r, r), 1.0));
         FragPos = position;

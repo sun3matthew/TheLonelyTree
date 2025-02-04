@@ -146,19 +146,19 @@ void TheLonelyTree::start(){
     directionalLight->addComponent(light);
     addGameobject(directionalLight);
 
-    // Gameobject* tree = GLTFLoader::loadMesh("../resources/models/tree/scene.gltf");
-    // std::list<Gameobject*> allChildren = tree->getAllChildren();
-    // for(Gameobject* child : allChildren){
-    //     RenderObjectComponent* meshComp = child -> getComponent<RenderObjectComponent>();
-    //     if(meshComp){
-    //         Mesh* mesh = static_cast<Mesh*>(meshComp->getRenderObject());
-    //         mesh->addShader(FRAME_BUFFER, "model");
-    //         mesh->addShader(SHADOW_BUFFER, "shadowMap");
-    //     }
-    // }
-    // addGameobject(tree);
-    // tree->setScale(glm::vec3(0.6f));
-    // tree->setPosition(glm::vec3(worldSize / 2, 300, worldSize / 2));
+    Gameobject* tree = GLTFLoader::loadMesh("../resources/models/tree/scene.gltf");
+    std::list<Gameobject*> allChildren = tree->getAllChildren();
+    for(Gameobject* child : allChildren){
+        RenderObjectComponent* meshComp = child -> getComponent<RenderObjectComponent>();
+        if(meshComp){
+            Mesh* mesh = static_cast<Mesh*>(meshComp->getRenderObject());
+            mesh->addShader(FRAME_BUFFER, "model");
+            mesh->addShader(SHADOW_BUFFER, "shadowMap");
+        }
+    }
+    addGameobject(tree);
+    tree->setScale(glm::vec3(0.6f));
+    tree->setPosition(glm::vec3(worldSize / 2, 300, worldSize / 2));
 
     int seed = 12923952u;
 
@@ -195,7 +195,7 @@ void TheLonelyTree::start(){
             (rand() % 1000) / 1000.0f - 0.5f
         );
         float dist = 0.10;
-        treeManager->rootBranch()->addNode(randomDirection, dist, entry);
+        treeManager->rootBranch()->addNode(entry);
     }
 
     std::stack <std::pair<TreeBranch*, int>> branchStack;
@@ -228,7 +228,7 @@ void TheLonelyTree::start(){
                         (rand() % 1000) / 1000.0f - 0.5f
                     );
                     float dist = 0.10;
-                    newBranch->addNode(direction + randomOffset, dist, entry);
+                    newBranch->addNode(entry);
                 }
                 branchStack.push({newBranch, depth - 1});
             }

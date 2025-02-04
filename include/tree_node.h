@@ -13,12 +13,16 @@ struct TreeVertex{
     glm::vec3 parentPosition;
     glm::vec3 parentDirection;
 
+    int depth;
+
     TreeVertex(){
         position = glm::vec3(0.0f);
         direction = glm::vec3(0.0f);
 
         parentPosition = glm::vec3(0.0f);
         parentDirection = glm::vec3(0.0f);
+
+        depth = 0;
     }
 };
 
@@ -30,23 +34,17 @@ struct Entry{
 
 class TreeNode{
     public:
-        TreeNode(TreeBranch* associatedBranch, int idx, glm::vec3 direction, float magnitude, Entry entry);
+        TreeNode(TreeBranch* associatedBranch, int idx, Entry entry);
         ~TreeNode();
 
-        void updateMagnitude(float magnitude);
-        void updateDirection(glm::vec3 direction);
-
         TreeBranch* getAssociatedBranch();
-        void recalculateVertex(TreeNode* parent);
+        void setVertexData(TreeNode* parent, glm::vec3 position, glm::vec3 direction);
 
     private:
         Entry entry;
 
         TreeBranch* associatedBranch;
         int index;
-
-        glm::vec3 localDirection;
-        float magnitude;
 };
 
 #endif // TREE_NODE_H

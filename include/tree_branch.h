@@ -7,6 +7,11 @@
 
 #include <engine/texture.h>
 
+struct PointDirection{
+    glm::vec3 point;
+    glm::vec3 direction;
+};
+
 class TreeBranch : public RenderObject{
 public:
     TreeBranch(unsigned int ID, TreeBranch* parentBranch, TreeNode* node);
@@ -18,14 +23,14 @@ public:
     int getNumNodes();
     TreeNode* getNode(int idx);
     TreeVertex* getVertex(int idx);
-    void addNode(glm::vec3 direction, float magnitude, Entry entry);
+    void addNode(Entry entry);
 
     unsigned int getID();
     void markForDeletion();
 
     void drawCall(Shader* shader) override;
     void writeDataToGPU();
-
+    void recalculateVertices();
 private:
     unsigned int ID;
     unsigned int VAO, VBO;
