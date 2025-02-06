@@ -19,6 +19,8 @@ public:
 
     TreeBranch* getParentBranch();
     TreeNode* getRootNode();
+    glm::mat4 getLocalModelMatrix();
+    std::vector<TreeBranch*> getChildBranches();
 
     int getNumNodes();
     TreeNode* getNode(int idx);
@@ -35,8 +37,13 @@ private:
     unsigned int ID;
     unsigned int VAO, VBO;
 
+    glm::mat4 localModelMatrix;
+
     TreeBranch* parentBranch;
+    std::vector<TreeBranch*> childBranches;
+
     TreeNode* rootNode;
+
     std::vector<TreeNode*> nodes;
     std::vector<TreeVertex> vertices;
 

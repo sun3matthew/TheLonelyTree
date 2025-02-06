@@ -38,8 +38,11 @@ class TreeNode{
         ~TreeNode();
 
         TreeBranch* getAssociatedBranch();
-        void setVertexData(TreeNode* parent, glm::vec3 position, glm::vec3 direction);
+        void setVertexData(TreeNode* parent, int depth, glm::vec3 position);
 
+        int getIndex();
+
+        unsigned int HashedEntry();
     private:
         Entry entry;
 

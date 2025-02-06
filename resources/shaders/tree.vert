@@ -7,15 +7,14 @@ layout (location = 3) in vec3 parentDirection;
 
 layout (location = 4) in int currentDepth;
 
+out vec3 parentPosition;
 out vec3 tiltDirection;
 out vec3 parentTiltDirection;
-out vec3 parentPosition;
 out int depth;
 
 void main(){
     gl_Position = vec4(aPos, 1.0);
     parentPosition = parentVector;
-
     tiltDirection = direction;
     parentTiltDirection = parentDirection;
 

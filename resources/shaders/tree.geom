@@ -34,7 +34,8 @@ out vec3 Color;
 vec3 parametricRing(vec3 position, vec3 normal, float t, float a, float b){
     normal = normalize(normal);
 
-    vec3 reference = (abs(normal.y) < abs(normal.x)) ? vec3(0,1,0) : vec3(1,0,0);
+    // vec3 reference = (abs(normal.y) < abs(normal.x)) ? vec3(0,1,0) : vec3(1,0,0);
+    vec3 reference = vec3(1,0,0);
 
     vec3 tangent = normalize(cross(reference, normal));  
     vec3 bitangent = cross(normal, tangent);
@@ -50,9 +51,20 @@ vec3 parametricRing(vec3 position, vec3 normal, float t, float a, float b){
     // return position + (rotatedTangent * (cos(t) * a) + rotatedBitangent * (sin(t) * b));
 }
 
+float random(float seed) {
+    return fract(sin(seed) * 843758.5453123);
+}
+float hash(float a, float b) {
+    return sin(a * 12.9898 + b * 78.233) * 43758.5453;
+}
+
 void main() {
 
     vec3 position = vec3(gl_in[0].gl_Position);
+    float density = 20;
+
+    vec2 offset = vec2(random(hash(position.x, position.z)), random(hash(position.x * 2, position.z))) * 0.6;
+    float stretch = random(hash(position.x * 2, position.z)) * 0.2 + 0.2;
     // float r = 1 / position.y;
 
     for(int i = 0; i <= SUBDIVISIONS; i++){
@@ -60,24 +72,27 @@ void main() {
         float t = 2.0 * PI * lerp;
 
         // Color = vec3(lerp, 1 - lerp, lerp * lerp);
-        Color = vec3(depth[0] / 100.0);
+        // Color = vec3(depth[0] / 100.0);
+        Color = vec3(tiltDirection[0]);
 
-        Normal = normalize(vec3(sin(t), 0, cos(t)));
+        // Normal = normalize(vec3(sin(t), 0, cos(t)));
 
-        float r = (10 - (0 - 1)) / 40.0;
-        if (r < 0.0) r = 0.0;
+        // e^{-\frac{x}{10}}
+        float r = exp(depth[0] / -density) * 0.4;
         position = vec3(model * vec4(parametricRing(parentPosition[0], parentTiltDirection[0], t, r, r), 1.0));
+        Normal = normalize(position - parentPosition[0]);
         FragPos = position;
-        TexCoords = vec2(lerp, 0);
+        TexCoords = offset + vec2(lerp * stretch * 2, 0);
         FragPosLightSpace = lightSpaceMatrix * vec4(position, 1.0);
         gl_Position = projection * view * vec4(position, 1.0);
         EmitVertex();
 
-        r = (10 - 0) / 40.0;
+        r = exp((depth[0] + 1) / -density) * 0.4;
         if (r < 0.0) r = 0.0;
         position = vec3(model * vec4(parametricRing(vec3(gl_in[0].gl_Position), tiltDirection[0], t, r, r), 1.0));
+        Normal = normalize(position - vec3(gl_in[0].gl_Position));
         FragPos = position;
-        TexCoords = vec2(lerp, 1);
+        TexCoords = offset + vec2(lerp * stretch * 2, stretch);
         FragPosLightSpace = lightSpaceMatrix * vec4(position, 1.0);
         gl_Position = projection * view * vec4(position, 1.0);
         EmitVertex();

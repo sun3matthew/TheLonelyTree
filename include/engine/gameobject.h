@@ -30,6 +30,7 @@ class Gameobject{
         std::list<Gameobject*> getAllChildren();
 
         void setParent(Gameobject*);
+        void removeChild(Gameobject*);
 
         void update();
         void lateUpdate();

@@ -2,6 +2,8 @@
 #include "tree_renderer_component.h"
 #include <engine/render_manager.h>
 
+#define MAX_ITERATION 10000
+
 TreeRendererComponent::TreeRendererComponent(TreeManager *treeManager){
     this->treeManager = treeManager;
 }
@@ -9,12 +11,32 @@ TreeRendererComponent::TreeRendererComponent(TreeManager *treeManager){
 TreeRendererComponent::~TreeRendererComponent(){
 }
 
+#include <iostream>
 void TreeRendererComponent::update(){
-    for(auto branch : treeManager->tree){
-        TreeBranch* treeBranch = branch.second;
-        treeBranch->modelMatrix = gameobject->getModelMatrix();
-        for(auto& [i, shaderNames] : treeBranch->shaderNames){
-            RenderManager::instance.addToBuffer(i, treeBranch);
+    glm::mat4 modelMatrix = gameobject->getModelMatrix();
+
+    treeManager->rootBranch()->modelMatrix = modelMatrix * treeManager->rootBranch()->getLocalModelMatrix();
+
+    std::stack <TreeBranch*> branchStack;
+    branchStack.push(treeManager->rootBranch());
+
+    int failSafe = 0;
+    while(!branchStack.empty()){
+        TreeBranch* branch = branchStack.top();
+        branchStack.pop();
+
+        for(TreeBranch* childBranch : branch->getChildBranches()){
+            childBranch->modelMatrix = branch->modelMatrix * childBranch->getLocalModelMatrix();
+            branchStack.push(childBranch);
+        }
+
+        for(auto& [i, shaderNames] : branch->shaderNames){
+            RenderManager::instance.addToBuffer(i, branch);
+        }
+
+        if (failSafe++ > MAX_ITERATION){
+            assert(false);
+            break;
         }
     }
 }

@@ -77,6 +77,10 @@ void Gameobject::setParent(Gameobject* parent){
         parent->children.push_back(this);
 }
 
+void Gameobject::removeChild(Gameobject* child){
+    children.remove(child);
+}
+
 glm::vec3 Gameobject::getPosition(){
     return position;
 }

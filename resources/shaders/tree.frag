@@ -44,8 +44,8 @@ float ShadowCalculation(vec4 fragPosLightSpace, vec3 normal, vec3 lightDir){
 vec3 CalcDirLight(DirectionalLight light, vec3 norm, vec3 viewDir){
     vec3 lightDir = normalize(-light.direction.xyz);
 
-    vec3 BaseColor = Color;
-    // vec3 BaseColor = vec3(texture(diffuse, TexCoords));
+    // vec3 BaseColor = Color;
+    vec3 BaseColor = vec3(texture(diffuse, TexCoords));
 
     vec3 ambient = light.lightingData.ambient * BaseColor;
 

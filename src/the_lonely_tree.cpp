@@ -17,13 +17,13 @@
 #include <engine/shader.h>
 #include <engine/light_directional.h>
 #include <engine/light_spot.h>
+#include <engine/http_client.h>
 
 #include <world_generation.h>
 #include <tree_manager.h>
 #include <tree_renderer_component.h>
 
 #include <iostream>
-#include <engine/http_client.h>
 
 #include <sstream>
 #include <chrono>
@@ -187,19 +187,15 @@ void TheLonelyTree::start(){
     treeManager = new TreeManager();
     treeManager->rootBranch()->addShader(FRAME_BUFFER, "tree");
     treeManager->rootBranch()->addShader(SHADOW_BUFFER, "shadowMap");
-    int numNodes = 100;
+    int numNodes = 60;
     for (int i = 0; i < numNodes; i++){
-        glm::vec3 randomDirection = glm::vec3(
-            (rand() % 1000) / 1000.0f - 0.5f,
-            1,
-            (rand() % 1000) / 1000.0f - 0.5f
-        );
-        float dist = 0.10;
         treeManager->rootBranch()->addNode(entry);
     }
+    treeManager->rootBranch()->recalculateVertices();
 
     std::stack <std::pair<TreeBranch*, int>> branchStack;
-    branchStack.push({treeManager->rootBranch(), 5});
+    branchStack.push({treeManager->rootBranch(), 2});
+    int counter = 0;
     while(!branchStack.empty()){
         std::pair<TreeBranch*, int> branchPair = branchStack.top();
         branchStack.pop();
@@ -207,29 +203,19 @@ void TheLonelyTree::start(){
         int depth = branchPair.second;
 
         if (depth > 0){
-            int numNodes = rand() % 50 + 50;
-            int numBranches = rand() % 3 + 1;
+            int numNodes = rand() % 30 + 5;
+            std::cout << "Num Nodes: " << numNodes << std::endl;
+            int numBranches = rand() % 3 + 2;
             for(int i = 0; i < numBranches; i++){
+                counter++;
                 // random node from 0 to numNodes
                 int randomNode = rand() % branch->getNumNodes();
                 TreeBranch* newBranch = treeManager->addBranch(branch->getID(), randomNode);
                 newBranch->addShader(FRAME_BUFFER, "tree");
                 newBranch->addShader(SHADOW_BUFFER, "shadowMap");
-                // glm::vec3 direction = glm::normalize(glm::vec3(0, 1, 1));
-                glm::vec3 direction = glm::normalize(glm::vec3(
-                    (rand() % 1000) / 1000.0f - 0.5f,
-                    1,
-                    (rand() % 1000) / 1000.0f - 0.5f
-                ));
-                for (int i = 0; i < numNodes; i++){
-                    glm::vec3 randomOffset = glm::vec3(
-                        (rand() % 1000) / 1000.0f - 0.5f,
-                        0,
-                        (rand() % 1000) / 1000.0f - 0.5f
-                    );
-                    float dist = 0.10;
+                for (int i = 0; i < numNodes; i++)
                     newBranch->addNode(entry);
-                }
+                newBranch->recalculateVertices();
                 branchStack.push({newBranch, depth - 1});
             }
         }
@@ -255,7 +241,7 @@ void TheLonelyTree::start(){
     Gameobject* treeManager = new Gameobject("Tree Manager");
     treeManager->addComponent(new TreeRendererComponent(this->treeManager));
     addGameobject(treeManager);
-    treeManager->setPosition(glm::vec3(worldSize/2, 240, worldSize/2));
+    treeManager->setPosition(glm::vec3(worldSize/2, 280, worldSize/2));
     treeManager->setScale(glm::vec3(100.0f));
 
     // Gameobject* water = new Gameobject("Water");
@@ -288,11 +274,11 @@ void TheLonelyTree::start(){
     // cube->setPosition(glm::vec3(worldSize/2 - 200, 360, worldSize/2));
     // cube->setScale(glm::vec3(90.0f));
 
-    // Gameobject* grass = new Gameobject("Grass");
-    // Grass* grassMesh = new Grass();
-    // grassMesh->addShader(FRAME_BUFFER, "grass");
-    // grass->addComponent(new RenderObjectComponent(grassMesh));
-    // addGameobject(grass);
+    Gameobject* grass = new Gameobject("Grass");
+    Grass* grassMesh = new Grass();
+    grassMesh->addShader(FRAME_BUFFER, "grass");
+    grass->addComponent(new RenderObjectComponent(grassMesh));
+    addGameobject(grass);
 
     std::string path = "../resources/textures/cubemaps/sky/";
     std::vector<std::string> faces = {
@@ -340,7 +326,7 @@ void TheLonelyTree::update(){
         numLights++;
         RenderManager::instance.getShadersAccepting("pointLights")[0]->setInt("numPointLights", numLights);
     }
-    std::cout << "FPS: " << FPS() << std::endl;
+    // std::cout << "FPS: " << FPS() << std::endl;
 }
 
 void TheLonelyTree::lateUpdate() {}
