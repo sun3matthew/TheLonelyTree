@@ -27,15 +27,19 @@ public:
     TreeVertex* getVertex(int idx);
     void addNode(Entry entry);
 
+    int getDepth();
     unsigned int getID();
     void markForDeletion();
 
     void drawCall(Shader* shader) override;
     void writeDataToGPU();
     void recalculateVertices();
+    void pushBackTexture(Texture texture);
 private:
     unsigned int ID;
     unsigned int VAO, VBO;
+
+    int depth;
 
     glm::mat4 localModelMatrix;
 

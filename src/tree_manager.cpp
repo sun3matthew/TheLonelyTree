@@ -28,7 +28,9 @@ TreeBranch* TreeManager::addBranch(TreeNode* node){
     TreeBranch* nodeBranch = node->getAssociatedBranch();
     assert(nodeBranch != nullptr);
 
-    int id = generateRandomID();
+    // int id = generateRandomID();
+    // int id = rand();
+    int id = rand();
     TreeBranch* newBranch = new TreeBranch(id, nodeBranch, node);
     tree[id] = newBranch;
 

@@ -16,8 +16,8 @@ Mesh::Mesh(std::vector<Vertex> verticesIn,
 {
     if(indices.size() == 0)
         indices = generateIndices(vertices);
-    // if(vertices[0].Tangent.x < -1)
-    //     ComputeTangents(vertices, indices);
+    if(vertices[0].Tangent.x < -1)
+        ComputeTangents(vertices, indices);
 
     // for(Vertex vertex : vertices){
     //     std::cout << vertex.Normal.x << "," << vertex.Normal.y << "," << vertex.Normal.z << std::endl;

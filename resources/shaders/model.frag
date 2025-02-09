@@ -122,6 +122,7 @@ void main()
         discard;
     }
     FragColor = vec4(result, a);
+    // FragColor = vec4(norm, 1.0);
 
     // FragColor = vec4(texture(depth_buffer, TexCoords).rrr, 1.0);
 }  

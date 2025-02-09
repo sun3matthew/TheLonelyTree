@@ -146,19 +146,19 @@ void TheLonelyTree::start(){
     directionalLight->addComponent(light);
     addGameobject(directionalLight);
 
-    Gameobject* tree = GLTFLoader::loadMesh("../resources/models/tree/scene.gltf");
-    std::list<Gameobject*> allChildren = tree->getAllChildren();
-    for(Gameobject* child : allChildren){
-        RenderObjectComponent* meshComp = child -> getComponent<RenderObjectComponent>();
-        if(meshComp){
-            Mesh* mesh = static_cast<Mesh*>(meshComp->getRenderObject());
-            mesh->addShader(FRAME_BUFFER, "model");
-            mesh->addShader(SHADOW_BUFFER, "shadowMap");
-        }
-    }
-    addGameobject(tree);
-    tree->setScale(glm::vec3(0.6f));
-    tree->setPosition(glm::vec3(worldSize / 2, 300, worldSize / 2));
+    // Gameobject* tree = GLTFLoader::loadMesh("../resources/models/tree/scene.gltf");
+    // std::list<Gameobject*> allChildren = tree->getAllChildren();
+    // for(Gameobject* child : allChildren){
+    //     RenderObjectComponent* meshComp = child -> getComponent<RenderObjectComponent>();
+    //     if(meshComp){
+    //         Mesh* mesh = static_cast<Mesh*>(meshComp->getRenderObject());
+    //         mesh->addShader(FRAME_BUFFER, "model");
+    //         mesh->addShader(SHADOW_BUFFER, "shadowMap");
+    //     }
+    // }
+    // addGameobject(tree);
+    // tree->setScale(glm::vec3(0.6f));
+    // tree->setPosition(glm::vec3(worldSize / 2, 300, worldSize / 2));
 
     int seed = 12923952u;
 
@@ -178,15 +178,20 @@ void TheLonelyTree::start(){
     addGameobject(world);
 
 
-
     Entry entry = Entry();
     entry.date = "2021-09-01";
     entry.name = "The Lonely Tree";
     entry.data = "The Lonely Tree is a project that aims to create a procedurally generated tree that can be used in a variety of applications. The tree is generated using a combination of L-systems and Perlin noise to create a realistic looking tree. The tree is then rendered using OpenGL and GLSL to create a realistic 3D model. The tree can be viewed from any angle and can be used in a variety of applications such as games, simulations, and visualizations.";
 
+    Texture branchDiffuse = Texture("../resources/textures/tree/Diffuse.jpeg", TextureType::Diffuse);
+    Texture branchNormal = Texture("../resources/textures/tree/Normal.png", TextureType::Normal);
+
+
     treeManager = new TreeManager();
     treeManager->rootBranch()->addShader(FRAME_BUFFER, "tree");
     treeManager->rootBranch()->addShader(SHADOW_BUFFER, "shadowMap");
+    treeManager->rootBranch()->pushBackTexture(branchDiffuse);
+    treeManager->rootBranch()->pushBackTexture(branchNormal);
     int numNodes = 60;
     for (int i = 0; i < numNodes; i++){
         treeManager->rootBranch()->addNode(entry);
@@ -194,29 +199,37 @@ void TheLonelyTree::start(){
     treeManager->rootBranch()->recalculateVertices();
 
     std::stack <std::pair<TreeBranch*, int>> branchStack;
-    branchStack.push({treeManager->rootBranch(), 2});
+    branchStack.push({treeManager->rootBranch(), 3});
     int counter = 0;
     while(!branchStack.empty()){
         std::pair<TreeBranch*, int> branchPair = branchStack.top();
         branchStack.pop();
         TreeBranch* branch = branchPair.first;
         int depth = branchPair.second;
+        // std::cout << "POP " << depth << std::endl;
 
         if (depth > 0){
-            int numNodes = rand() % 30 + 5;
-            std::cout << "Num Nodes: " << numNodes << std::endl;
-            int numBranches = rand() % 3 + 2;
+            int numBranches = rand() % 2 + 3;
+            numBranches = 4;
             for(int i = 0; i < numBranches; i++){
+                int numNodes = rand() % (10 * depth) + 4;
+                std::cout << "Num Nodes: " << numNodes << std::endl;
                 counter++;
                 // random node from 0 to numNodes
-                int randomNode = rand() % branch->getNumNodes();
+                int totalNodes = branch->getNumNodes();
+                int randomNode = rand() % (totalNodes); // TODO make better
                 TreeBranch* newBranch = treeManager->addBranch(branch->getID(), randomNode);
+                newBranch->pushBackTexture(branchDiffuse);
+                newBranch->pushBackTexture(branchNormal);
                 newBranch->addShader(FRAME_BUFFER, "tree");
                 newBranch->addShader(SHADOW_BUFFER, "shadowMap");
                 for (int i = 0; i < numNodes; i++)
                     newBranch->addNode(entry);
                 newBranch->recalculateVertices();
-                branchStack.push({newBranch, depth - 1});
+                if (depth - 1 > 0){
+                    // std::cout << "PUSH " << (depth - 1) << std::endl;
+                    branchStack.push({newBranch, depth - 1});
+                }
             }
         }
     }
@@ -257,8 +270,8 @@ void TheLonelyTree::start(){
 
     // Gameobject* sphere = new Gameobject("Sphere");
     // Mesh* sphereMesh = MeshGeneration::Sphere(32, 32);
-    // sphereMesh->addShader("model");
-    // sphereMesh->addShader(1, "shadowMap");
+    // sphereMesh->addShader(FRAME_BUFFER, "model");
+    // sphereMesh->addShader(SHADOW_BUFFER, "shadowMap");
     // sphere->addComponent(new RenderObjectComponent(sphereMesh));
     // addGameobject(sphere);
     // sphere->setPosition(glm::vec3(worldSize/2 + 100, 450, worldSize/2));

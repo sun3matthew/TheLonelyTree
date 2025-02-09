@@ -9,16 +9,17 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 TreeBranch::TreeBranch(unsigned int id, TreeBranch* parentBranch, TreeNode* node){
+    this->depth = 1;
 
     this->ID = id;
 
     this->rootNode = node;
 
     this->parentBranch = parentBranch;
-    if (parentBranch)
+    if (parentBranch){
         parentBranch->childBranches.push_back(this);
-
-    textures.push_back(Texture("../resources/textures/tree/Diffuse.jpeg", TextureType::Diffuse));
+        this->depth = parentBranch->depth + 1;
+    }
 
     localModelMatrix = glm::mat4(1.0f); // ! important.
 
@@ -41,7 +42,7 @@ TreeBranch::TreeBranch(unsigned int id, TreeBranch* parentBranch, TreeNode* node
     glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(TreeVertex), (void*)offsetof(TreeVertex, parentDirection));
 
     glEnableVertexAttribArray(4);	
-    glVertexAttribPointer(4, 1, GL_INT, GL_FALSE, sizeof(TreeVertex), (void*)offsetof(TreeVertex, depth));
+    glVertexAttribPointer(4, 1, GL_FLOAT, GL_FALSE, sizeof(TreeVertex), (void*)offsetof(TreeVertex, nodePercent));
 
     glBindVertexArray(0);
 }
@@ -57,6 +58,14 @@ TreeBranch::~TreeBranch(){
     glDeleteBuffers(1, &VBO);
 }
 
+int TreeBranch::getDepth(){
+    return depth;
+}
+
+void TreeBranch::pushBackTexture(Texture texture){
+    textures.push_back(texture);
+}
+
 glm::mat4 TreeBranch::getLocalModelMatrix(){
     return localModelMatrix;
 }
@@ -64,7 +73,6 @@ glm::mat4 TreeBranch::getLocalModelMatrix(){
 std::vector<TreeBranch*> TreeBranch::getChildBranches(){
     return childBranches;
 }
-#include <iostream>
 
 void TreeBranch::writeDataToGPU(){
     glBindVertexArray(VAO);
@@ -116,9 +124,8 @@ void TreeBranch::recalculateVertices(){
         // currentPosition = rootVertex->position; // TODO modify so this is applied in model matrix
         currentDirection = rootVertex->direction;
         branchDirection = rootVertex->direction;
-        parentDepth = rootVertex->depth;
     }
-    parentDepth += 10;
+    // parentDepth += 10;
 
     for(int i = 0; i < maxKeyPoints; i++){
         float completion = nodes.size()/(growthStageSize * i);
@@ -165,8 +172,7 @@ void TreeBranch::recalculateVertices(){
         // std::cout << "Position: " << position.x << ", " << position.y << ", " << position.z << std::endl;
         // std::cout << "Index: " << t << std::endl;
 
-        int depth = i + parentDepth;
-        nodes[i]->setVertexData(i == 0 ? nullptr : nodes[i - 1], depth, position);
+        nodes[i]->setVertexData(i == 0 ? nullptr : nodes[i - 1], position, 1 - ((i + 1) / (float)nodes.size()));
         // nodes[i]->setVertexData(i == 0 ? nullptr : nodes[i - 1], glm::vec3(10, i * 0.1, 10));
         // nodes[i]->setVertexData(i == 0 ? nullptr : nodes[i - 1], position, glm::vec3(0, 1, 0));
     }
@@ -176,25 +182,25 @@ void TreeBranch::recalculateVertices(){
 }
 
 
+#include <iostream>
 void TreeBranch::drawCall(Shader* shader){
     shader->setMat4("model", modelMatrix);
-    // shader->setFloat("time", time);
-    // shader->setVec3("worldCenter", WorldGeneration::worldSize()/2.0, 0.0, WorldGeneration::worldSize()/2.0);
 
-    // shader->setTexture(perlinLane, 0);
+    shader->setInt("numNodes", nodes.size());
+    shader->setInt("branchDepth", depth);
+
+    if (rootNode){
+        shader->setFloat("rootNodePercent", rootNode->getVertexData()->nodePercent);
+        // std::cout << "Root Node Percent: " << rootNode->getVertexData()->nodePercent << std::endl;
+    }else{
+        shader->setFloat("rootNodePercent", 0.25);
+        // std::cout << "Root Node Percent: " << 0 << std::endl;
+    }
 
     shader->setTexture(&RenderManager::instance.getFrameBuffer(SHADOW_BUFFER).textures[0], 0);
     for (int i = 0; i < textures.size(); i++){
         shader->setTexture(&textures[i], i + 1);
     }
-
-    // std::cout << "Vertices: " << vertices.size() << std::endl;
-    // for(auto vertex : vertices){
-    //     std::cout << "Vertex: " << vertex.position.x << ", " << vertex.position.y << ", " << vertex.position.z << std::endl;
-    // }
-    // std::cout << "" << std::endl;
-    // std::cout << "" << std::endl;
-    // std::cout << "" << std::endl;
 
     glBindVertexArray(VAO);
     glDrawArrays(GL_POINTS, 0, vertices.size());
@@ -219,7 +225,7 @@ TreeVertex* TreeBranch::getVertex(int idx){
 void TreeBranch::addNode(Entry entry){
     vertices.push_back(TreeVertex());
     nodes.push_back(new TreeNode(this, vertices.size() - 1, entry));
-    writeDataToGPU();
+    // writeDataToGPU();
 }
 
 uint TreeBranch::getID(){ return ID; }

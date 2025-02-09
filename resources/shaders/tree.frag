@@ -16,12 +16,13 @@ uniform vec3 viewPos;
 
 uniform sampler2D depth_buffer;
 uniform sampler2D diffuse;
+uniform sampler2D normal;
 
-in vec3 Normal;
 in vec3 FragPos;
 in vec2 TexCoords;
 in vec4 FragPosLightSpace;
 in vec3 Color;
+in mat3 TBN;
 
 out vec4 FragColor;
 
@@ -68,11 +69,15 @@ vec3 CalcDirLight(DirectionalLight light, vec3 norm, vec3 viewDir){
 
 void main()
 {
-    vec3 norm = normalize(Normal);
+    vec3 norm = texture(normal, TexCoords).rgb;
+    norm = norm * 2.0 - 1.0;   
+    norm = normalize(TBN * norm); 
+
     vec3 viewDir = normalize(viewPos - FragPos);
     vec3 result = CalcDirLight(dirLight, norm, viewDir);
 
     FragColor = vec4(result, 1.0);
+    // FragColor = vec4(norm, 1.0);
     // FragColor = vec4(BaseColor, 1.0);
     // FragColor = vec4(1.0);
 }

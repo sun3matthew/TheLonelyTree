@@ -14,7 +14,7 @@ TreeNode::~TreeNode(){
 }
 
 #include <iostream>
-void TreeNode::setVertexData(TreeNode* parent, int depth, glm::vec3 position){
+void TreeNode::setVertexData(TreeNode* parent, glm::vec3 position, float nodePercent){
     TreeVertex* vertex = associatedBranch->getVertex(index);
     glm::vec3 direction = glm::vec3(0, 1, 0);
     if (parent == nullptr){
@@ -26,13 +26,18 @@ void TreeNode::setVertexData(TreeNode* parent, int depth, glm::vec3 position){
         vertex->parentDirection = parentVertex->direction;
         vertex->parentPosition = parentVertex->position;
 
-
         direction = position - parentVertex->position;
     }
 
-    vertex->depth = depth;
+    std::cout << "Node Percent: " << nodePercent << std::endl;
+    vertex->nodePercent = nodePercent;
     vertex->direction = glm::normalize(direction);
     vertex->position = position;
+}
+
+//! unsafe
+TreeVertex* TreeNode::getVertexData(){
+    return associatedBranch->getVertex(index);
 }
 
 int TreeNode::getIndex(){

@@ -13,7 +13,7 @@ struct TreeVertex{
     glm::vec3 parentPosition;
     glm::vec3 parentDirection;
 
-    int depth;
+    float nodePercent;
 
     TreeVertex(){
         position = glm::vec3(0.0f);
@@ -22,7 +22,7 @@ struct TreeVertex{
         parentPosition = glm::vec3(0.0f);
         parentDirection = glm::vec3(0.0f);
 
-        depth = 0;
+        float nodePercent = 0.0f;
     }
 };
 
@@ -38,7 +38,8 @@ class TreeNode{
         ~TreeNode();
 
         TreeBranch* getAssociatedBranch();
-        void setVertexData(TreeNode* parent, int depth, glm::vec3 position);
+        void setVertexData(TreeNode* parent, glm::vec3 position, float nodePercent);
+        TreeVertex* getVertexData();
 
         int getIndex();
 
