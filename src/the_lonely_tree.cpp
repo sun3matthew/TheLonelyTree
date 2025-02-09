@@ -220,7 +220,7 @@ void TheLonelyTree::start(){
         // std::cout << "POP " << depth << std::endl;
 
         if (depth > 0){
-            int numBranches = rand() % 2 + 3;
+            int numBranches = rand() % 5 + 1;
             numBranches = 4;
             for(int i = 0; i < numBranches; i++){
                 int numNodes = rand() % (10 * depth) + 4;
@@ -262,7 +262,7 @@ void TheLonelyTree::start(){
     Gameobject* treeManager = new Gameobject("Tree Manager");
     treeManager->addComponent(new TreeRendererComponent(this->treeManager));
     treeManager->setPosition(glm::vec3(worldSize/2, 380, worldSize/2));
-    treeManager->setScale(glm::vec3(10.0f));
+    treeManager->setScale(glm::vec3(200.0f));
     addGameobject(treeManager);
 
     // float worldSize = 500.0f;

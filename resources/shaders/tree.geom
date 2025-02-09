@@ -18,12 +18,14 @@ uniform mat4 lightSpaceMatrix;
 uniform float rootBranchDepth;
 uniform int numNodes;
 uniform int branchDepth;
-uniform float rootNodePercent;
 
+// vec3 glPosition
+in vec3 parentPosition[];
 in vec3 tiltDirection[];
 in vec3 parentTiltDirection[];
-in vec3 parentPosition[];
-in float nodeLevel[];
+in float treeRadius[];
+in float parentTreeRadius[];
+
 
 out vec3 FragPos;
 out vec2 TexCoords;
@@ -57,8 +59,8 @@ mat3 calculateTBN(vec3 normal, vec3 tangent){
     return mat3(tangent, bitangent, normal);
 }
 
-float calculateRadius(float x, float c){
-    return (1 / (1 - exp(-c))) * ((exp(-c * (-x + 1))) - exp(-c));
+vec3 applyModel(vec3 position){
+    return vec3(model * vec4(position, 1.0));
 }
 
 float random(float seed) {
@@ -75,22 +77,14 @@ void main() {
     vec2 offset = vec2(random(hash(position.x, position.z)), random(hash(position.x * 2, position.z))) * 0.6;
     float stretch = random(hash(position.x * 2, position.z)) * 0.1 + 0.1;
 
-    float c = 0.5;
-    float scalar = 0.7;
-
-    float rootScale = scalar * pow(0.5, branchDepth);
-    float rRoot = calculateRadius(rootNodePercent, c) * rootScale;
-    rRoot *= 0.6;
-    rRoot = 10000000000.0;
-
-    float scale = scalar * pow(0.5, branchDepth + 1);
-    float rParent = min(calculateRadius(nodeLevel[0] + (1.0 / numNodes), c) * scale, rRoot);
-    float r = min(calculateRadius(nodeLevel[0], c) * scale, rRoot);
+    float scale = 0.2;
+    float rParent = scale * parentTreeRadius[0];
+    float r = scale * treeRadius[0];
 
     float lerp = -1 / float(SUBDIVISIONS);
 
-    vec3 lastPositionParent = parametricRing(parentPosition[0], parentTiltDirection[0], lerp, rParent, rParent);
-    vec3 lastPosition = parametricRing(vec3(gl_in[0].gl_Position), tiltDirection[0], lerp, r, r);
+    vec3 lastPositionParent = applyModel(parametricRing(parentPosition[0], parentTiltDirection[0], lerp, rParent, rParent));
+    vec3 lastPosition = applyModel(parametricRing(vec3(gl_in[0].gl_Position), tiltDirection[0], lerp, r, r));
 
     for(int i = 0; i <= SUBDIVISIONS; i++){
         lerp += 1 / float(SUBDIVISIONS);
@@ -99,20 +93,22 @@ void main() {
         // Color = vec3(depth[0] / 100.0);
         Color = vec3(tiltDirection[0]);
 
-        position = vec3(model * vec4(parametricRing(parentPosition[0], parentTiltDirection[0], lerp, rParent, rParent), 1.0));
+        position = applyModel(parametricRing(parentPosition[0], parentTiltDirection[0], lerp, rParent, rParent));
         TBN = calculateTBN(
-            normalize(position - vec3(model * vec4(parentPosition[0], 1.0))),
+            normalize(position - applyModel(parentPosition[0])),
             -normalize(position - lastPositionParent)); // flip tangent
+        lastPositionParent = position;
         FragPos = position;
         TexCoords = offset + vec2(lerp * stretch * 2, 0);
         FragPosLightSpace = lightSpaceMatrix * vec4(position, 1.0);
         gl_Position = projection * view * vec4(position, 1.0);
         EmitVertex();
 
-        position = vec3(model * vec4(parametricRing(vec3(gl_in[0].gl_Position), tiltDirection[0], lerp, r, r), 1.0));
+        position = applyModel(parametricRing(vec3(gl_in[0].gl_Position), tiltDirection[0], lerp, r, r));
         TBN = calculateTBN(
-            normalize(position - vec3(model * vec4(gl_in[0].gl_Position))),
+            normalize(position - vec3(model * gl_in[0].gl_Position)),
             -normalize(position - lastPosition));
+        lastPosition = position;
         FragPos = position;
         TexCoords = offset + vec2(lerp * stretch * 2, stretch);
         FragPosLightSpace = lightSpaceMatrix * vec4(position, 1.0);

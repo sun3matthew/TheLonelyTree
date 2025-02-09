@@ -42,7 +42,9 @@ TreeBranch::TreeBranch(unsigned int id, TreeBranch* parentBranch, TreeNode* node
     glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(TreeVertex), (void*)offsetof(TreeVertex, parentDirection));
 
     glEnableVertexAttribArray(4);	
-    glVertexAttribPointer(4, 1, GL_FLOAT, GL_FALSE, sizeof(TreeVertex), (void*)offsetof(TreeVertex, nodePercent));
+    glVertexAttribPointer(4, 1, GL_FLOAT, GL_FALSE, sizeof(TreeVertex), (void*)offsetof(TreeVertex, radius));
+    glEnableVertexAttribArray(5);	
+    glVertexAttribPointer(5, 1, GL_FLOAT, GL_FALSE, sizeof(TreeVertex), (void*)offsetof(TreeVertex, parentRadius));
 
     glBindVertexArray(0);
 }
@@ -178,7 +180,7 @@ void TreeBranch::recalculateVertices(){
         // std::cout << "Position: " << position.x << ", " << position.y << ", " << position.z << std::endl;
         // std::cout << "Index: " << t << std::endl;
 
-        nodes[i]->setVertexData(i == 0 ? nullptr : nodes[i - 1], position, 1 - ((i + 1) / (float)nodes.size()));
+        nodes[i]->setVertexData(i == 0 ? nullptr : nodes[i - 1], position, (i + 1) / (float)nodes.size());
         // nodes[i]->setVertexData(i == 0 ? nullptr : nodes[i - 1], glm::vec3(10, i * 0.1, 10));
         // nodes[i]->setVertexData(i == 0 ? nullptr : nodes[i - 1], position, glm::vec3(0, 1, 0));
     }
@@ -194,14 +196,6 @@ void TreeBranch::drawCall(Shader* shader){
 
     shader->setInt("numNodes", nodes.size());
     shader->setInt("branchDepth", depth);
-
-    if (rootNode){
-        shader->setFloat("rootNodePercent", rootNode->getVertexData()->nodePercent);
-        // std::cout << "Root Node Percent: " << rootNode->getVertexData()->nodePercent << std::endl;
-    }else{
-        shader->setFloat("rootNodePercent", 0.25);
-        // std::cout << "Root Node Percent: " << 0 << std::endl;
-    }
 
     shader->setTexture(&RenderManager::instance.getFrameBuffer(SHADOW_BUFFER).textures[0], 0);
     for (int i = 0; i < textures.size(); i++){

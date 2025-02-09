@@ -13,8 +13,8 @@ struct TreeVertex{
     glm::vec3 parentPosition;
     glm::vec3 parentDirection;
 
-    float nodePercent;
-
+    float radius; // better struct packing..?
+    float parentRadius;
     TreeVertex(){
         position = glm::vec3(0.0f);
         direction = glm::vec3(0.0f);
@@ -22,7 +22,8 @@ struct TreeVertex{
         parentPosition = glm::vec3(0.0f);
         parentDirection = glm::vec3(0.0f);
 
-        float nodePercent = 0.0f;
+        radius = 0.0f;
+        parentRadius = 0.0f;
     }
 };
 
@@ -47,7 +48,7 @@ class TreeNode{
     private:
         Entry entry;
 
-        TreeBranch* associatedBranch;
+    TreeBranch* associatedBranch;
         int index;
 };
 
