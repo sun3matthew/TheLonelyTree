@@ -8,12 +8,12 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
-TreeBranch::TreeBranch(unsigned int id, TreeBranch* parentBranch, TreeNode* node){
+TreeBranch::TreeBranch(unsigned int id, TreeBranch* parentBranch, TreeNode* node, LeafManager* leafManager){
     this->depth = 1;
-
     this->ID = id;
-
     this->rootNode = node;
+
+    this->leafManager = new LeafManager();
 
     this->parentBranch = parentBranch;
     if (parentBranch){
@@ -50,12 +50,18 @@ TreeBranch::TreeBranch(unsigned int id, TreeBranch* parentBranch, TreeNode* node
 TreeBranch::~TreeBranch(){
     assert(ID == 0);
 
+    delete leafManager;
+
     for(auto node : nodes){
         delete node;
     }
 
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
+}
+
+LeafManager* TreeBranch::getLeafManager(){
+    return leafManager;
 }
 
 int TreeBranch::getDepth(){

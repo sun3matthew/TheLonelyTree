@@ -20,7 +20,7 @@
 #include <engine/http_client.h>
 
 #include <world_generation.h>
-#include <tree_manager.h>
+#include <leaf_manager.h>
 #include <tree_renderer_component.h>
 
 #include <iostream>
@@ -80,6 +80,9 @@ TheLonelyTree::TheLonelyTree()
             std::vector<std::string>{"dirLightCamera", "model", "meshTextures"}));
     RenderManager::instance.addShader(
         new Shader("tree", "../resources/shaders/tree.vert", "../resources/shaders/tree.geom", "../resources/shaders/tree.frag",
+            std::vector<std::string>{"camera", "dirLight", "dirLightCamera"}));
+    RenderManager::instance.addShader(
+        new Shader("leaf", "../resources/shaders/leaf.vert", "../resources/shaders/leaf.geom", "../resources/shaders/leaf.frag",
             std::vector<std::string>{"camera", "dirLight", "dirLightCamera"}));
 
     RenderManager::instance.addFrameBuffer(FrameBufferGeneration::BaseFrameBuffer(FRAME_BUFFER, GLFWWrapper::width, GLFWWrapper::height));
@@ -178,6 +181,12 @@ void TheLonelyTree::start(){
     addGameobject(world);
 
 
+    unsigned int numLeafTypes = 2;
+
+    // leafManager = new LeafManager();
+    // leafManager->addShader(FRAME_BUFFER, "leaf");
+    // leafManager->addShader(SHADOW_BUFFER, "shadowMap");
+
     Entry entry = Entry();
     entry.date = "2021-09-01";
     entry.name = "The Lonely Tree";
@@ -186,12 +195,14 @@ void TheLonelyTree::start(){
     Texture branchDiffuse = Texture("../resources/textures/tree/Diffuse.jpeg", TextureType::Diffuse);
     Texture branchNormal = Texture("../resources/textures/tree/Normal.png", TextureType::Normal);
 
-
+    //! This is the worst code I have ever written
     treeManager = new TreeManager();
     treeManager->rootBranch()->addShader(FRAME_BUFFER, "tree");
     treeManager->rootBranch()->addShader(SHADOW_BUFFER, "shadowMap");
     treeManager->rootBranch()->pushBackTexture(branchDiffuse);
     treeManager->rootBranch()->pushBackTexture(branchNormal);
+    treeManager->rootBranch()->getLeafManager()->addShader(FRAME_BUFFER, "leaf");
+    treeManager->rootBranch()->getLeafManager()->addShader(SHADOW_BUFFER, "shadowMap");
     int numNodes = 60;
     for (int i = 0; i < numNodes; i++){
         treeManager->rootBranch()->addNode(entry);
@@ -215,6 +226,7 @@ void TheLonelyTree::start(){
                 int numNodes = rand() % (10 * depth) + 4;
                 std::cout << "Num Nodes: " << numNodes << std::endl;
                 counter++;
+
                 // random node from 0 to numNodes
                 int totalNodes = branch->getNumNodes();
                 int randomNode = rand() % (totalNodes); // TODO make better
@@ -223,9 +235,21 @@ void TheLonelyTree::start(){
                 newBranch->pushBackTexture(branchNormal);
                 newBranch->addShader(FRAME_BUFFER, "tree");
                 newBranch->addShader(SHADOW_BUFFER, "shadowMap");
+                newBranch->getLeafManager()->addShader(FRAME_BUFFER, "leaf");
+                newBranch->getLeafManager()->addShader(SHADOW_BUFFER, "shadowMap");
                 for (int i = 0; i < numNodes; i++)
                     newBranch->addNode(entry);
                 newBranch->recalculateVertices();
+
+                for( int i = 0; i < newBranch->getNumNodes(); ){
+                    TreeVertex* vertex = newBranch->getNode(i)->getVertexData();
+                    LeafKey key = newBranch->getLeafManager()->getNewLeafKey();
+                    newBranch->getLeafManager()->writeLeafData(key, vertex->position, vertex->direction);
+                    // i += rand() % 3 + 1;
+                    i++;
+                }
+                newBranch->getLeafManager()->writeDataToGPU();
+
                 if (depth - 1 > 0){
                     // std::cout << "PUSH " << (depth - 1) << std::endl;
                     branchStack.push({newBranch, depth - 1});
@@ -235,34 +259,11 @@ void TheLonelyTree::start(){
     }
 
 
-    // TreeBranch* secondBranch =  treeManager->addBranch(treeManager->rootBranch()->getID(), 80);
-    // secondBranch->addShader(FRAME_BUFFER, "tree");
-    // secondBranch->addShader(SHADOW_BUFFER, "shadowMap");
-    // glm::vec3 direction = glm::normalize(glm::vec3(0, 1, 1));
-    // for (int i = 0; i < numNodes; i++){
-    //     glm::vec3 randomOffset = glm::vec3(
-    //         (rand() % 1000) / 1000.0f - 0.5f,
-    //         0,
-    //         (rand() % 1000) / 1000.0f - 0.5f
-    //     );
-    //     float dist = 0.10;
-    //     secondBranch->addNode(direction + randomOffset, dist, entry);
-    // }
-
-    // treeManager->rootBranch()->addNode(glm::vec3(0, 1, 1), 200, entry);
-
     Gameobject* treeManager = new Gameobject("Tree Manager");
     treeManager->addComponent(new TreeRendererComponent(this->treeManager));
+    treeManager->setPosition(glm::vec3(worldSize/2, 380, worldSize/2));
+    treeManager->setScale(glm::vec3(10.0f));
     addGameobject(treeManager);
-    treeManager->setPosition(glm::vec3(worldSize/2, 280, worldSize/2));
-    treeManager->setScale(glm::vec3(100.0f));
-
-    // Gameobject* water = new Gameobject("Water");
-    // Mesh* waterMesh = MeshGeneration::Plane(64, 64);
-    // waterMesh->addShader("model");
-    // water->addComponent(new RenderObjectComponent(waterMesh));
-    // addGameobject(water);
-    // water->setScale(glm::vec3(worldSize * 8, 1, worldSize * 8));
 
     // float worldSize = 500.0f;
     // plane->setPosition(glm::vec3(worldSize/2, -50, worldSize/2));

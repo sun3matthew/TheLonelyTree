@@ -52,4 +52,12 @@ build-osx:
 	cd $(BUILD_DIR_OSX) && cmake -G Ninja -DBUILD_TARGET=OSX ../..
 	cd $(BUILD_DIR_OSX) && ninja $(PROJECT_NAME)
 
-.PHONY: all configure build run clean release debug build-osx
+post-process: merge-images-leaves-diffuse merge-images-leaves-normal
+
+merge-images-leaves-diffuse:
+	python scripts/imageMerge.py data/leaves/diffuse resources/textures/tree/leaves/Diffuse.png
+
+merge-images-leaves-normal:
+	python scripts/imageMerge.py data/leaves/normal resources/textures/tree/leaves/Normal.png
+
+.PHONY: all configure build run clean release debug build-osx merge-images

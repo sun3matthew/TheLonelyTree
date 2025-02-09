@@ -27,11 +27,13 @@ void TreeRendererComponent::update(){
 
         for(TreeBranch* childBranch : branch->getChildBranches()){
             childBranch->modelMatrix = branch->modelMatrix * childBranch->getLocalModelMatrix();
+            childBranch->getLeafManager()->modelMatrix = childBranch->modelMatrix;
             branchStack.push(childBranch);
         }
 
         for(auto& [i, shaderNames] : branch->shaderNames){
             RenderManager::instance.addToBuffer(i, branch);
+            RenderManager::instance.addToBuffer(i, branch->getLeafManager());
         }
 
         if (failSafe++ > MAX_ITERATION){

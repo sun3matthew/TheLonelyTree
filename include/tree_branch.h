@@ -4,6 +4,7 @@
 #include <vector>
 #include <engine/render_object.h>
 #include "tree_node.h"
+#include "leaf_manager.h"
 
 #include <engine/texture.h>
 
@@ -14,8 +15,10 @@ struct PointDirection{
 
 class TreeBranch : public RenderObject{
 public:
-    TreeBranch(unsigned int ID, TreeBranch* parentBranch, TreeNode* node);
+    TreeBranch(unsigned int ID, TreeBranch* parentBranch, TreeNode* node, LeafManager* leafManager);
     ~TreeBranch();
+
+    LeafManager* getLeafManager();
 
     TreeBranch* getParentBranch();
     TreeNode* getRootNode();
@@ -40,6 +43,8 @@ private:
     unsigned int VAO, VBO;
 
     int depth;
+
+    LeafManager* leafManager;
 
     glm::mat4 localModelMatrix;
 

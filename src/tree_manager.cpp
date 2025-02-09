@@ -7,7 +7,7 @@
 
 TreeManager::TreeManager(){
     unsigned int id = generateRandomID();
-    tree[id] = new TreeBranch(id, nullptr, nullptr);
+    tree[id] = new TreeBranch(id, nullptr, nullptr, new LeafManager());
 
     rootBranchID = id;
 }
@@ -31,7 +31,7 @@ TreeBranch* TreeManager::addBranch(TreeNode* node){
     // int id = generateRandomID();
     // int id = rand();
     int id = rand();
-    TreeBranch* newBranch = new TreeBranch(id, nodeBranch, node);
+    TreeBranch* newBranch = new TreeBranch(id, nodeBranch, node, new LeafManager());
     tree[id] = newBranch;
 
     return newBranch;

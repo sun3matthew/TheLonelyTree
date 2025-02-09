@@ -29,7 +29,6 @@ void TreeNode::setVertexData(TreeNode* parent, glm::vec3 position, float nodePer
         direction = position - parentVertex->position;
     }
 
-    std::cout << "Node Percent: " << nodePercent << std::endl;
     vertex->nodePercent = nodePercent;
     vertex->direction = glm::normalize(direction);
     vertex->position = position;
