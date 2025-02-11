@@ -2,12 +2,13 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <engine/render_manager.h>
 #include <engine/gameobject.h>
+#include <engine/glfw_wrapper.h>
 
 // Constructor with vectors
 Camera::Camera(glm::vec3 up, float yaw, float pitch)
     : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED),
       MouseSensitivity(SENSITIVITY), Zoom(ZOOM),
-      WorldUp(up), Yaw(yaw), Pitch(pitch) {
+      WorldUp(up), Yaw(yaw), Pitch(pitch), time(0), originPosition(glm::vec3(0.0f, 0.0f, 0.0f)) {
     updateCameraVectors();
 }
 
@@ -16,7 +17,7 @@ Camera::Camera(float upX, float upY, float upZ,
                float yaw, float pitch)
     : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED),
       MouseSensitivity(SENSITIVITY), Zoom(ZOOM),
-      WorldUp(glm::vec3(upX, upY, upZ)), Yaw(yaw), Pitch(pitch) {
+      WorldUp(glm::vec3(upX, upY, upZ)), Yaw(yaw), Pitch(pitch), time(0), originPosition(glm::vec3(0.0f, 0.0f, 0.0f)) {
     updateCameraVectors();
 }
 
@@ -79,6 +80,7 @@ void Camera::updateCameraVectors() {
     Up = glm::normalize(glm::cross(Right, Front));
 }
 
+#include <iostream>
 void Camera::update(){
     glm::mat4 view = GetViewMatrix();
     glm::mat4 projection = glm::perspective(glm::radians(Zoom), 800.0f / 600.0f, 10.0f, 5000.0f);
@@ -90,14 +92,21 @@ void Camera::update(){
         shader->use();
         shader->setMat4("view", glm::value_ptr(view));
         shader->setMat4("projection", glm::value_ptr(projection));
-        shader->setVec3("viewPos", position.x, position.y, position.z);
+        shader->setVec3("viewPos", position);
     }
 
     shaders = RenderManager::instance.getShadersAccepting("cameraSkyBox");
+    time += GLFWWrapper::instance->getDeltaTime() * 4;
     for(Shader* shader : shaders){
         glm::mat4 viewSkyBox = glm::mat4(glm::mat3(view));  
         shader->use();
         shader->setMat4("view", glm::value_ptr(viewSkyBox));
         shader->setMat4("projection", glm::value_ptr(projection));
+
+        // glm::vec3 realCameraPosition = position - originPosition;
+        glm::vec3 realCameraPosition = position - originPosition;
+        realCameraPosition = glm::vec3(realCameraPosition.x, position.y, realCameraPosition.z);
+        shader->setVec3("viewPos", realCameraPosition);
+        shader->setFloat("time", time);
     }
 }

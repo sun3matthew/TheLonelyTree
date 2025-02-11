@@ -138,6 +138,7 @@ void TheLonelyTree::start(){
     cameraGameobject->addComponent(this->camera);
     addGameobject(cameraGameobject);
     cameraGameobject->setPosition(glm::vec3(worldSize/2, 400, worldSize/2));
+    camera->originPosition = cameraGameobject->getPosition();
 
     Gameobject* directionalLight = new Gameobject("Directional Light");
     LightDirectional *light = new LightDirectional(
@@ -173,13 +174,13 @@ void TheLonelyTree::start(){
     world2->addComponent(new RenderObjectComponent(terrainMesh2));
     addGameobject(world2);
 
-    Gameobject* world = new Gameobject("World");
-    Mesh* terrainMesh = WorldGeneration::createWorld(seed, 60, worldSize, 4 * 2, 0);
-    terrainMesh->updateTexture(Texture::diffuse(0x50, 0x4D, 0x53));
-    terrainMesh->addShader(FRAME_BUFFER, "model");
-    terrainMesh->addShader(SHADOW_BUFFER, "shadowMap");
-    world->addComponent(new RenderObjectComponent(terrainMesh));
-    addGameobject(world);
+    // Gameobject* world = new Gameobject("World");
+    // Mesh* terrainMesh = WorldGeneration::createWorld(seed, 60, worldSize, 4 * 2, 0);
+    // terrainMesh->updateTexture(Texture::diffuse(0x50, 0x4D, 0x53));
+    // terrainMesh->addShader(FRAME_BUFFER, "model");
+    // terrainMesh->addShader(SHADOW_BUFFER, "shadowMap");
+    // world->addComponent(new RenderObjectComponent(terrainMesh));
+    // addGameobject(world);
 
 
     unsigned int numLeafTypes = 2;
@@ -280,14 +281,14 @@ void TheLonelyTree::start(){
     // sphere->setScale(glm::vec3(90.0f));
 
     // ! Cube bugged
-    // Gameobject* cube = new Gameobject("Cube");
-    // Mesh* cubeMesh = MeshGeneration::Cube();
-    // cubeMesh->addShader(FRAME_BUFFER, "model");
-    // cubeMesh->addShader(SHADOW_BUFFER, "shadowMap");
-    // cube->addComponent(new RenderObjectComponent(cubeMesh));
-    // addGameobject(cube);
-    // cube->setPosition(glm::vec3(worldSize/2 - 200, 360, worldSize/2));
-    // cube->setScale(glm::vec3(90.0f));
+    Gameobject* cube = new Gameobject("Cube");
+    Mesh* cubeMesh = MeshGeneration::Cube();
+    cubeMesh->addShader(FRAME_BUFFER, "model");
+    cubeMesh->addShader(SHADOW_BUFFER, "shadowMap");
+    cube->addComponent(new RenderObjectComponent(cubeMesh));
+    addGameobject(cube);
+    cube->setPosition(glm::vec3(worldSize/2 - 200, 0, worldSize/2));
+    cube->setScale(glm::vec3(10.0f));
 
     Gameobject* grass = new Gameobject("Grass");
     Grass* grassMesh = new Grass();

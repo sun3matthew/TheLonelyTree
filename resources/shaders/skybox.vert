@@ -8,7 +8,6 @@ uniform mat4 projection;
 uniform mat4 view;
 
 out vec3 TexCoords;
-out vec3 FragPos;
 
 void main()
 {

@@ -25,12 +25,14 @@ const float ZOOM = 45.0f;
 
 class Camera : public Component{
 public:
+    glm::vec3 originPosition;
     // Camera Attributes
     glm::vec3 Front, Up, Right, WorldUp;
     // Euler Angles
     float Yaw, Pitch;
     // Camera options
     float MovementSpeed, MouseSensitivity, Zoom;
+    float time;
 
     // Constructors
     Camera(glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f),
