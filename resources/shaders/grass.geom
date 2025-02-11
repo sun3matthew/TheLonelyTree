@@ -41,7 +41,7 @@ void main() {
         mat4 model = projection * view;
 
         float segmentSize = 1.1 + (clumpColor[0] * 0.4) + (randomHash[0] * 0.2);
-        segmentSize *= 34;
+        segmentSize *= 54;
         // segmentSize = 1.0;
 
 

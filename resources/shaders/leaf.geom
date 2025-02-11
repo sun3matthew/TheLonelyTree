@@ -7,6 +7,7 @@ uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
 uniform mat4 lightSpaceMatrix;
+uniform int numLeafTypes;
 
 in vec3 leafDirection[];
 in int leafTextureIndex[];
@@ -19,10 +20,10 @@ out mat3 TBN;
 
 void main() {
     float scale = 1.0;
-    float r = 1.0;
+    float r = 0.8;
 
     // calculate normal
-    vec3 normal = normalize(cross(vec3(model * vec4(leafDirection[0], 0.0)), vec3(0, 1, 0)));
+    vec3 normal = normalize(cross(vec3(model * vec4(leafDirection[0], 0.0)), vec3(0, 0, 1)));
     vec3 tangent = normalize(cross(normal, leafDirection[0]));
     vec3 bitangent = cross(normal, tangent);
     TBN = mat3(tangent, bitangent, normal);
@@ -31,30 +32,33 @@ void main() {
     vec3 position = vec3(0);
     Color = modelPosition;
 
+    float left = float(leafTextureIndex[0])/numLeafTypes;
+    float right = float(leafTextureIndex[0] + 1)/numLeafTypes;
+
     position = vec3(model * vec4(modelPosition, 1.0));
     FragPos = position;
-    TexCoords = vec2(0, 0);
+    TexCoords = vec2(left, 0);
     FragPosLightSpace = lightSpaceMatrix * vec4(position, 1.0);
     gl_Position = projection * view * vec4(position, 1.0);
     EmitVertex();
 
     position = vec3(model * vec4(modelPosition + (leafDirection[0] * scale * 0.5) + (tangent * scale * 0.5 * r), 1.0));
     FragPos = position;
-    TexCoords = vec2(1, 0);
+    TexCoords = vec2(right, 0);
     FragPosLightSpace = lightSpaceMatrix * vec4(position, 1.0);
     gl_Position = projection * view * vec4(position, 1.0);
     EmitVertex();
 
     position = vec3(model * vec4(modelPosition + (leafDirection[0] * scale * 0.5) - (tangent * scale * 0.5 * r), 1.0));
     FragPos = position;
-    TexCoords = vec2(0, 1);
+    TexCoords = vec2(left, 1);
     FragPosLightSpace = lightSpaceMatrix * vec4(position, 1.0);
     gl_Position = projection * view * vec4(position, 1.0);
     EmitVertex();
 
     position = vec3(model * vec4(modelPosition + (leafDirection[0] * scale), 1.0));
     FragPos = position;
-    TexCoords = vec2(1, 1);
+    TexCoords = vec2(right, 1);
     FragPosLightSpace = lightSpaceMatrix * vec4(position, 1.0);
     gl_Position = projection * view * vec4(position, 1.0);
     EmitVertex();

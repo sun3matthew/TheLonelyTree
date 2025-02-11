@@ -165,12 +165,13 @@ void TheLonelyTree::start(){
 
     int seed = 12923952u;
 
-    // Gameobject* world2 = new Gameobject("World");
-    // Mesh* terrainMesh2 = WorldGeneration::createWorld(seed, 60, worldSize, 4, 10);
-    // terrainMesh2->updateTexture(Texture::diffuse(0x50, 0x4D, 0x53));
-    // terrainMesh2->addShader(SHADOW_BUFFER, "shadowMap");
-    // world2->addComponent(new RenderObjectComponent(terrainMesh2));
-    // addGameobject(world2);
+    Gameobject* world2 = new Gameobject("World");
+    Mesh* terrainMesh2 = WorldGeneration::createWorld(seed, 60, worldSize, 4, 10);
+    terrainMesh2->updateTexture(Texture::diffuse(0x50, 0x4D, 0x53));
+    // terrainMesh2->addShader(FRAME_BUFFER, "model");
+    terrainMesh2->addShader(SHADOW_BUFFER, "shadowMap");
+    world2->addComponent(new RenderObjectComponent(terrainMesh2));
+    addGameobject(world2);
 
     Gameobject* world = new Gameobject("World");
     Mesh* terrainMesh = WorldGeneration::createWorld(seed, 60, worldSize, 4 * 2, 0);
@@ -197,10 +198,10 @@ void TheLonelyTree::start(){
 
     //! This is the worst code I have ever written
     treeManager = new TreeManager();
-    treeManager->rootBranch()->addShader(FRAME_BUFFER, "tree");
-    treeManager->rootBranch()->addShader(SHADOW_BUFFER, "shadowMap");
     treeManager->rootBranch()->pushBackTexture(branchDiffuse);
     treeManager->rootBranch()->pushBackTexture(branchNormal);
+    treeManager->rootBranch()->addShader(FRAME_BUFFER, "tree");
+    treeManager->rootBranch()->addShader(SHADOW_BUFFER, "shadowMap");
     treeManager->rootBranch()->getLeafManager()->addShader(FRAME_BUFFER, "leaf");
     treeManager->rootBranch()->getLeafManager()->addShader(SHADOW_BUFFER, "shadowMap");
     int numNodes = 60;
@@ -241,14 +242,14 @@ void TheLonelyTree::start(){
                     newBranch->addNode(entry);
                 newBranch->recalculateVertices();
 
-                for( int i = 0; i < newBranch->getNumNodes(); ){
-                    TreeVertex* vertex = newBranch->getNode(i)->getVertexData();
-                    LeafKey key = newBranch->getLeafManager()->getNewLeafKey();
-                    newBranch->getLeafManager()->writeLeafData(key, vertex->position, vertex->direction);
-                    // i += rand() % 3 + 1;
-                    i++;
-                }
-                newBranch->getLeafManager()->writeDataToGPU();
+                // for( int i = 0; i < newBranch->getNumNodes(); ){
+                //     TreeVertex* vertex = newBranch->getNode(i)->getVertexData();
+                //     LeafKey key = newBranch->getLeafManager()->getNewLeafKey();
+                //     newBranch->getLeafManager()->writeLeafData(key, vertex->position, vertex->direction);
+                //     // i += rand() % 3 + 1;
+                //     i++;
+                // }
+                // newBranch->getLeafManager()->writeDataToGPU();
 
                 if (depth - 1 > 0){
                     // std::cout << "PUSH " << (depth - 1) << std::endl;
@@ -261,8 +262,8 @@ void TheLonelyTree::start(){
 
     Gameobject* treeManager = new Gameobject("Tree Manager");
     treeManager->addComponent(new TreeRendererComponent(this->treeManager));
-    treeManager->setPosition(glm::vec3(worldSize/2, 380, worldSize/2));
-    treeManager->setScale(glm::vec3(200.0f));
+    treeManager->setPosition(glm::vec3(worldSize/2, 280, worldSize/2));
+    treeManager->setScale(glm::vec3(100.0f));
     addGameobject(treeManager);
 
     // float worldSize = 500.0f;

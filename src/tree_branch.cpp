@@ -183,10 +183,21 @@ void TreeBranch::recalculateVertices(){
         nodes[i]->setVertexData(i == 0 ? nullptr : nodes[i - 1], position, (i + 1) / (float)nodes.size());
         // nodes[i]->setVertexData(i == 0 ? nullptr : nodes[i - 1], glm::vec3(10, i * 0.1, 10));
         // nodes[i]->setVertexData(i == 0 ? nullptr : nodes[i - 1], position, glm::vec3(0, 1, 0));
+
+        for(int j = 0; j < 1; j++){
+            TreeVertex* vertex = nodes[i]->getVertexData();
+            LeafKey key = leafManager->getNewLeafKey();
+
+            float theta = dist(rng) * 360;
+            float tiltAngle = dist(rng) * 120;
+            glm::vec3 direction = generateBranchDirection(vertex->direction, tiltAngle, theta);
+
+            leafManager->writeLeafData(key, vertex->position, direction);
+        }
     }
-    
 
     writeDataToGPU();
+    leafManager->writeDataToGPU();
 }
 
 

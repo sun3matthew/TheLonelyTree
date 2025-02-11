@@ -33,7 +33,7 @@ void TreeRendererComponent::update(){
 
         for(auto& [i, shaderNames] : branch->shaderNames){
             RenderManager::instance.addToBuffer(i, branch);
-            // RenderManager::instance.addToBuffer(i, branch->getLeafManager());
+            RenderManager::instance.addToBuffer(i, branch->getLeafManager());
         }
 
         if (failSafe++ > MAX_ITERATION){
