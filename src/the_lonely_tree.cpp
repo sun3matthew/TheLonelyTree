@@ -17,7 +17,11 @@
 #include <engine/shader.h>
 #include <engine/light_directional.h>
 #include <engine/light_spot.h>
+
 #include <engine/http_client.h>
+
+#include <engine/font.h>
+#include <engine/text.h>
 
 #include <world_generation.h>
 #include <leaf_manager.h>
@@ -53,16 +57,13 @@ TheLonelyTree::TheLonelyTree()
     createWindow(800 * 1.5f, 600 * 1.5f, "The Lonely Tree");
     lockCursor(true);
 
-    // prepend ../ to the filepath
-    // char* newFilepath = (char*)malloc(strlen(filepath) + 4);
-    // strcpy(newFilepath, "../");
-    // strcat(newFilepath, filepath);
-
-
     // TODO turn these into enums
     RenderManager::instance.addShader(
         new Shader("screen", "../resources/shaders/screen.vert", "../resources/shaders/screen.frag",
             std::vector<std::string>{"meshTextures"}));
+    RenderManager::instance.addShader(
+        new Shader("text", "../resources/shaders/text.vert", "../resources/shaders/text.frag",
+            std::vector<std::string>{}));
 
     RenderManager::instance.addShader(
         new Shader("shadowMap", "../resources/shaders/shadowMap.vert", "../resources/shaders/shadowMap.frag",
@@ -101,29 +102,32 @@ TheLonelyTree::TheLonelyTree()
         std::cerr << "Framebuffer not complete!" << std::endl;
     }
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    font = new Font("../resources/fonts/arial.ttf", 48);
 }
 
 TheLonelyTree::~TheLonelyTree(){
     // delete camera; //! Do not delete, just a reference to a component
+    delete font;
     delete treeManager;
 }
 
 void TheLonelyTree::start(){
-    // std::string url = "https://7sqvdwegyf.execute-api.us-west-2.amazonaws.com";
-    // std::string dataPath = "/default/the-lonely-tree";
-    // HttpClient client(url, dataPath);
+    std::string url = "https://7sqvdwegyf.execute-api.us-west-2.amazonaws.com";
+    std::string dataPath = "/default/the-lonely-tree";
+    HttpClient client(url, dataPath);
 
-    // std::string key = "exampleKey";
-    // std::string value = getCurrentDateTime();
+    std::string key = "exampleKey";
+    std::string value = getCurrentDateTime();
 
-    // if(client.write(key, value)){
-    //     std::cout << "Write successful" << std::endl;
-    // }else{
-    //     std::cout << "Write failed" << std::endl;
-    // }
+    if(client.write(key, value)){
+        std::cout << "Write successful" << std::endl;
+    }else{
+        std::cout << "Write failed" << std::endl;
+    }
 
-    // std::string readValue = client.read(key);
-    // std::cout << "Read value: " << readValue << std::endl;
+    std::string readValue = client.read(key);
+    std::cout << "Read value: " << readValue << std::endl;
 
     numLights = 0;
 
@@ -321,6 +325,12 @@ void TheLonelyTree::start(){
     skyBoxMesh->updateTexture(Texture(faces));
     skyBox->addComponent(new RenderObjectComponent(skyBoxMesh));
     addGameobject(skyBox);
+
+    Gameobject* text = new Gameobject("Text");
+    Text* textMesh = new Text(font, "The Lonely Tree", glm::vec2(100, 100), 2.0f, glm::vec3(1.0f, 1.0f, 1.0f));
+    textMesh->addShader(FRAME_BUFFER, "text");
+    text->addComponent(new RenderObjectComponent(textMesh));
+    addGameobject(text);
 }
 
 void TheLonelyTree::update(){

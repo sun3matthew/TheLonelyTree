@@ -1,0 +1,34 @@
+#ifndef TEXT_H
+#define TEXT_H
+
+#include <engine/font.h>
+#include <engine/render_object.h>
+#include <string>
+#include <glm/glm.hpp>
+
+class Text : public RenderObject
+{
+public:
+    Text(Font* font, std::string text, glm::vec2 position, float scale, glm::vec3 color);
+    ~Text();
+
+    void drawCall(Shader*) override;
+
+    void updateFont(Font* font);
+    void setText(std::string text);
+    void setPosition(glm::vec2 position);
+    void setColor(glm::vec3 color);
+    void setScale(float scale);
+private:
+    Font* font;
+
+    std::string text;
+
+    glm::vec2 position;
+    glm::vec3 color;
+    float scale;
+
+    unsigned int VAO, VBO;
+};
+
+#endif // TEXT_H

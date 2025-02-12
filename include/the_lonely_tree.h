@@ -5,6 +5,8 @@
 #include <engine/gameobject.h>
 #include <engine/camera.h>
 
+#include <engine/font.h>
+
 #include <vector>
 #include <list>
 
@@ -26,6 +28,7 @@ class TheLonelyTree : public GLFWWrapper{
         int numLights;
 
         TreeManager* treeManager;
+        Font* font;
 };  
 
 #endif

@@ -73,6 +73,9 @@ add_library(stb STATIC external/stb/src/stb_image.cpp)
 target_include_directories(stb PUBLIC external/stb/include)
 target_link_libraries(${PROJECT_NAME} PRIVATE stb)
 
+add_subdirectory(external/freetype)
+target_link_libraries(${PROJECT_NAME} PRIVATE freetype) # TODO make sure this is correctly included into the build
+
 add_subdirectory(external/glm)
 target_link_libraries(${PROJECT_NAME} PRIVATE glm)
 

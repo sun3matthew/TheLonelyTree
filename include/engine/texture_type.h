@@ -12,6 +12,7 @@ enum class TextureType {
     PerlinLane,
     DepthBuffer,
     FrameBuffer,
+    Font,
     MAX_TYPES
 };
 
@@ -33,6 +34,8 @@ inline std::string TextureTypeToString(TextureType textureType){
             return "depth_buffer";
         case TextureType::FrameBuffer:
             return "frame_buffer";
+        case TextureType::Font:
+            return "font";
         default:
             return "unknown";
     }

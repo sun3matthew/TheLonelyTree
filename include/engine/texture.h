@@ -11,7 +11,7 @@ public:
     TextureType type;
 
     Texture(const char* path, TextureType type);
-    Texture(const unsigned char* data, int width, int height, int nChannels, TextureType type);
+    Texture(const unsigned char* data, int width, int height, int nChannels, TextureType type, bool generateMipMap = true);
     Texture(std::vector<std::string> faces);
     Texture(int w, int h, unsigned int channelType, unsigned int channelCompType, TextureType textureType);
     // TODO add a destructor to clean up openGL

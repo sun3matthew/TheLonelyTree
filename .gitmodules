@@ -13,3 +13,6 @@
 [submodule "external/http"]
 	path = external/http
 	url = https://github.com/yhirose/cpp-httplib.git
+[submodule "external/freetype"]
+	path = external/freetype
+	url = https://github.com/freetype/freetype.git
