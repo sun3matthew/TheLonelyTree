@@ -59,7 +59,6 @@ void LeafManager::writeLeafData(LeafKey key, glm::vec3 point, glm::vec3 directio
     leafSet->leafData[key.LeafIdx].direction = direction;
 }
 
-#include <iostream>
 void LeafManager::drawCall(Shader* shader){
     shader->setMat4("model", modelMatrix);
     shader->setInt("numLeafTypes", leafSets.size());

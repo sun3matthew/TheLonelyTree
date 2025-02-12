@@ -68,8 +68,11 @@ TheLonelyTree::TheLonelyTree()
         new Shader("shadowMap", "../resources/shaders/shadowMap.vert", "../resources/shaders/shadowMap.frag",
             std::vector<std::string>{"dirLightCamera", "model", "meshTextures"}));
     RenderManager::instance.addShader(
-        new Shader("treeShadowMap", "../resources/shaders/tree.vert", "../resources/shaders/tree.geom", "../resources/shaders/shadowMap.frag",
-            std::vector<std::string>{"camera, dirLightCamera", "model", "meshTextures"}));
+        new Shader("treeShadowMap", "../resources/shaders/tree.vert", "../resources/shaders/tree_sm.geom", "../resources/shaders/shadowMap.frag",
+            std::vector<std::string>{"camera", "dirLight", "dirLightCamera"}));
+    RenderManager::instance.addShader(
+        new Shader("leafShadowMap", "../resources/shaders/leaf.vert", "../resources/shaders/leaf_sm.geom", "../resources/shaders/shadowMap.frag",
+            std::vector<std::string>{"camera", "dirLight", "dirLightCamera"}));
     
     RenderManager::instance.addShader(
         new Shader("model", "../resources/shaders/model.vert", "../resources/shaders/model.frag",
@@ -173,13 +176,13 @@ void TheLonelyTree::start(){
 
     int seed = 12923952u;
 
-    // Gameobject* world2 = new Gameobject("World");
-    // Mesh* terrainMesh2 = WorldGeneration::createWorld(seed, 60, worldSize, 4, 10);
-    // terrainMesh2->updateTexture(Texture::diffuse(0x50, 0x4D, 0x53));
-    // // terrainMesh2->addShader(FRAME_BUFFER, "model");
-    // terrainMesh2->addShader(SHADOW_BUFFER, "shadowMap");
-    // world2->addComponent(new RenderObjectComponent(terrainMesh2));
-    // addGameobject(world2);
+    Gameobject* world2 = new Gameobject("World");
+    Mesh* terrainMesh2 = WorldGeneration::createWorld(seed, 60, worldSize, 4, 10);
+    terrainMesh2->updateTexture(Texture::diffuse(0x50, 0x4D, 0x53));
+    // terrainMesh2->addShader(FRAME_BUFFER, "model");
+    terrainMesh2->addShader(SHADOW_BUFFER, "shadowMap");
+    world2->addComponent(new RenderObjectComponent(terrainMesh2));
+    addGameobject(world2);
 
     Gameobject* world = new Gameobject("World");
     Mesh* terrainMesh = WorldGeneration::createWorld(seed, 60, worldSize, 4 * 2, 0);
@@ -209,9 +212,9 @@ void TheLonelyTree::start(){
     treeManager->rootBranch()->pushBackTexture(branchDiffuse);
     treeManager->rootBranch()->pushBackTexture(branchNormal);
     treeManager->rootBranch()->addShader(FRAME_BUFFER, "tree");
-    treeManager->rootBranch()->addShader(SHADOW_BUFFER, "tree");
+    treeManager->rootBranch()->addShader(SHADOW_BUFFER, "treeShadowMap");
     treeManager->rootBranch()->getLeafManager()->addShader(FRAME_BUFFER, "leaf");
-    treeManager->rootBranch()->getLeafManager()->addShader(SHADOW_BUFFER, "shadowMap");
+    treeManager->rootBranch()->getLeafManager()->addShader(SHADOW_BUFFER, "leafShadowMap");
     int numNodes = 60;
     for (int i = 0; i < numNodes; i++){
         treeManager->rootBranch()->addNode(entry);
@@ -243,9 +246,9 @@ void TheLonelyTree::start(){
                 newBranch->pushBackTexture(branchDiffuse);
                 newBranch->pushBackTexture(branchNormal);
                 newBranch->addShader(FRAME_BUFFER, "tree");
-                newBranch->addShader(SHADOW_BUFFER, "tree");
+                newBranch->addShader(SHADOW_BUFFER, "treeShadowMap");
                 newBranch->getLeafManager()->addShader(FRAME_BUFFER, "leaf");
-                newBranch->getLeafManager()->addShader(SHADOW_BUFFER, "shadowMap");
+                newBranch->getLeafManager()->addShader(SHADOW_BUFFER, "leafShadowMap");
                 for (int i = 0; i < numNodes; i++)
                     newBranch->addNode(entry);
                 newBranch->recalculateVertices();
@@ -297,11 +300,11 @@ void TheLonelyTree::start(){
     // cube->setPosition(glm::vec3(worldSize/2 - 200, 0, worldSize/2));
     // cube->setScale(glm::vec3(10.0f));
 
-    // Gameobject* grass = new Gameobject("Grass");
-    // Grass* grassMesh = new Grass();
-    // grassMesh->addShader(FRAME_BUFFER, "grass");
-    // grass->addComponent(new RenderObjectComponent(grassMesh));
-    // addGameobject(grass);
+    Gameobject* grass = new Gameobject("Grass");
+    Grass* grassMesh = new Grass();
+    grassMesh->addShader(FRAME_BUFFER, "grass");
+    grass->addComponent(new RenderObjectComponent(grassMesh));
+    addGameobject(grass);
 
     std::string path = "../resources/textures/cubemaps/cloud/";
     std::vector<std::string> faces = {
