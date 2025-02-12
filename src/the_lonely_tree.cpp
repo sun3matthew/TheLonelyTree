@@ -22,6 +22,7 @@
 
 #include <engine/font.h>
 #include <engine/text.h>
+#include <engine/image.h>
 
 #include <world_generation.h>
 #include <leaf_manager.h>
@@ -62,7 +63,10 @@ TheLonelyTree::TheLonelyTree()
         new Shader("screen", "../resources/shaders/screen.vert", "../resources/shaders/screen.frag",
             std::vector<std::string>{"meshTextures"}));
     RenderManager::instance.addShader(
-        new Shader("text", "../resources/shaders/text.vert", "../resources/shaders/text.frag",
+        new Shader("text", "../resources/shaders/ui.vert", "../resources/shaders/text.frag",
+            std::vector<std::string>{}));
+    RenderManager::instance.addShader(
+        new Shader("image", "../resources/shaders/ui.vert", "../resources/shaders/image.frag",
             std::vector<std::string>{}));
 
     RenderManager::instance.addShader(
@@ -240,7 +244,7 @@ void TheLonelyTree::start(){
             numBranches = 4;
             for(int i = 0; i < numBranches; i++){
                 int numNodes = rand() % (10 * depth) + 4;
-                std::cout << "Num Nodes: " << numNodes << std::endl;
+                // std::cout << "Num Nodes: " << numNodes << std::endl;
                 counter++;
 
                 // random node from 0 to numNodes
@@ -326,41 +330,71 @@ void TheLonelyTree::start(){
     skyBox->addComponent(new RenderObjectComponent(skyBoxMesh));
     addGameobject(skyBox);
 
+
+    ui = new Gameobject("UI");
+    ui->active = false;
+    addGameobject(ui);
+
+    Texture* texture = new Texture("../resources/textures/UI/Button.png", TextureType::Diffuse);
+    Gameobject* image = new Gameobject("Image");
+    Image* imageMesh = new Image(texture, glm::vec2(0.1, 0.1), glm::vec2(0.9, 0.9), glm::vec3(1.0f, 1.0f, 1.0f));
+    imageMesh->addShader(FRAME_BUFFER, "image");
+    image->addComponent(new RenderObjectComponent(imageMesh));
+    image->setParent(ui);
+
     Gameobject* text = new Gameobject("Text");
-    Text* textMesh = new Text(font, "The Lonely Tree", glm::vec2(100, 100), 2.0f, glm::vec3(1.0f, 1.0f, 1.0f));
+    textMesh = new Text(font, "The Lonely Tree", glm::vec2(0.2, 0.7), 1.0f, glm::vec3(1.0f, 1.0f, 1.0f));
     textMesh->addShader(FRAME_BUFFER, "text");
     text->addComponent(new RenderObjectComponent(textMesh));
-    addGameobject(text);
+    text->setParent(ui);
 }
 
 void TheLonelyTree::update(){
-    if (Input::getKey(KeyCode::KEY_W))
-        camera->ProcessKeyboard(FORWARD, getDeltaTime());
-    if (Input::getKey(KeyCode::KEY_S))
-        camera->ProcessKeyboard(BACKWARD, getDeltaTime());
-    if (Input::getKey(KeyCode::KEY_A))
-        camera->ProcessKeyboard(LEFT, getDeltaTime());
-    if (Input::getKey(KeyCode::KEY_D))
-        camera->ProcessKeyboard(RIGHT, getDeltaTime());
+    if(!ui->active){
+        if (Input::getKey(KeyCode::KEY_W))
+            camera->ProcessKeyboard(FORWARD, getDeltaTime());
+        if (Input::getKey(KeyCode::KEY_S))
+            camera->ProcessKeyboard(BACKWARD, getDeltaTime());
+        if (Input::getKey(KeyCode::KEY_A))
+            camera->ProcessKeyboard(LEFT, getDeltaTime());
+        if (Input::getKey(KeyCode::KEY_D))
+            camera->ProcessKeyboard(RIGHT, getDeltaTime());
 
-    camera->ProcessMouseScroll(Input::getMouseScroll());
+        camera->ProcessMouseScroll(Input::getMouseScroll());
 
-    glm::vec2 mouseDelta = Input::getMouseDelta();
-    camera->ProcessMouseMovement(-mouseDelta.x, mouseDelta.y);
+        glm::vec2 mouseDelta = Input::getMouseDelta();
+        camera->ProcessMouseMovement(-mouseDelta.x, mouseDelta.y);
+    }else{
+        for (int i = 0; i < (int)KeyCode::MAX_KEYS; i++){
+            if (Input::getKeyDown((KeyCode)i)){
+                entry += KeyCodeToString((KeyCode)i);
+            }
+        }
+        if (Input::getKeyDown(KeyCode::KEY_BACKSPACE)){
+            entry = entry.substr(0, entry.size() - 1);
+        }
+        if (Input::getKeyDown(KeyCode::KEY_ENTER)){
 
-    if (Input::getKeyUp(KeyCode::KEY_SPACE)){
-        Gameobject* gameobject = new Gameobject();
-        gameobject->addComponent(new LightSpot(
-            camera->getGameobject()->getPosition(),
-            glm::vec3(1.0f, 0.09f, 0.032f),
-            numLights,
-            glm::vec3(0.15f, 0.15f, 0.15f),
-            glm::vec3(0.6f, 0.6f, 0.6f),
-            glm::vec3(0.8f, 0.8f, 0.8f)));
-        addGameobject(gameobject);
+            std::string url = "https://7sqvdwegyf.execute-api.us-west-2.amazonaws.com";
+            std::string dataPath = "/default/the-lonely-tree";
+            HttpClient client(url, dataPath);
+        
+            std::string key = "entry";
+            std::string value = entry;
+        
+            client.write(key, value);
 
-        numLights++;
-        RenderManager::instance.getShadersAccepting("pointLights")[0]->setInt("numPointLights", numLights);
+            std::cout << "Entry: " << entry << std::endl;
+            std::cout << "READ: " << client.read(key) << std::endl;
+
+            entry = "";
+        }
+
+        textMesh->setText(entry);
+    }
+
+    if (Input::getKeyUp(KeyCode::KEY_ESCAPE)){
+        ui->active = !ui->active;
     }
     // std::cout << "FPS: " << FPS() << std::endl;
 }

@@ -1,5 +1,8 @@
 #ifndef KEY_CODE_H
 #define KEY_CODE_H
+
+#include <string>
+
 enum class KeyCode {
     KEY_SPACE = 32,
     KEY_APOSTROPHE = 39,  /* ' */
@@ -123,5 +126,91 @@ enum class KeyCode {
     KEY_MENU = 348,
     MAX_KEYS
 };
+
+inline std::string KeyCodeToString(KeyCode keyCode) {
+    switch (keyCode) {
+        case KeyCode::KEY_SPACE: return " ";
+        case KeyCode::KEY_APOSTROPHE: return "'";
+        case KeyCode::KEY_COMMA: return ",";
+        case KeyCode::KEY_MINUS: return "-";
+        case KeyCode::KEY_PERIOD: return ".";
+        case KeyCode::KEY_SLASH: return "/";
+        case KeyCode::KEY_0: return "0";
+        case KeyCode::KEY_1: return "1";
+        case KeyCode::KEY_2: return "2";
+        case KeyCode::KEY_3: return "3";
+        case KeyCode::KEY_4: return "4";
+        case KeyCode::KEY_5: return "5";
+        case KeyCode::KEY_6: return "6";
+        case KeyCode::KEY_7: return "7";
+        case KeyCode::KEY_8: return "8";
+        case KeyCode::KEY_9: return "9";
+        case KeyCode::KEY_SEMICOLON: return ";";
+        case KeyCode::KEY_EQUAL: return "=";
+        case KeyCode::KEY_A: return "A";
+        case KeyCode::KEY_B: return "B";
+        case KeyCode::KEY_C: return "C";
+        case KeyCode::KEY_D: return "D";
+        case KeyCode::KEY_E: return "E";
+        case KeyCode::KEY_F: return "F";
+        case KeyCode::KEY_G: return "G";
+        case KeyCode::KEY_H: return "H";
+        case KeyCode::KEY_I: return "I";
+        case KeyCode::KEY_J: return "J";
+        case KeyCode::KEY_K: return "K";
+        case KeyCode::KEY_L: return "L";
+        case KeyCode::KEY_M: return "M";
+        case KeyCode::KEY_N: return "N";
+        case KeyCode::KEY_O: return "O";
+        case KeyCode::KEY_P: return "P";
+        case KeyCode::KEY_Q: return "Q";
+        case KeyCode::KEY_R: return "R";
+        case KeyCode::KEY_S: return "S";
+        case KeyCode::KEY_T: return "T";
+        case KeyCode::KEY_U: return "U";
+        case KeyCode::KEY_V: return "V";
+        case KeyCode::KEY_W: return "W";
+        case KeyCode::KEY_X: return "X";
+        case KeyCode::KEY_Y: return "Y";
+        case KeyCode::KEY_Z: return "Z";
+        case KeyCode::KEY_LEFT_BRACKET: return "[";
+        case KeyCode::KEY_BACKSLASH: return "\\";
+        case KeyCode::KEY_RIGHT_BRACKET: return "]";
+        case KeyCode::KEY_GRAVE_ACCENT: return "`";
+        case KeyCode::KEY_ESCAPE: return "";
+        case KeyCode::KEY_ENTER: return "";
+        case KeyCode::KEY_TAB: return "";
+        case KeyCode::KEY_BACKSPACE: return "";
+        case KeyCode::KEY_INSERT: return "";
+        case KeyCode::KEY_DELETE: return "";
+        case KeyCode::KEY_RIGHT: return "";
+        case KeyCode::KEY_LEFT: return "";
+        case KeyCode::KEY_DOWN: return "";
+        case KeyCode::KEY_UP: return "";
+        case KeyCode::KEY_F1: return "";
+        case KeyCode::KEY_F2: return "";
+        case KeyCode::KEY_F3: return "";
+        case KeyCode::KEY_F4: return "";
+        case KeyCode::KEY_F5: return "";
+        case KeyCode::KEY_F6: return "";
+        case KeyCode::KEY_F7: return "";
+        case KeyCode::KEY_F8: return "";
+        case KeyCode::KEY_F9: return "";
+        case KeyCode::KEY_F10: return "";
+        case KeyCode::KEY_F11: return "";
+        case KeyCode::KEY_F12: return "";
+        case KeyCode::KEY_LEFT_SHIFT: return "";
+        case KeyCode::KEY_RIGHT_SHIFT: return "";
+        case KeyCode::KEY_LEFT_CONTROL: return "";
+        case KeyCode::KEY_RIGHT_CONTROL: return "";
+        case KeyCode::KEY_LEFT_ALT: return "";
+        case KeyCode::KEY_RIGHT_ALT: return "";
+        case KeyCode::KEY_LEFT_SUPER: return "";
+        case KeyCode::KEY_RIGHT_SUPER: return "";
+        case KeyCode::KEY_MENU: return "";
+        default: return "";
+    }
+}
+
 
 #endif // KEY_CODE_H

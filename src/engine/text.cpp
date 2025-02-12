@@ -1,8 +1,5 @@
 #include <engine/text.h>
-
 #include <glad/glad.h>
-#include <glm/gtc/matrix_transform.hpp>
-
 #include <engine/glfw_wrapper.h>
 
 Text::Text(Font* font, std::string text, glm::vec2 position, float scale, glm::vec3 color)
@@ -27,16 +24,14 @@ Text::~Text()
 
 void Text::drawCall(Shader* shader)
 {
-    shader->use();
+    UIRenderObject::drawCall(shader);
+
     shader->setVec3("textColor", color);
 
     glBindVertexArray(VAO);
 
-    glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(GLFWWrapper::width), 0.0f, static_cast<float>(GLFWWrapper::height));
-    shader->setMat4("projection", projection);
-
     std::string::const_iterator c;
-    glm::vec2 currentPosition = position;
+    glm::vec2 currentPosition = position * glm::vec2(GLFWWrapper::width, GLFWWrapper::height);
     for (c = text.begin(); c != text.end(); c++)
     {
         Character ch = font->Characters[*c];

@@ -6,6 +6,7 @@
 #include <engine/camera.h>
 
 #include <engine/font.h>
+#include <engine/text.h>
 
 #include <vector>
 #include <list>
@@ -29,6 +30,11 @@ class TheLonelyTree : public GLFWWrapper{
 
         TreeManager* treeManager;
         Font* font;
+
+        Gameobject* ui;
+        Text* textMesh;
+
+        std::string entry;
 };  
 
 #endif

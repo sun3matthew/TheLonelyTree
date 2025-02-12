@@ -2,11 +2,12 @@
 #define TEXT_H
 
 #include <engine/font.h>
-#include <engine/render_object.h>
 #include <string>
 #include <glm/glm.hpp>
 
-class Text : public RenderObject
+#include <engine/ui_render_object.h>
+
+class Text : public UIRenderObject
 {
 public:
     Text(Font* font, std::string text, glm::vec2 position, float scale, glm::vec3 color);
