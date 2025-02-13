@@ -36,6 +36,7 @@ class TheLonelyTree : public GLFWWrapper{
         Text* textMesh;
 
         std::string entry;
+        std::string steamUsername;
 };  
 
 #endif

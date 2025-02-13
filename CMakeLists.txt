@@ -65,6 +65,27 @@ else ()
     target_link_libraries(${PROJECT_NAME} PRIVATE OpenSSL::SSL)
 endif ()
 
+# Add Steamworks SDK
+set(STEAMWORKS_DIR ${CMAKE_SOURCE_DIR}/external/steamworks)
+include_directories(${STEAMWORKS_DIR}/public)
+if (APPLE)
+    set(STEAM_LIB_PATH ${STEAMWORKS_DIR}/redistributable_bin/osx/libsteam_api.dylib)
+    target_link_libraries(${PROJECT_NAME} PRIVATE ${STEAM_LIB_PATH})
+
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy ${STEAM_LIB_PATH} $<TARGET_FILE_DIR:${PROJECT_NAME}>
+    )
+elseif (UNIX)
+    target_link_libraries(${PROJECT_NAME} PRIVATE ${STEAMWORKS_DIR}/redistributable_bin/linux64/libsteam_api.so)
+endif()
+
+set(STEAM_APPID_PATH ${CMAKE_SOURCE_DIR}/steam_appid.txt)
+set(STEAM_APPID_DEST ${CMAKE_BINARY_DIR}/steam_appid.txt)
+add_custom_target(copy_steam_appid ALL
+    COMMAND ${CMAKE_COMMAND} -E copy ${STEAM_APPID_PATH} ${STEAM_APPID_DEST}
+)
+add_dependencies(${PROJECT_NAME} copy_steam_appid)
+
 add_library(glad STATIC external/glad/src/glad.c)
 target_include_directories(glad PUBLIC external/glad/include)
 target_link_libraries(${PROJECT_NAME} PRIVATE glad)

@@ -35,6 +35,8 @@
 #include <iomanip>
 #include <ctime>
 
+#include <steam/steam_api.h>
+
 std::string getCurrentDateTime() {
     // Get the current time
     auto now = std::chrono::system_clock::now();
@@ -108,6 +110,14 @@ TheLonelyTree::TheLonelyTree()
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     font = new Font("../resources/fonts/arial.ttf", 48);
+
+    if (SteamAPI_Init()) {
+        // std::cout << "Hello, Steam! User: " << SteamFriends()->GetPersonaName() << std::endl;
+        steamUsername = SteamFriends()->GetPersonaName();
+        SteamAPI_Shutdown();
+    }else{
+        std::cerr << "Failed to initialize Steam API!" << std::endl;
+    }
 }
 
 TheLonelyTree::~TheLonelyTree(){
@@ -346,7 +356,13 @@ void TheLonelyTree::start(){
     textMesh = new Text(font, "The Lonely Tree", glm::vec2(0.2, 0.75), glm::vec2(0.8, 0.25), 1.0f, glm::vec3(1.0f, 1.0f, 1.0f));
     textMesh->addShader(FRAME_BUFFER, "text");
     text->addComponent(new RenderObjectComponent(textMesh));
-    text->setParent(ui);
+
+    std::cout << "Steam Username: " << steamUsername << std::endl;
+    Gameobject* text2 = new Gameobject("Text");
+    Text* textMesh2 = new Text(font, steamUsername, glm::vec2(0.0, 0.0), glm::vec2(0.8, 0.25), 1.0f, glm::vec3(1.0f, 1.0f, 1.0f));
+    textMesh2->addShader(FRAME_BUFFER, "text");
+    text2->addComponent(new RenderObjectComponent(textMesh2));
+    text2->setParent(ui);
 }
 
 void TheLonelyTree::update(){
@@ -367,7 +383,7 @@ void TheLonelyTree::update(){
         glm::vec2 mouseDelta = Input::getMouseDelta();
         camera->ProcessMouseMovement(-mouseDelta.x, mouseDelta.y);
     }else{
-        grass->active = false;
+        // grass->active = false;
         
         for (int i = 0; i < (int)KeyCode::MAX_KEYS; i++){
             if (Input::getKeyDown((KeyCode)i)){
