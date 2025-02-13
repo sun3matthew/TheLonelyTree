@@ -2,8 +2,8 @@
 #include <glad/glad.h>
 #include <engine/glfw_wrapper.h>
 
-Text::Text(Font* font, std::string text, glm::vec2 position, float scale, glm::vec3 color)
-    : font(font), text(text), position(position), scale(scale), color(color)
+Text::Text(Font* font, std::string text, glm::vec2 min, glm::vec2 max, float scale, glm::vec3 color)
+    : font(font), text(text), min(min), max(max), scale(scale), color(color)
 {
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
@@ -22,6 +22,7 @@ Text::~Text()
     glDeleteBuffers(1, &VBO);
 }
 
+#include <iostream>
 void Text::drawCall(Shader* shader)
 {
     UIRenderObject::drawCall(shader);
@@ -31,10 +32,19 @@ void Text::drawCall(Shader* shader)
     glBindVertexArray(VAO);
 
     std::string::const_iterator c;
-    glm::vec2 currentPosition = position * glm::vec2(GLFWWrapper::width, GLFWWrapper::height);
+    glm::vec2 currentPosition = min * glm::vec2(GLFWWrapper::width, GLFWWrapper::height);
+    glm::vec2 maxPosition = max * glm::vec2(GLFWWrapper::width, GLFWWrapper::height);
+
+    float lineSpacing = 0.03 * GLFWWrapper::height;
+
     for (c = text.begin(); c != text.end(); c++)
     {
         Character ch = font->Characters[*c];
+
+        if (currentPosition.x > maxPosition.x){
+            currentPosition.x = min.x * GLFWWrapper::width;
+            currentPosition.y -= (lineSpacing) * scale;
+        }
 
         float xpos = currentPosition.x + ch.Bearing.x * scale;
         float ypos = currentPosition.y - (ch.Size.y - ch.Bearing.y) * scale;
@@ -72,8 +82,9 @@ void Text::setText(std::string text){
     this->text = text;
 }
 
-void Text::setPosition(glm::vec2 position){
-    this->position = position;
+void Text::setPosition(glm::vec2 min, glm::vec2 max){
+    this->min = min;
+    this->max = max;
 }
 
 void Text::setColor(glm::vec3 color){

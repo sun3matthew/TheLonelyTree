@@ -308,7 +308,7 @@ void TheLonelyTree::start(){
     // cube->setPosition(glm::vec3(worldSize/2 - 200, 0, worldSize/2));
     // cube->setScale(glm::vec3(10.0f));
 
-    Gameobject* grass = new Gameobject("Grass");
+    grass = new Gameobject("Grass");
     Grass* grassMesh = new Grass();
     grassMesh->addShader(FRAME_BUFFER, "grass");
     grass->addComponent(new RenderObjectComponent(grassMesh));
@@ -343,7 +343,7 @@ void TheLonelyTree::start(){
     image->setParent(ui);
 
     Gameobject* text = new Gameobject("Text");
-    textMesh = new Text(font, "The Lonely Tree", glm::vec2(0.2, 0.7), 1.0f, glm::vec3(1.0f, 1.0f, 1.0f));
+    textMesh = new Text(font, "The Lonely Tree", glm::vec2(0.2, 0.75), glm::vec2(0.8, 0.25), 1.0f, glm::vec3(1.0f, 1.0f, 1.0f));
     textMesh->addShader(FRAME_BUFFER, "text");
     text->addComponent(new RenderObjectComponent(textMesh));
     text->setParent(ui);
@@ -351,6 +351,8 @@ void TheLonelyTree::start(){
 
 void TheLonelyTree::update(){
     if(!ui->active){
+        grass->active = true;
+
         if (Input::getKey(KeyCode::KEY_W))
             camera->ProcessKeyboard(FORWARD, getDeltaTime());
         if (Input::getKey(KeyCode::KEY_S))
@@ -365,11 +367,19 @@ void TheLonelyTree::update(){
         glm::vec2 mouseDelta = Input::getMouseDelta();
         camera->ProcessMouseMovement(-mouseDelta.x, mouseDelta.y);
     }else{
+        grass->active = false;
+        
         for (int i = 0; i < (int)KeyCode::MAX_KEYS; i++){
             if (Input::getKeyDown((KeyCode)i)){
-                entry += KeyCodeToString((KeyCode)i);
+                std::string key = KeyCodeToString((KeyCode)i);
+                if (!Input::getKey(KeyCode::KEY_LEFT_SHIFT)){
+                    if(key[0] >= 'A' && key[0] <= 'Z')
+                        key[0] = std::tolower(key[0]);
+                }
+                entry += key;
             }
         }
+
         if (Input::getKeyDown(KeyCode::KEY_BACKSPACE)){
             entry = entry.substr(0, entry.size() - 1);
         }
@@ -382,12 +392,14 @@ void TheLonelyTree::update(){
             std::string key = "entry";
             std::string value = entry;
         
-            client.write(key, value);
+            int val = client.write(key, value);
+            if(!val){
+                std::cout << "Write failed" << std::endl;
+            }
 
-            std::cout << "Entry: " << entry << std::endl;
             std::cout << "READ: " << client.read(key) << std::endl;
 
-            entry = "";
+            // entry = "";
         }
 
         textMesh->setText(entry);

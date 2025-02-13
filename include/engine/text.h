@@ -10,14 +10,14 @@
 class Text : public UIRenderObject
 {
 public:
-    Text(Font* font, std::string text, glm::vec2 position, float scale, glm::vec3 color);
+    Text(Font* font, std::string text, glm::vec2 min, glm::vec2 max, float scale, glm::vec3 color);
     ~Text();
 
     void drawCall(Shader*) override;
 
     void updateFont(Font* font);
     void setText(std::string text);
-    void setPosition(glm::vec2 position);
+    void setPosition(glm::vec2 min, glm::vec2 max);
     void setColor(glm::vec3 color);
     void setScale(float scale);
 private:
@@ -25,7 +25,7 @@ private:
 
     std::string text;
 
-    glm::vec2 position;
+    glm::vec2 min, max;
     glm::vec3 color;
     float scale;
 

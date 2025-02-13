@@ -32,6 +32,7 @@ class TheLonelyTree : public GLFWWrapper{
         Font* font;
 
         Gameobject* ui;
+        Gameobject* grass;
         Text* textMesh;
 
         std::string entry;
