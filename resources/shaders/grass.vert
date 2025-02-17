@@ -16,7 +16,7 @@ out float clumpColor;
 out vec2 facing;
 out vec3 tipPosition;
 out vec3 bezierPoint;
-out vec3 debugColor;
+// out vec3 debugColor;
 
 out float perlinValue;
 
@@ -60,6 +60,8 @@ void main(){
     vec2 texCoords = vec2(aPos.x/3048, aPos.z/3048) - universalDirection * (time / 12);
     float perlin = texture(perlin_lane, texCoords).r;
     perlinValue = perlin;
+
+    // debugColor = vec3(perlin);
     // perlinValue = 0.0;
 
     vec2 clumpDirection = normalize(vec2(2*random(hash(minX, minY / 2)) - 1, 2*random(hash(minX + 3.3, minY)) - 1));

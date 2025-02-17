@@ -48,6 +48,7 @@ Texture::Texture(const char* path, TextureType textureType) : type(textureType){
 
     // target, mipmap level, internal format, width, height, 0, format, type, data
     unsigned char *data = stbi_load(path, &width, &height, &nChannels, 0);
+    depth = 1;
     if(data){
         if (nChannels == 3){
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
@@ -72,7 +73,7 @@ Texture::Texture(const char* path, TextureType textureType) : type(textureType){
 }
 
 Texture::Texture(const unsigned char* data, int w, int h, int nC, TextureType textureType, bool generateMipMap)
-    : width(w), height(h), nChannels(nC), type(textureType)
+    : width(w), height(h), depth(1), nChannels(nC), type(textureType)
 {
     glGenTextures(1, &ID);  
     glBindTexture(GL_TEXTURE_2D, ID);
@@ -102,8 +103,31 @@ Texture::Texture(const unsigned char* data, int w, int h, int nC, TextureType te
     glBindTexture(GL_TEXTURE_2D, 0);
 } 
 
+Texture::Texture(const unsigned char* data, int w, int h, int d, int nC, TextureType textureType)
+    : width(w), height(h), depth(d), nChannels(nC), type(textureType)
+{
+    glGenTextures(1, &ID);  
+    glBindTexture(GL_TEXTURE_3D, ID);
+
+    if (nChannels == 3){
+        glTexImage3D(GL_TEXTURE_3D, 0, GL_RGB, width, height, depth, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+    }else if (nChannels == 4){
+        glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA, width, height, depth, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+    }else if (nChannels == 1){
+        glTexImage3D(GL_TEXTURE_3D, 0, GL_RED, width, height, depth, 0, GL_RED, GL_UNSIGNED_BYTE, data);
+    }
+
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_MIRRORED_REPEAT);
+
+    glBindTexture(GL_TEXTURE_3D, 0);
+} 
+
 Texture::Texture(int w, int h, unsigned int channelType, unsigned int channelCompType, TextureType textureType) 
-    : width(w), height(h), nChannels(-1), type(textureType)
+    : width(w), height(h), depth(1), nChannels(-1), type(textureType)
 {
 
     glGenTextures(1, &ID);
@@ -130,10 +154,10 @@ Texture::Texture(std::vector<std::string> faces)
     glGenTextures(1, &ID);
     glBindTexture(GL_TEXTURE_CUBE_MAP, ID);
 
-    int width, height, nrChannels;
+    depth = 1;
     for (unsigned int i = 0; i < faces.size(); i++)
     {
-        unsigned char *data = stbi_load(faces[i].c_str(), &width, &height, &nrChannels, 0);
+        unsigned char *data = stbi_load(faces[i].c_str(), &width, &height, &nChannels, 0);
         if (data)
         {
             glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 
@@ -158,14 +182,16 @@ Texture::Texture(std::vector<std::string> faces)
 
 
 void Texture::bind(int textureUnit){
-    // TODO seperate CubeMaps out of Texture
-    if(type == TextureType::CubeMap){
-        glActiveTexture(GL_TEXTURE0 + textureUnit);
-        glBindTexture(GL_TEXTURE_CUBE_MAP, ID);
-        return;
-    }
     glActiveTexture(GL_TEXTURE0 + textureUnit);
-    glBindTexture(GL_TEXTURE_2D, ID);
+
+    if(type == TextureType::CubeMap){
+        glBindTexture(GL_TEXTURE_CUBE_MAP, ID);
+    }else if(depth > 1){
+        glBindTexture(GL_TEXTURE_3D, ID);
+    }else{
+        glBindTexture(GL_TEXTURE_2D, ID);
+    }
+
     this->textureUnit = textureUnit;
 }
 
