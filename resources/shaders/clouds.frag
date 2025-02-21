@@ -1,7 +1,7 @@
 #version 330 core
 
-#define INFINITY 2000.0
-#define HEIGHT 200.0
+#define INFINITY 5000.0
+#define HEIGHT 5000.0
 #define STEPS 40
 #define SUN_STEPS 4
 
@@ -37,7 +37,7 @@ float remap(float value, float low1, float high1, float low2, float high2) {
 }
 
 float sampleDensity(vec3 samplePoint){
-    float noise = texture(td_noise, vec3((samplePoint.x - time * 0.005) * 0.5, samplePoint.y, samplePoint.z * 0.5)).r;
+    float noise = texture(td_noise, vec3((samplePoint.x - time * 0.005) * 0.2, samplePoint.y * 0.2, samplePoint.z * 0.2)).r;
     if (noise < 0.55){
         noise = 0.0;
     }else{
@@ -160,18 +160,20 @@ void main(){
         if(blendOut > 1.0) blendOut = 1.0;
 
         // FragColor = vec4(color, 1.0);
-        FragColor = vec4(mix(backGround, color, blendOut), 1.0);
+        // FragColor = vec4(mix(backGround, color, blendOut), 1.0);
 
 
         // FragColor = vec4(vec3(density), 1.0);
         // FragColor = vec4(backGround * (1.0 - density), 1.0);
 
 
+        intersection /= INFINITY;
+        intersection *= 10000.0;
+        float noise = texture(td_noise, vec3(intersection.x, time / 100, intersection.z)).r;
+        FragColor = vec4(vec3(noise), 1.0);
+
         // intersection /= INFINITY;
         // intersection *= 1000.0;
-        // float noise = texture(td_noise, vec3(intersection.x, time / 100, intersection.z)).r;
-        // FragColor = vec4(vec3(noise), 1.0);
-
         // FragColor = vec4(vec3(intersection.x / INFINITY * 100, 1.0, intersection.z / INFINITY * 100), 1.0);
 
     // }else{

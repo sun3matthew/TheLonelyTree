@@ -127,7 +127,8 @@ TheLonelyTree::TheLonelyTree()
 TheLonelyTree::~TheLonelyTree(){
     // delete camera; //! Do not delete, just a reference to a component
     delete font;
-    delete treeManager;
+    if (treeManager)
+        delete treeManager;
 }
 
 void TheLonelyTree::start(){
@@ -213,7 +214,6 @@ void TheLonelyTree::start(){
     terrainMesh->addShader(SHADOW_BUFFER, "shadowMap");
     world->addComponent(new RenderObjectComponent(terrainMesh));
     addGameobject(world);
-
 
     unsigned int numLeafTypes = 2;
 
@@ -323,9 +323,9 @@ void TheLonelyTree::start(){
     // cube->setScale(glm::vec3(10.0f));
 
     grass = new Gameobject("Grass");
-    // Grass* grassMesh = new Grass();
-    // grassMesh->addShader(FRAME_BUFFER, "grass");
-    // grass->addComponent(new RenderObjectComponent(grassMesh));
+    Grass* grassMesh = new Grass();
+    grassMesh->addShader(FRAME_BUFFER, "grass");
+    grass->addComponent(new RenderObjectComponent(grassMesh));
     addGameobject(grass);
 
     std::string path = "../resources/textures/cubemaps/cloud/";
@@ -337,7 +337,7 @@ void TheLonelyTree::start(){
         path + "front.jpg",
         path + "back.jpg"
     };
-    Texture tdNoise = NoiseGeneration::GetCloudNoise(seed, 128, 0.11f);
+    Texture tdNoise = NoiseGeneration::GetCloudNoise(seed, 128);
     Gameobject* skyBox = new Gameobject("SkyBox");
     Mesh* skyBoxMesh = MeshGeneration::SkyMap();
     skyBoxMesh->addShader(FRAME_BUFFER, "skyBox");

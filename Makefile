@@ -5,7 +5,7 @@ BUILD_DIR_OSX = $(BUILD_DIR)/osx
 BUILD_DIR_WIN = $(BUILD_DIR)/win
 
 # Default build type (Release or Debug)
-BUILD_TYPE ?= Debug
+BUILD_TYPE ?= Release
 
 PROJECT_NAME = TheLonelyTree
 
@@ -16,10 +16,13 @@ APP_CONTENTS = $(APP_BUNDLE)/Contents
 APP_MACOS = $(APP_CONTENTS)/MacOS
 APP_RESOURCES = $(APP_CONTENTS)/Resources
 
+run-lldb: BUILD_TYPE = debug
+
 # Default target to configure and build
 all: build
 
 # Configure the project (this will invoke CMake with the build type)
+# cd $(BUILD_DIR) && cmake -G Ninja -DCMAKE_BUILD_TYPE=$(BUILD_TYPE) ..
 configure:
 	mkdir -p $(BUILD_DIR)
 	cd $(BUILD_DIR) && cmake -G Ninja -DCMAKE_BUILD_TYPE=$(BUILD_TYPE) ..
@@ -38,14 +41,6 @@ run-lldb: build
 # Clean the build files
 clean:
 	rm -rf $(BUILD_DIR)
-
-# Build a Release version
-release:
-	$(MAKE) BUILD_TYPE=Release
-
-# Build a Debug version
-debug:
-	$(MAKE) BUILD_TYPE=Debug
 
 build-osx:
 	mkdir -p $(BUILD_DIR_OSX)

@@ -3,13 +3,31 @@
 
 #include <glad/glad.h>
 
+#include <iostream>
+
+// !!! CODE OF SHAME
+// assert(!FT_Init_FreeType(&ft));
+// assert(!FT_New_Face(ft, filepath.c_str(), 0, &face));
+// !!! Asserts are not included in release
+
 Font::Font(std::string filepath, int size)
 {
     FT_Face face;
     FT_Library ft;
 
-    assert(!FT_Init_FreeType(&ft));
-    assert(!FT_New_Face(ft, filepath.c_str(), 0, &face));
+    bool success = FT_Init_FreeType(&ft);
+    if (success != 0)
+    {
+        std::cerr << "ERROR::FREETYPE: Could not init FreeType Library" << std::endl;
+        return;
+    }
+
+    success = FT_New_Face(ft, filepath.c_str(), 0, &face);
+    if (success != 0)
+    {
+        std::cerr << "ERROR::FREETYPE: Failed to load font" << std::endl;
+        return;
+    }
 
     FT_Set_Pixel_Sizes(face, 0, size);
 

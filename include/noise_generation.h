@@ -32,43 +32,47 @@ public:
         return new Texture(data, width, height, 1, TextureType::PerlinLane);
     }
 
-    static Texture GetCloudNoise(unsigned int seed, int resolution, float zoom){
-        siv::PerlinNoise seededPerlin{seed};
+    static Texture GetCloudNoise(unsigned int seed, int resolution){
+        unsigned char* perlinData = TDPerlinNoise(seed, resolution, 0.03f, 8);
+        unsigned char* worleyData = TDWorleyNoise(seed, resolution, resolution / 4.0f, 1, 0.5f);
 
-        // unsigned char* perlinData = TDPerlinNoise(seed, resolution, zoom);
-        unsigned char* worleyData = TDWorleyNoise(seed, resolution, 20.0f);
-        unsigned char* worleyData2 = TDWorleyNoise(seed + 4, resolution, 10.0f);
-        unsigned char* worleyData3 = TDWorleyNoise(seed + 2, resolution, 5.0f);
+        unsigned char* worleyData1 = TDWorleyNoise(seed + 491, resolution, resolution / 20.0f, 1, 0.5f);
+        unsigned char* worleyData2 = TDWorleyNoise(seed + 1033, resolution, resolution / 40.0f, 1, 0.5f);
+        unsigned char* worleyData3 = TDWorleyNoise(seed + 4212, resolution, resolution / 40.0f, 1, 0.5f);
 
-        unsigned char data[resolution * resolution * resolution];
+        unsigned char data[resolution * resolution * resolution * 4];
 
         // copy perlin noise to 3D texture
         int i = 0;
+        int idx = 0;
         for(int z = 0; z < resolution; z++){
             for(int y = 0; y < resolution; y++){
                 for(int x = 0; x < resolution; x++){
-                    // data[i] = (worleyData[i] + perlinData[i]) / 2;
-                    // data[i] = (0xff - worleyData[i] + perlinData[i]) / 2;
-                    // data[i] = (worleyData[i] + worleyData2[i]) / 2;
-                    float r = 1.0f - worleyData[i] / 255.0f;
-                    float g = 1.0f - worleyData2[i] / 255.0f;
-                    float b = 1.0f - worleyData3[i] / 255.0f;
+                    // data[i] = (0xff - worleyData[idx]) * perlinData[idx] / 0xff;
+                    data[i] = perlinData[idx];
+                    data[i + 1] = 0xff - worleyData1[idx];
+                    data[i + 2] = 0xff - worleyData2[idx];
+                    data[i + 3] = 0xff - worleyData3[idx];
 
-                    data[i] = (unsigned char)(0xff * (r * 0.5f + g * 0.3f + b * 0.2f));
-                    i++;
+                    i += 4;
+                    idx++;
                 }
             }
         }
 
-        // delete[] perlinData;
+
+
+
+        delete[] perlinData;
         delete[] worleyData;
+        delete[] worleyData1;
         delete[] worleyData2;
         delete[] worleyData3;
 
-        return Texture(data, resolution, resolution, resolution, 1, TextureType::TDNoise);
+        return Texture(data, resolution, resolution, resolution, 4, TextureType::TDNoise);
     }
 
-    static unsigned char* TDPerlinNoise(unsigned int seed, int resolution, float zoom){
+    static unsigned char* TDPerlinNoise(unsigned int seed, int resolution, float zoom, int octaves){
         siv::PerlinNoise seededPerlin{seed};
 
         int height = resolution;
@@ -80,7 +84,7 @@ public:
         for (int z = 0; z < depth; z++){
             for(int y = 0; y < height; y++){
                 for(int x = 0; x < width; x++){
-                    data[i] = static_cast<unsigned char>(0xff * seededPerlin.octave3D_01(x * zoom, y * zoom, z * zoom, 2));
+                    data[i] = static_cast<unsigned char>(0xff * seededPerlin.normalizedOctave3D_01(x * zoom, y * zoom, z * zoom, octaves));
                     i++;
                 }
             }
@@ -89,7 +93,7 @@ public:
         return data;
     }
     
-    static unsigned char* TDWorleyNoise(unsigned int seed, int resolution, float cellSize) {
+    static unsigned char* TDWorleyNoise(unsigned int seed, int resolution, float initialFrequency, int octaves, float persistence){
         int width = resolution;
         int height = resolution;
         int depth = resolution;
@@ -98,67 +102,86 @@ public:
         std::mt19937 rng(seed);
         std::uniform_real_distribution<float> dist(0.0f, 1.0f);
     
-        int gridSize = static_cast<int>(std::ceil(resolution / cellSize));
+        // Precompute feature points for each octave
+        std::vector<std::vector<std::vector<std::vector<glm::vec3>>>> allFeaturePoints(octaves);
+        for (int octave = 0; octave < octaves; ++octave) {
+            float frequency = initialFrequency * std::pow(2.0f, octave);
+            float cellSize = resolution / frequency;
+            int gridSize = static_cast<int>(std::ceil(resolution / cellSize));
     
-        std::vector<std::vector<std::vector<glm::vec3>>> featurePoints(gridSize,
-            std::vector<std::vector<glm::vec3>>(gridSize,
-                std::vector<glm::vec3>(gridSize)));
+            allFeaturePoints[octave].resize(gridSize,
+                std::vector<std::vector<glm::vec3>>(gridSize,
+                    std::vector<glm::vec3>(gridSize)));
     
-        // Generate feature points
-        for (int gx = 0; gx < gridSize; gx++) {
-            for (int gy = 0; gy < gridSize; gy++) {
-                for (int gz = 0; gz < gridSize; gz++) {
-                    featurePoints[gx][gy][gz] = glm::vec3(
-                        (gx + dist(rng)) * cellSize,
-                        (gy + dist(rng)) * cellSize,
-                        (gz + dist(rng)) * cellSize
-                    );
+            for (int gx = 0; gx < gridSize; gx++) {
+                for (int gy = 0; gy < gridSize; gy++) {
+                    for (int gz = 0; gz < gridSize; gz++) {
+                        allFeaturePoints[octave][gx][gy][gz] = glm::vec3(
+                            (gx + dist(rng)) * cellSize,
+                            (gy + dist(rng)) * cellSize,
+                            (gz + dist(rng)) * cellSize
+                        );
+                    }
                 }
             }
         }
     
+        // Compute Worley noise with fBm
         int i = 0;
         for (int z = 0; z < depth; z++) {
             for (int y = 0; y < height; y++) {
                 for (int x = 0; x < width; x++) {
-                    float minDist = 1e10f;
+                    float totalNoise = 0.0f;
+                    float amplitude = 1.0f;
+                    float frequency = initialFrequency;
                     glm::vec3 voxelPos(x, y, z);
     
-                    int gx = static_cast<int>(x / cellSize);
-                    int gy = static_cast<int>(y / cellSize);
-                    int gz = static_cast<int>(z / cellSize);
+                    for (int octave = 0; octave < octaves; ++octave) {
+                        float cellSize = resolution / frequency;
+                        int gridSize = static_cast<int>(std::ceil(resolution / cellSize));
     
-                    for (int dx = -1; dx <= 1; dx++) {
-                        for (int dy = -1; dy <= 1; dy++) {
-                            for (int dz = -1; dz <= 1; dz++) {
-                                int neighborX = (gx + dx + gridSize) % gridSize;
-                                int neighborY = (gy + dy + gridSize) % gridSize;
-                                int neighborZ = (gz + dz + gridSize) % gridSize;
+                        int gx = static_cast<int>(x / cellSize);
+                        int gy = static_cast<int>(y / cellSize);
+                        int gz = static_cast<int>(z / cellSize);
     
-                                glm::vec3 point = featurePoints[neighborX][neighborY][neighborZ];
+                        float minDist = std::numeric_limits<float>::max();
     
-                                // Compute wrapped distance
-                                glm::vec3 wrappedDist = voxelPos - point;
-                                wrappedDist.x -= resolution * std::round(wrappedDist.x / resolution);
-                                wrappedDist.y -= resolution * std::round(wrappedDist.y / resolution);
-                                wrappedDist.z -= resolution * std::round(wrappedDist.z / resolution);
+                        for (int dx = -1; dx <= 1; dx++) {
+                            for (int dy = -1; dy <= 1; dy++) {
+                                for (int dz = -1; dz <= 1; dz++) {
+                                    int neighborX = (gx + dx + gridSize) % gridSize;
+                                    int neighborY = (gy + dy + gridSize) % gridSize;
+                                    int neighborZ = (gz + dz + gridSize) % gridSize;
     
-                                float dist = glm::length(wrappedDist);
+                                    glm::vec3 point = allFeaturePoints[octave][neighborX][neighborY][neighborZ];
     
-                                if (dist < minDist) {
-                                    minDist = dist;
+                                    glm::vec3 wrappedDist = voxelPos - point;
+                                    wrappedDist.x -= resolution * std::round(wrappedDist.x / resolution);
+                                    wrappedDist.y -= resolution * std::round(wrappedDist.y / resolution);
+                                    wrappedDist.z -= resolution * std::round(wrappedDist.z / resolution);
+    
+                                    float dist = glm::dot(wrappedDist, wrappedDist);
+                                    if (dist < minDist) {
+                                        minDist = dist;
+                                    }
                                 }
                             }
                         }
+    
+                        minDist = std::sqrt(minDist);
+                        totalNoise += (minDist / cellSize) * amplitude;
+    
+                        frequency *= 2.0f;
+                        amplitude *= persistence;
                     }
     
-                    unsigned int value = static_cast<unsigned int>((minDist / cellSize) * 255);
-                    data[i] = static_cast<unsigned char>(std::min(value, 255u));
-                    i++;
+                    // Normalize and store the result
+                    unsigned int value = static_cast<unsigned int>((totalNoise / (2.0f - 1.0f)) * 255);
+                    data[i++] = static_cast<unsigned char>(std::min(value, 255u));
                 }
             }
         }
-        
+    
         return data;
     }
 private:
