@@ -33,12 +33,12 @@ public:
     }
 
     static Texture GetCloudNoise(unsigned int seed, int resolution){
-        unsigned char* perlinData = TDPerlinNoise(seed, resolution, 0.03f, 8);
-        unsigned char* worleyData = TDWorleyNoise(seed, resolution, resolution / 4.0f, 1, 0.5f);
+        unsigned char* perlinData = TDPerlinNoise(seed, resolution, 0.06f, 8);
+        unsigned char* worleyData = TDWorleyNoise(seed, resolution, resolution / 10.0f, 4, 0.3f);
 
-        unsigned char* worleyData1 = TDWorleyNoise(seed + 491, resolution, resolution / 20.0f, 1, 0.5f);
-        unsigned char* worleyData2 = TDWorleyNoise(seed + 1033, resolution, resolution / 40.0f, 1, 0.5f);
-        unsigned char* worleyData3 = TDWorleyNoise(seed + 4212, resolution, resolution / 40.0f, 1, 0.5f);
+        unsigned char* worleyData1 = TDWorleyNoise(seed + 491, resolution, resolution / 16.0f, 4, 0.3f);
+        unsigned char* worleyData2 = TDWorleyNoise(seed + 1033, resolution, resolution / 8.0f, 3, 0.3f);
+        unsigned char* worleyData3 = TDWorleyNoise(seed + 4212, resolution, resolution / 4.0f, 2, 0.3f);
 
         unsigned char data[resolution * resolution * resolution * 4];
 
@@ -48,8 +48,11 @@ public:
         for(int z = 0; z < resolution; z++){
             for(int y = 0; y < resolution; y++){
                 for(int x = 0; x < resolution; x++){
-                    // data[i] = (0xff - worleyData[idx]) * perlinData[idx] / 0xff;
-                    data[i] = perlinData[idx];
+                    float worleyValue = (0xff - worleyData[idx]) / 255.0f;
+                    float perlinValue = perlinData[idx] / 255.0f;
+                    float perlinWorleyValue = 0.5f * worleyValue + 0.5f * perlinValue;
+                    data[i] = static_cast<unsigned char>(0xff * perlinWorleyValue);
+
                     data[i + 1] = 0xff - worleyData1[idx];
                     data[i + 2] = 0xff - worleyData2[idx];
                     data[i + 3] = 0xff - worleyData3[idx];
@@ -84,7 +87,7 @@ public:
         for (int z = 0; z < depth; z++){
             for(int y = 0; y < height; y++){
                 for(int x = 0; x < width; x++){
-                    data[i] = static_cast<unsigned char>(0xff * seededPerlin.normalizedOctave3D_01(x * zoom, y * zoom, z * zoom, octaves));
+                    data[i] = static_cast<unsigned char>(0xff * seededPerlin.octave3D_01(x * zoom, y * zoom, z * zoom, octaves));
                     i++;
                 }
             }

@@ -7,6 +7,13 @@
 
 #define W_INFINITY 100000.0
 #define H 0.0001
+
+#define PI 3.14159
+
+#define CLOUD_HEIGHT 50.0
+#define CLOUD_VOLUME 800.0
+#define RADIUS 4000.0
+#define OUTER_RADIUS (RADIUS + CLOUD_VOLUME)
 // #define 
 
 in vec3 TexCoords;
@@ -37,12 +44,13 @@ float remap(float value, float low1, float high1, float low2, float high2) {
 }
 
 float sampleDensity(vec3 samplePoint){
-    float noise = texture(td_noise, vec3((samplePoint.x - time * 0.005) * 0.2, samplePoint.y * 0.2, samplePoint.z * 0.2)).r;
-    if (noise < 0.55){
+    vec4 noiseData = texture(td_noise, vec3((samplePoint.x - time * 0.005), samplePoint.y, samplePoint.z));
+    float noise = noiseData.r * 0.5 + noiseData.g * 0.25 + noiseData.b * 0.125 + noiseData.a * 0.125;
+    if (noise < 0.4){
         noise = 0.0;
     }else{
         // noise = 1.0;
-        noise *= (noise - 0.55) * 84;
+        noise *= (noise - 0.4) * 34;
         
     }
     return noise;
@@ -58,14 +66,33 @@ vec3 waveNormal(float x, float y, float t){
     return normalize(vec3(-dx, 1, -dy));
 }
 
+vec2 sphereIntersection(vec3 rayOrigin, vec3 rayDir, float sphereRadius, float remapMin, float remapMax){
+    float a = dot(rayDir, rayDir);
+    float b = 2.0 * dot(rayOrigin, rayDir);
+    float c = dot(rayOrigin, rayOrigin) - sphereRadius * sphereRadius;
+    float discriminant = b * b - 4.0 * a * c;
+
+    if (discriminant > 0.0) {
+        float t0 = (-b - sqrt(discriminant)) / (2.0 * a);
+        float t1 = (-b + sqrt(discriminant)) / (2.0 * a);
+
+        float tStart = min(t0, t1);
+        if (tStart < 0.0){
+            tStart = max(t0, t1);
+        }
+
+        vec3 localPos = normalize(rayOrigin + rayDir * tStart);
+
+        float theta = atan(localPos.y, localPos.x);
+        float phi = atan(localPos.y, localPos.z);
+        return vec2(remap(theta, remapMin, remapMax, 0.0, 1.0), remap(phi, remapMin, remapMax, 0.0, 1.0));
+    }
+    return vec2(0.0);
+}
+
 void main(){    
     vec3 newCoords = TexCoords;
 
-    // if (TexCoords.y < 0.0){
-    //     newCoords.y = -1.0 * TexCoords.y;
-    // }
-
-    vec3 originRay = vec3(0.0, 0.0, 0.0);
     vec3 originDir = vec3(0.0, 0.0, 0.0);
     if (TexCoords.y < 0.0){
         // Compute intersection with y = 0 plane
@@ -83,37 +110,40 @@ void main(){
 
         // n = vec3(0.0, 1.0, 0.0);
         // compute intersection with y = 1 plane
-        originRay = intersection;
         originDir = normalize(reflect(dir, normalize(n + vec3(0.0, 30.0 * (60 * length(intersection) + 1), 0.0))));
     }else{
         vec3 p1 = vec3(0.0, 0.0, 0.0);
         vec3 p2 = TexCoords * INFINITY;
         vec3 dir = normalize(p2 - p1);
 
-        originRay = p1;
         originDir = dir;
     }
 
+    vec3 rayOrigin = vec3(0.0, RADIUS - CLOUD_HEIGHT, 0.0);
+
+    float innerHorizonAngle = atan(
+        rayOrigin.y, 
+        sqrt(RADIUS * RADIUS - rayOrigin.y * rayOrigin.y)
+    );
+    float outerHorizonAngle = atan(
+        rayOrigin.y,
+        sqrt(OUTER_RADIUS * OUTER_RADIUS - rayOrigin.y * rayOrigin.y)
+    );
+
+
+    vec2 lowerIntersection = sphereIntersection(rayOrigin, originDir, RADIUS, innerHorizonAngle, PI - innerHorizonAngle);
+    vec2 upperIntersection = sphereIntersection(rayOrigin, originDir, OUTER_RADIUS, outerHorizonAngle, PI - outerHorizonAngle);
+
+    // vec4 noiseData = texture(td_noise, vec3(upperIntersection.x, time / 100, upperIntersection.y));
+    // float fbmNoise = noiseData.r * 0.5 + noiseData.g * 0.25 + noiseData.b * 0.125 + noiseData.a * 0.125;
+
+    // FragColor = vec4(vec3(fbmNoise), 1.0);
+    // return;
+
     // if (TexCoords.y > 0.0){
-        // Compute intersection with y = height plane
-        // vec3 p1 = viewPos;
-        vec3 p1 = originRay;
-        vec3 dir = originDir;
-        float t = (HEIGHT - p1.y) / dir.y;
-        vec3 intersection = p1 + t * dir;
-
-        // vec3 p2 = (newCoords) * INFINITY;
-        // float t = (HEIGHT) / p2.y;
-        // vec3 intersection = t * p2;
-
-        intersection /= INFINITY;
-
-
-
-        // intersection *= 4.0;
-
-
-        vec3 samplePoint = intersection;
+        vec3 samplePoint = vec3(lowerIntersection.x, 0.0, lowerIntersection.y);
+        // vec3 dir = normalize(vec3(upperIntersection.x, 1.0, upperIntersection.y) - samplePoint);
+        vec3 dir = vec3(upperIntersection.x, 1.0, upperIntersection.y) - samplePoint;
         float stepSize = 1 / float(STEPS);
         float density = 0.0;
 
@@ -122,7 +152,9 @@ void main(){
 
         vec3 backGround = vec3(233.0 / 255.0, 172.0 / 255.0, 99.0 / 255.0) * 0.7;
         // vec3 lightPos = vec3(projection * view * vec4(normalize(vec3(cos(time * 0.55), sin(time * 0.55), 0)), 1.0));
-        vec3 lightPos = vec3(cos(time * 0.04), sin(time * 0.04), 0);
+        // vec3 lightPos = vec3(cos(time * 0.04), sin(time * 0.04), 0);
+        vec3 lightPos = vec3(0.0, 100.0, 0.0);
+        vec3 sunDir = normalize(lightPos - samplePoint);
         // vec3 sunColor = vec3(1.0, 1.0, 1.0);
 
         vec3 sunColor = backGround * 2.5;
@@ -138,13 +170,13 @@ void main(){
             float localLightDensity = 0.0;
             for (int j = 0; j < SUN_STEPS; j++){
                 localLightDensity += sampleDensity(sunSamplePoint);
-                sunSamplePoint += normalize(lightPos) * sunStepSize;
+                sunSamplePoint += sunDir * sunStepSize;
             }
             localLightDensity = localLightDensity / float(SUN_STEPS);
             lightTransmit += exp(-localLightDensity) / float(STEPS);
 
             density += sampleDensity(samplePoint) / float(STEPS) * 4;
-            samplePoint += normalize(dir) * stepSize;
+            samplePoint += dir * stepSize;
         }
 
         float transmittance = exp(-density);
@@ -156,21 +188,15 @@ void main(){
 
         vec3 color = mix(cloudColor, backGround, transmittance);
 
-        float blendOut = 1.0 / length(intersection);
-        if(blendOut > 1.0) blendOut = 1.0;
+        // float blendOut = 1.0 / length(intersection);
+        // if(blendOut > 1.0) blendOut = 1.0;
 
-        // FragColor = vec4(color, 1.0);
+        FragColor = vec4(color, 1.0);
         // FragColor = vec4(mix(backGround, color, blendOut), 1.0);
 
 
         // FragColor = vec4(vec3(density), 1.0);
         // FragColor = vec4(backGround * (1.0 - density), 1.0);
-
-
-        intersection /= INFINITY;
-        intersection *= 10000.0;
-        float noise = texture(td_noise, vec3(intersection.x, time / 100, intersection.z)).r;
-        FragColor = vec4(vec3(noise), 1.0);
 
         // intersection /= INFINITY;
         // intersection *= 1000.0;
