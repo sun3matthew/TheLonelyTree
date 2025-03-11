@@ -9,10 +9,10 @@
 LightDirectional::LightDirectional(glm::vec3 dir, glm::vec3 amb, glm::vec3 diff, glm::vec3 spec)
     : Light(amb, diff, spec), direction(dir)
 {
-    angle = 3.1415 * 0.8;
+    angle = 3.1415 * 0.8 + 1.4;
 }
 void LightDirectional::update(){
-    angle += 0.11 * GLFWWrapper::instance->getDeltaTime();
+    // angle += 0.11 * GLFWWrapper::instance->getDeltaTime();
     // std::cout << angle << std::endl;
     direction = glm::vec3(cos(angle), sin(angle), 0);
     std::vector<Shader*> shaders = RenderManager::instance.getShadersAccepting("dirLight");
@@ -43,7 +43,6 @@ void LightDirectional::update(){
         dayTime = 0.0;
     if (dayTime > 1.0)
         dayTime = 1.0;
-
     for(Shader* shader : shaders){
         shader->use();
         shader->setFloat("day", dayTime);

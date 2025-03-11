@@ -103,7 +103,7 @@ void main(){
 
     // CULL
     // ! BAD CODE the tipPosition * X should be ~ segment height
-    vec3 grassTip = gl_Position.xyz + tipPosition * 40;
+    vec3 grassTip = gl_Position.xyz + tipPosition * 80;
     mat4 viewProjection = projection * view;
     vec4 frustumPlanes[6];
     for (int i = 0; i < 6; i++) {

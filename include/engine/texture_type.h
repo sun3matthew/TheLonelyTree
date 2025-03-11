@@ -14,6 +14,7 @@ enum class TextureType {
     FrameBuffer,
     Font,
     TDNoise,
+    TDDetailNoise,
     MAX_TYPES
 };
 
@@ -39,6 +40,8 @@ inline std::string TextureTypeToString(TextureType textureType){
             return "font";
         case TextureType::TDNoise:
             return "td_noise";
+        case TextureType::TDDetailNoise:
+            return "td_detail_noise";
         default:
             return "unknown";
     }

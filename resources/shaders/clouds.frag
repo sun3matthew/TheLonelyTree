@@ -2,8 +2,8 @@
 
 #define INFINITY 5000.0
 #define HEIGHT 5000.0
-#define STEPS 48
-#define SUN_STEPS 6
+#define STEPS 24
+#define SUN_STEPS 4
 
 #define W_INFINITY 100000.0
 #define H 0.0001
@@ -31,6 +31,7 @@ uniform mat4 projection;
 uniform mat4 view;
 
 uniform sampler3D td_noise;
+uniform sampler3D td_detail_noise;
 
 float random(float seed) {
     return fract(sin(seed) * 843758.5453123);
@@ -52,34 +53,26 @@ float clamp(float value){
 }
 
 float sampleDensity(vec3 samplePoint){
+    float gc = 0.29;
+
     float perlinWorley = texture(td_noise, vec3((samplePoint.x - time * 0.0005), samplePoint.y * 0.15, samplePoint.z)).r;
-    vec4 noiseData2 = texture(td_noise, vec3((samplePoint.x * 1.5 - time * 0.0005), samplePoint.y * 0.15, samplePoint.z * 1.5));
+    vec4 noiseData2 = texture(td_noise, vec3((samplePoint.x - time * 0.0005), samplePoint.y * 0.15, samplePoint.z));
 
     // SNsample= R(snr, (sng ×0.625 + snb ×0.25 + sna ×0.125)−1, 1, 0, 1)
     float noise = remap(perlinWorley, (noiseData2.g * 0.625 + noiseData2.b * 0.25 + noiseData2.a * 0.125) - 1, 1, 0, 1);
+    // noise = perlinWorley;
 
-    float gc = 0.29;
+    // DN_{fbm} = dnr ×0.625+dng ×0.25+dnb ×0.125
+    vec3 detailNoise = texture(td_detail_noise, vec3((samplePoint.x * 3 - time * 0.0005), samplePoint.y * 0.15, samplePoint.z * 3)).rgb;
+    float detailFBM = detailNoise.r * 0.625 + detailNoise.g * 0.25 + detailNoise.b * 0.125;
+    // DNmod = 0.35×e−gc×0.75 ×Li(DNf bm, 1−DNf bm, SAT(ph ×5))
+    detailFBM = 0.35 * exp(-gc * 0.75) * detailFBM;
+    //d = SAT(R(SNnd, DNmod, 1, 0, 1)))×DA 
+    noise = clamp(remap(noise, detailFBM, 1, 0, 1));
+    
+    // SN= SAT (R(SNsample ×SA, 1−gc ×WMc, 1, 0, 1)) ×DA 
     noise = clamp(remap(noise, 1 - gc, 1, 0, 1));
 
-    // if (noise < 0.0001){
-    //     noise = 0.0;
-    // }else{
-    //     noise = 1.0;
-    // }
-
-
-    // SN= SAT (R(SNsample ×SA, 1−gc ×WMc, 1, 0, 1)) ×DA 
-
-    // noise = pow(noise, 0.2);
-    // float threshold = 0.82;
-    // noise = clamp(remap(noise, 0, 1, threshold, 1));
-
-    // if (noise < threshold){
-    //     noise = 0.0;
-    // }else{
-    // }
-    // vec4 a = texture(td_noise, vec3((samplePoint.x - time * 0.0005), samplePoint.y * 0.15, samplePoint.z));
-    // return a.a;
     return noise;
 }
 
@@ -177,7 +170,7 @@ void main(){
     float density = 0.0;
 
     float sunStepSize = 1 / float(SUN_STEPS);
-    sunStepSize *= 0.02;
+    sunStepSize *= 0.22;
 
     vec3 backGround = vec3(79.0 / 255.0, 175.0 / 255.0, 226.0 / 255.0) * 0.7;
     // vec3 backGround = vec3(233.0 / 255.0, 172.0 / 255.0, 99.0 / 255.0) * 0.7;
@@ -185,12 +178,12 @@ void main(){
     // vec3 lightPos = vec3(projection * view * vec4(normalize(vec3(cos(time * 0.55), sin(time * 0.55), 0)), 1.0));
     // vec3 lightPos = vec3(cos(time * 0.04), sin(time * 0.04), 0);
     // vec3 lightPos = vec3(cos(time * 0.4) * 1000.0, sin(time * 0.4) * 1000.0, 0.0);
-    vec3 lightPos = vec3(0, OUTER_RADIUS * 2, 0.0);
+
+    vec3 lightPos = vec3(0.0, OUTER_RADIUS * 2, 0.0);
+    // vec3 lightPos = vec3(cos(time * 0.04) * OUTER_RADIUS * 2, sin(time * 0.04) * OUTER_RADIUS * 2, 0.0);
+
     vec3 sunDir = normalize(lightPos - samplePoint);
-    // sunDir = vec3(0.0, 1.0, 0.0);
-    // vec3 lightPos = vec3(cos(time * 0.04), sin(time * 0.04), 0);
-    // sunDir = vec3(cos(time * 0.1), sin(time * 0.1), 0.0);
-    // vec3 sunColor = vec3(1.0, 1.0, 1.0);
+    sunDir = vec3(0.0, 1.0, 0.0);
 
     vec3 sunColor = backGround * 2.5;
     if (sunColor.r > 1.0) sunColor.r = 1.0;
@@ -200,47 +193,57 @@ void main(){
     sunColor = vec3(255.0 / 255.0, 248.0 / 255.0, 230.0 / 255.0);
 
     // vec3 sunColor = vec3(0.0, 1.0, 0.0);
-    float lightTransmit = 0.0;        
+    float lightEnergy = 0.0;        
+    float transmittance = 0.00001;
     for (int i = 0; i < STEPS; i++){
         float sampledDensity = sampleDensity(samplePoint); 
         sampledDensity *= stepSize;
+        sampledDensity *= 8;
+        // sampledDensity *= 24;
+        // if(sampledDensity < 0.05){
+        //     sampledDensity = 0.0;
+        // }
+
+        density += sampledDensity;
+        if (density > 1.0){
+            density = 1.0;
+            break;
+        }
 
         if (sampledDensity > 0.0001){
             vec3 sunSamplePoint = samplePoint;
             float localLightDensity = 0.0;
+            // Step towards the sun
             for (int j = 0; j < SUN_STEPS; j++){
                 sunSamplePoint += sunDir * sunStepSize;
                 localLightDensity += sampleDensity(sunSamplePoint);
             }
-            localLightDensity *= sunStepSize;
-            lightTransmit = lightTransmit * density + localLightDensity * (1.0 - density);
-            // lightTransmit += localLightDensity * (1.0 - density);
+            localLightDensity /= SUN_STEPS;
+
+            float lightWeight = (1.0 - density) * sampledDensity;
+            lightEnergy += lightWeight * (exp(-localLightDensity * 2));
+            transmittance += lightWeight;
         }
 
-        density += sampledDensity * 16;
         samplePoint += dir * stepSize;
-        if (density > 1.0){
-            density = 1.0;
-            // FragColor = vec4(1.0, 0.0, 0.0, 1.0);
-            // return;
-            break;
-        }
     }
 
-    float transmittance = exp(-density * 4);
-    lightTransmit = exp(-lightTransmit * 32);
+    // float transmittance = exp(-density * 4);
+    // lightEnergy = exp(-lightEnergy * 32);
 
     // vec3 backGround = vec3(233.0 / 255.0, 172.0 / 255.0, 99.0 / 255.0);
     // vec3 backGround = vec3(0.0);
-    // vec3 cloudColor = mix(vec3(0.1), sunColor, lightTransmit);
+    // vec3 cloudColor = mix(vec3(0.1), sunColor, lightEnergy);
 
     // !
-    vec3 cloudColor = mix(sunColor * 0.25, sunColor * 0.75, lightTransmit);
+    // lightEnergy = 1.0;
+    lightEnergy /= transmittance;
+    vec3 cloudColor = mix(sunColor * 0.45, sunColor * 0.95, lightEnergy);
 
     // cloudColor = sunColor * 0.95;
     // cloudColor = sunDir;
 
-    vec3 color = mix(cloudColor, backGround, transmittance);
+    vec3 color = mix(backGround, cloudColor, density);
 
     // float blendOut = 1.0 / length(intersection);
     // if(blendOut > 1.0) blendOut = 1.0;

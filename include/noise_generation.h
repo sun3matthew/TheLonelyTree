@@ -34,11 +34,11 @@ public:
 
     static Texture GetCloudNoise(unsigned int seed, int resolution){
         unsigned char* perlinData = TDPerlinNoise(seed, resolution, 0.04f, 8);
-        unsigned char* worleyData = TDWorleyNoise(seed, resolution, resolution / 10.0f, 4, 0.3f);
+        unsigned char* worleyData = TDWorleyNoise(seed, resolution, resolution / 10.0f, 3, 0.3f);
 
-        unsigned char* worleyData1 = TDWorleyNoise(seed + 491, resolution, resolution / 8.0f, 3, 0.3f);
-        unsigned char* worleyData2 = TDWorleyNoise(seed + 1033, resolution, resolution / 6.0f, 3, 0.3f);
-        unsigned char* worleyData3 = TDWorleyNoise(seed + 4212, resolution, resolution / 4.0f, 2, 0.3f);
+        unsigned char* worleyData1 = TDWorleyNoise(seed + 491, resolution, resolution / 10.0f, 2, 0.3f);
+        unsigned char* worleyData2 = TDWorleyNoise(seed + 1033, resolution, resolution / 8.0f, 2, 0.3f);
+        unsigned char* worleyData3 = TDWorleyNoise(seed + 4212, resolution, resolution / 6.0f, 1, 0.3f);
 
         unsigned char data[resolution * resolution * resolution * 4];
 
@@ -64,9 +64,6 @@ public:
             }
         }
 
-
-
-
         delete[] perlinData;
         delete[] worleyData;
         delete[] worleyData1;
@@ -74,6 +71,36 @@ public:
         delete[] worleyData3;
 
         return Texture(data, resolution, resolution, resolution, 4, TextureType::TDNoise);
+    }
+
+    static Texture GetDetailedCloudNoise(unsigned int seed, int resolution){
+        unsigned char* worleyData1 = TDWorleyNoise(seed + 3391, resolution, resolution / 8.0f, 3, 0.3f);
+        unsigned char* worleyData2 = TDWorleyNoise(seed + 1033, resolution, resolution / 6.0f, 3, 0.3f);
+        unsigned char* worleyData3 = TDWorleyNoise(seed + 4212, resolution, resolution / 4.0f, 2, 0.3f);
+
+        unsigned char data[resolution * resolution * resolution * 3];
+
+        // copy perlin noise to 3D texture
+        int i = 0;
+        int idx = 0;
+        for(int z = 0; z < resolution; z++){
+            for(int y = 0; y < resolution; y++){
+                for(int x = 0; x < resolution; x++){
+                    data[i + 0] = worleyData1[idx];
+                    data[i + 1] = worleyData2[idx];
+                    data[i + 2] = worleyData3[idx];
+
+                    i += 3;
+                    idx++;
+                }
+            }
+        }
+
+        delete[] worleyData1;
+        delete[] worleyData2;
+        delete[] worleyData3;
+
+        return Texture(data, resolution, resolution, resolution, 3, TextureType::TDDetailNoise);
     }
 
     static unsigned char* TDPerlinNoise(unsigned int seed, int resolution, float zoom, int octaves){
