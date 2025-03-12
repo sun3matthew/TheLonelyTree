@@ -116,6 +116,8 @@ TheLonelyTree::TheLonelyTree()
 
     font = new Font("../resources/fonts/arial.ttf", 48);
 
+    SaveFile::Initialize("SunCats", "TheLonelyTree");
+
     if (SteamAPI_Init()) {
         // std::cout << "Hello, Steam! User: " << SteamFriends()->GetPersonaName() << std::endl;
         steamUsername = SteamFriends()->GetPersonaName();
