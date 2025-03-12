@@ -15,7 +15,7 @@ struct PointDirection{
 
 class TreeBranch : public RenderObject{
 public:
-    TreeBranch(unsigned int ID, TreeBranch* parentBranch, TreeNode* node, LeafManager* leafManager);
+    TreeBranch(unsigned long long ID, TreeBranch* parentBranch, TreeNode* node, LeafManager* leafManager);
     ~TreeBranch();
 
     LeafManager* getLeafManager();
@@ -31,15 +31,21 @@ public:
     void addNode(Entry entry);
 
     int getDepth();
-    unsigned int getID();
+    unsigned long long getID();
+    std::string getIDString();
     void markForDeletion();
 
     void drawCall(Shader* shader) override;
     void writeDataToGPU();
     void recalculateVertices();
     void pushBackTexture(Texture texture);
+
+    std::string serializeNodes();
+    std::string serializeChildBranches();
 private:
-    unsigned int ID;
+    unsigned long long ID;
+    std::string IDString;
+
     unsigned int VAO, VBO;
 
     int depth;

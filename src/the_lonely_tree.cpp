@@ -7,6 +7,8 @@
 #include <engine/mesh_generation.h>
 #include <engine/texture_type.h>
 #include <engine/frame_buffer_generation.h>
+#include <engine/crypto.h>
+#include <engine/save_file.h>
 
 #include <engine/gltf_loader.h>
 #include <engine/render_object_component.h>
@@ -17,8 +19,6 @@
 #include <engine/shader.h>
 #include <engine/light_directional.h>
 #include <engine/light_spot.h>
-
-#include <engine/http_client.h>
 
 #include <engine/font.h>
 #include <engine/text.h>
@@ -119,8 +119,18 @@ TheLonelyTree::TheLonelyTree()
     if (SteamAPI_Init()) {
         // std::cout << "Hello, Steam! User: " << SteamFriends()->GetPersonaName() << std::endl;
         steamUsername = SteamFriends()->GetPersonaName();
-        SteamAPI_Shutdown();
+        steamID = SteamUser()->GetSteamID().ConvertToUint64();
+
+        SaveFile::Save("steamID", std::to_string(steamID));
     }else{
+        steamUsername = "Offline";
+        steamID = 0;
+
+        std::string steamIDString = SaveFile::Load("steamID");
+        if (steamIDString != ""){
+            steamID = std::stoull(steamIDString);
+        }
+
         std::cerr << "Failed to initialize Steam API!" << std::endl;
     }
 }
@@ -130,27 +140,12 @@ TheLonelyTree::~TheLonelyTree(){
     delete font;
     if (treeManager)
         delete treeManager;
+
+    SteamAPI_Shutdown();
 }
 
 void TheLonelyTree::start(){
-    // std::string url = "https://7sqvdwegyf.execute-api.us-west-2.amazonaws.com";
-    // std::string dataPath = "/default/the-lonely-tree";
-    // HttpClient client(url, dataPath);
-
-    // std::string key = "exampleKey";
-    // std::string value = getCurrentDateTime();
-
-    // if(client.write(key, value)){
-    //     std::cout << "Write successful" << std::endl;
-    // }else{
-    //     std::cout << "Write failed" << std::endl;
-    // }
-
-    // std::string readValue = client.read(key);
-    // std::cout << "Read value: " << readValue << std::endl;
-
     numLights = 0;
-
 
     float worldSize = 1024 * 5;
 
@@ -200,13 +195,13 @@ void TheLonelyTree::start(){
 
     int seed = 12923952u;
 
-    // Gameobject* world2 = new Gameobject("World");
-    // Mesh* terrainMesh2 = WorldGeneration::createWorld(seed, 60, worldSize, 4, 10);
-    // terrainMesh2->updateTexture(Texture::diffuse(0x50, 0x4D, 0x53));
-    // // terrainMesh2->addShader(FRAME_BUFFER, "model");
-    // terrainMesh2->addShader(SHADOW_BUFFER, "shadowMap");
-    // world2->addComponent(new RenderObjectComponent(terrainMesh2));
-    // addGameobject(world2);
+    Gameobject* world2 = new Gameobject("World");
+    Mesh* terrainMesh2 = WorldGeneration::createWorld(seed, 60, worldSize, 4, 10);
+    terrainMesh2->updateTexture(Texture::diffuse(0x50, 0x4D, 0x53));
+    // terrainMesh2->addShader(FRAME_BUFFER, "model");
+    terrainMesh2->addShader(SHADOW_BUFFER, "shadowMap");
+    world2->addComponent(new RenderObjectComponent(terrainMesh2));
+    addGameobject(world2);
 
     Gameobject* world = new Gameobject("World");
     Mesh* terrainMesh = WorldGeneration::createWorld(seed, 60, worldSize, 4 * 2, 0);
@@ -218,20 +213,25 @@ void TheLonelyTree::start(){
 
     unsigned int numLeafTypes = 2;
 
-    // leafManager = new LeafManager();
-    // leafManager->addShader(FRAME_BUFFER, "leaf");
-    // leafManager->addShader(SHADOW_BUFFER, "shadowMap");
-
-    Entry entry = Entry();
-    entry.date = "2021-09-01";
-    entry.name = "The Lonely Tree";
-    entry.data = "The Lonely Tree is a project that aims to create a procedurally generated tree that can be used in a variety of applications. The tree is generated using a combination of L-systems and Perlin noise to create a realistic looking tree. The tree is then rendered using OpenGL and GLSL to create a realistic 3D model. The tree can be viewed from any angle and can be used in a variety of applications such as games, simulations, and visualizations.";
+    Entry entry = Entry(
+        "2021-09-01",
+        "The Lonely Tree",
+        "The Lonely Tree is a project that aims to create a procedurally generated tree that can be used in a variety of applications. The tree is generated using a combination of L-systems and Perlin noise to create a realistic looking tree. The tree is then rendered using OpenGL and GLSL to create a realistic 3D model. The tree can be viewed from any angle and can be used in a variety of applications such as games, simulations, and visualizations."
+    );
 
     Texture branchDiffuse = Texture("../resources/textures/tree/Diffuse.jpeg", TextureType::Diffuse);
     Texture branchNormal = Texture("../resources/textures/tree/Normal.png", TextureType::Normal);
 
     // //! This is the worst code I have ever written
-    treeManager = new TreeManager();
+    userTree = new UserTree("https://7sqvdwegyf.execute-api.us-west-2.amazonaws.com", "/default/the-lonely-tree");
+    std::string baseBranchID = userTree->read(userTree->constructKey(EntryType::UserIDBranchID, Crypto::toHex(steamID)));
+    if (baseBranchID == ""){
+        treeManager = new TreeManager();
+    }else{
+        treeManager = new TreeManager(Crypto::hexToLong(baseBranchID));
+    }
+    userTree->updateTreeManager(steamID, treeManager);
+
     treeManager->rootBranch()->pushBackTexture(branchDiffuse);
     treeManager->rootBranch()->pushBackTexture(branchNormal);
     treeManager->rootBranch()->addShader(FRAME_BUFFER, "tree");
@@ -244,6 +244,7 @@ void TheLonelyTree::start(){
     }
     treeManager->rootBranch()->recalculateVertices();
 
+    // build tree
     std::stack <std::pair<TreeBranch*, int>> branchStack;
     branchStack.push({treeManager->rootBranch(), 3});
     int counter = 0;
@@ -296,6 +297,7 @@ void TheLonelyTree::start(){
 
     Gameobject* treeManager = new Gameobject("Tree Manager");
     treeManager->addComponent(new TreeRendererComponent(this->treeManager));
+    treeManager->addComponent(this->userTree);
     treeManager->setPosition(glm::vec3(worldSize/2, 280, worldSize/2));
     treeManager->setScale(glm::vec3(100.0f));
     addGameobject(treeManager);
@@ -365,6 +367,7 @@ void TheLonelyTree::start(){
     textMesh = new Text(font, "The Lonely Tree", glm::vec2(0.2, 0.75), glm::vec2(0.8, 0.25), 1.0f, glm::vec3(1.0f, 1.0f, 1.0f));
     textMesh->addShader(FRAME_BUFFER, "text");
     text->addComponent(new RenderObjectComponent(textMesh));
+    text->setParent(ui);
 
     std::cout << "Steam Username: " << steamUsername << std::endl;
     Gameobject* text2 = new Gameobject("Text");
@@ -402,6 +405,7 @@ void TheLonelyTree::update(){
                         key[0] = std::tolower(key[0]);
                 }
                 entry += key;
+                textMesh->setText(entry);
             }
         }
 
@@ -409,25 +413,13 @@ void TheLonelyTree::update(){
             entry = entry.substr(0, entry.size() - 1);
         }
         if (Input::getKeyDown(KeyCode::KEY_ENTER)){
-
-            std::string url = "https://7sqvdwegyf.execute-api.us-west-2.amazonaws.com";
-            std::string dataPath = "/default/the-lonely-tree";
-            HttpClient client(url, dataPath);
-        
-            std::string key = "entry";
-            std::string value = entry;
-        
-            int val = client.write(key, value);
-            if(!val){
-                std::cout << "Write failed" << std::endl;
-            }
-
-            std::cout << "READ: " << client.read(key) << std::endl;
-
-            // entry = "";
+            userTree->addEntry(Entry(
+                getCurrentDateTime(),
+                steamUsername,
+                entry
+            ));
         }
 
-        textMesh->setText(entry);
     }
 
     if (Input::getKeyUp(KeyCode::KEY_ESCAPE)){

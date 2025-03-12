@@ -4,11 +4,9 @@
 
 #define RADIUS_C 0.5f
 
-TreeNode::TreeNode(TreeBranch* associatedBranch, int idx, Entry entry){
+TreeNode::TreeNode(TreeBranch* associatedBranch, int idx, Entry entry) : entry(entry){
     this->associatedBranch = associatedBranch;
     this->index = idx;
-
-    this->entry = entry;
 }
 
 TreeNode::~TreeNode(){
@@ -61,12 +59,8 @@ int TreeNode::getIndex(){
     return index;
 }
 
-unsigned int TreeNode::HashedEntry(){
-    unsigned int hash = 0;
-    for (char c : entry.name){
-        hash = hash * 31 + c;
-    }
-    return hash;
+Entry& TreeNode::getEntry(){
+    return entry;
 }
 
 TreeBranch* TreeNode::getAssociatedBranch(){

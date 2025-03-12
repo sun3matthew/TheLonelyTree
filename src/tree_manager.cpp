@@ -5,8 +5,11 @@
 #include <cassert>
 
 
-TreeManager::TreeManager(){
-    unsigned int id = generateRandomID();
+TreeManager::TreeManager(unsigned long long id){
+    if (id == 0){
+        id = generateRandomID();
+    }
+
     tree[id] = new TreeBranch(id, nullptr, nullptr, new LeafManager());
 
     rootBranchID = id;
@@ -18,9 +21,9 @@ TreeManager::~TreeManager(){
     }
 }
 
-unsigned int TreeManager::generateRandomID(){
+unsigned long long TreeManager::generateRandomID(){
     static std::mt19937 rng(std::random_device{}()); // Random number generator
-    static std::uniform_int_distribution<unsigned int> dist(0, UINT_MAX);
+    static std::uniform_int_distribution<unsigned long long> dist(0, std::numeric_limits<unsigned long long>::max());
     return dist(rng);
 }
 

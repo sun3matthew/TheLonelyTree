@@ -37,6 +37,7 @@ void Text::drawCall(Shader* shader)
 
     float lineSpacing = 0.03 * GLFWWrapper::height;
 
+    std::cout << "text: " << text << std::endl;
     for (c = text.begin(); c != text.end(); c++)
     {
         Character ch = font->Characters[*c];

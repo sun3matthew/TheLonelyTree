@@ -4,6 +4,8 @@
 
 #include <vector>
 #include <glm/glm.hpp>
+
+#include "entry.h"
 class TreeBranch;
 
 struct TreeVertex{
@@ -27,12 +29,6 @@ struct TreeVertex{
     }
 };
 
-struct Entry{
-    std::string date;
-    std::string name;
-    std::string data;
-};
-
 class TreeNode{
     public:
         TreeNode(TreeBranch* associatedBranch, int idx, Entry entry);
@@ -42,9 +38,9 @@ class TreeNode{
         void setVertexData(TreeNode* parent, glm::vec3 position, float nodePercent);
         TreeVertex* getVertexData();
 
+        Entry& getEntry();
         int getIndex();
 
-        unsigned int HashedEntry();
     private:
         Entry entry;
 

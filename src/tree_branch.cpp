@@ -8,12 +8,17 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
-TreeBranch::TreeBranch(unsigned int id, TreeBranch* parentBranch, TreeNode* node, LeafManager* leafManager){
+#include <engine/crypto.h>
+
+TreeBranch::TreeBranch(unsigned long long id, TreeBranch* parentBranch, TreeNode* node, LeafManager* leafManager){
     this->depth = 1;
+
     this->ID = id;
+    this->IDString = Crypto::toHex(id);
+
     this->rootNode = node;
 
-    this->leafManager = new LeafManager();
+    this->leafManager = leafManager;
 
     this->parentBranch = parentBranch;
     if (parentBranch){
@@ -239,5 +244,22 @@ void TreeBranch::addNode(Entry entry){
     // writeDataToGPU();
 }
 
-uint TreeBranch::getID(){ return ID; }
+std::string TreeBranch::serializeNodes(){
+    std::string serialized = "";
+    for(int i = 0; i < nodes.size(); i++){
+        serialized += nodes[i]->getEntry().getHashString();
+    }
+    return serialized;
+}
+
+std::string TreeBranch::serializeChildBranches(){
+    std::string serialized = "";
+    for(int i = 0; i < childBranches.size(); i++){
+        serialized += childBranches[i]->IDString;
+    }
+    return serialized;
+}
+
+unsigned long long TreeBranch::getID(){ return ID; }
+std::string TreeBranch::getIDString(){ return IDString; }
 void TreeBranch::markForDeletion(){ ID = 0; }

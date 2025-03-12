@@ -22,11 +22,17 @@ std::string HttpClient::read(std::string key){
 }
 
 bool HttpClient::write(std::string key, std::string value){
-    value = "{\"key\": \"" + key + "\", \"data\": \"" + value + "\"}";
-    auto res = client.Post((dataPath).c_str(), value, "application/json");
+    size_t pos = 0;
+    while ((pos = value.find('\n', pos)) != std::string::npos) {
+        value.replace(pos, 1, "\\n");
+        pos += 2;
+    }
 
-    if(!res)
-        return 0;
+    std::string payload = "{\"key\": \"" + key + "\", \"data\": \"" + value + "\"}";
+    auto res = client.Post(dataPath.c_str(), payload, "application/json");
+
+    if (!res)
+        return false;
     return res->status == 200;
 }
 

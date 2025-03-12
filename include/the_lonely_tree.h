@@ -11,7 +11,7 @@
 #include <vector>
 #include <list>
 
-#include "tree_manager.h"
+#include "user_tree.h"
 
 class TheLonelyTree : public GLFWWrapper{
     public:
@@ -29,6 +29,7 @@ class TheLonelyTree : public GLFWWrapper{
         int numLights;
 
         TreeManager* treeManager;
+        UserTree* userTree;
         Font* font;
 
         Gameobject* ui;
@@ -37,6 +38,7 @@ class TheLonelyTree : public GLFWWrapper{
 
         std::string entry;
         std::string steamUsername;
+        unsigned long long steamID;
 };  
 
 #endif
