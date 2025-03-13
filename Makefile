@@ -24,26 +24,28 @@ all: build
 # Configure the project (this will invoke CMake with the build type)
 # cd $(BUILD_DIR) && cmake -G Ninja -DCMAKE_BUILD_TYPE=$(BUILD_TYPE) ..
 configure:
-	mkdir -p $(BUILD_DIR)
-	cd $(BUILD_DIR) && cmake -G Ninja -DCMAKE_BUILD_TYPE=$(BUILD_TYPE) ..
+	cmake -E make_directory $(BUILD_DIR)
+	cmake -B $(BUILD_DIR) -S . -G Ninja -DCMAKE_BUILD_TYPE=$(BUILD_TYPE)
 
-# Build the project (invokes make)
+# Build the project
 build: configure
-	cd $(BUILD_DIR) && ninja $(PROJECT_NAME)
+	cmake --build $(BUILD_DIR) --target $(PROJECT_NAME)
 
-# Run the built project
 run: build
-	cd $(BUILD_DIR) && ./$(PROJECT_NAME)
+	@if [ -f "$(BUILD_DIR)/$(PROJECT_NAME)" ]; then cd $(BUILD_DIR) && ./$(PROJECT_NAME); \
+	elif [ -f "$(BUILD_DIR)/$(PROJECT_NAME).exe" ]; then $(BUILD_DIR)/$(PROJECT_NAME).exe; \
+	else echo "Executable not found!"; exit 1; fi
 
 run-lldb: build
 	cd $(BUILD_DIR) && lldb ./$(PROJECT_NAME)
 
 # Clean the build files
 clean:
-	rm -rf $(BUILD_DIR)
+	cmake -E remove_directory $(BUILD_DIR)
+
 
 build-osx:
-	mkdir -p $(BUILD_DIR_OSX)
+	cmake -E make_directory $(BUILD_DIR_OSX)
 	cd $(BUILD_DIR_OSX) && cmake -G Ninja -DBUILD_TARGET=OSX ../..
 	cd $(BUILD_DIR_OSX) && ninja $(PROJECT_NAME)
 
