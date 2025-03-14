@@ -27,6 +27,13 @@ if ( BUILD_TARGET STREQUAL "OSX" )
     # Copy resources directory to the build folder
     set(BUNDLE_RESOURCES_DIR "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.app/Contents/resources")
     file(COPY ${CMAKE_SOURCE_DIR}/resources/ DESTINATION ${BUNDLE_RESOURCES_DIR})
+elseif ( BUILD_TARGET STREQUAL "Windows" )
+    message("Building for Windows target")
+    
+    add_executable(${PROJECT_NAME} ${SRC_FILES})
+
+    set(BUNDLE_RESOURCES_DIR "${CMAKE_BINARY_DIR}/../resources")
+    file(COPY ${CMAKE_SOURCE_DIR}/resources/ DESTINATION ${BUNDLE_RESOURCES_DIR})
 else ()
     message("Building for Base target")
 
@@ -59,7 +66,25 @@ if ( BUILD_TARGET STREQUAL "OSX" )
 
     # Link OpenSSL to your app
     target_link_libraries(${PROJECT_NAME} PRIVATE ${OPENSSL_LIBS})
+# elseif ( BUILD_TARGET STREQUAL "Windows" )
+#     set(OPENSSL_USE_STATIC_LIBS ON)
+#     find_package(OpenSSL REQUIRED)
+    
+#     message("Libs: ${OPENSSL_SSL_LIBRARY}")
+#     message("Dirs: ${OPENSSL_INCLUDE_DIR}")
 
+#     target_include_directories(${PROJECT_NAME} PRIVATE ${OPENSSL_INCLUDE_DIR})
+
+#     # target_link_libraries(${PROJECT_NAME} PRIVATE OpenSSL::SSL)
+
+#     set(OPENSSL_LIBS "C:/Program Files/OpenSSL-Win64/lib/VC/x64/MD/libssl.lib")
+#     set(OPENSSL_INCLUDE_DIR ${OPENSSL_INCLUDE_DIR})
+
+#     set(APP_FRAMEWORKS_DIR "${CMAKE_BINARY_DIR}/")
+#     file(COPY ${OPENSSL_LIBS} DESTINATION ${APP_FRAMEWORKS_DIR})
+
+#     # Link OpenSSL to your app
+#     target_link_libraries(${PROJECT_NAME} PRIVATE ${OPENSSL_LIBS})
 else ()
     find_package(OpenSSL REQUIRED)
     target_link_libraries(${PROJECT_NAME} PRIVATE OpenSSL::SSL)
@@ -68,12 +93,17 @@ endif ()
 # Add Steamworks SDK
 set(STEAMWORKS_DIR ${CMAKE_SOURCE_DIR}/external/steamworks)
 include_directories(${STEAMWORKS_DIR}/public)
-if (APPLE)
+if (WIN32)
+    set(STEAM_LIB_PATH ${STEAMWORKS_DIR}/redistributable_bin/win64/steam_api64.dll)
+    target_link_libraries(${PROJECT_NAME} PRIVATE ${STEAMWORKS_DIR}/redistributable_bin/win64/steam_api64.lib)
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different ${STEAM_LIB_PATH} $<TARGET_FILE_DIR:${PROJECT_NAME}>
+    )
+elseif (APPLE)
     set(STEAM_LIB_PATH ${STEAMWORKS_DIR}/redistributable_bin/osx/libsteam_api.dylib)
     target_link_libraries(${PROJECT_NAME} PRIVATE ${STEAM_LIB_PATH})
-
     add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy ${STEAM_LIB_PATH} $<TARGET_FILE_DIR:${PROJECT_NAME}>
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different ${STEAM_LIB_PATH} $<TARGET_FILE_DIR:${PROJECT_NAME}>
     )
 elseif (UNIX)
     target_link_libraries(${PROJECT_NAME} PRIVATE ${STEAMWORKS_DIR}/redistributable_bin/linux64/libsteam_api.so)
@@ -103,11 +133,15 @@ target_link_libraries(${PROJECT_NAME} PRIVATE glm)
 add_subdirectory(external/glfw)
 target_link_libraries(${PROJECT_NAME} PRIVATE glfw)
 
-# Include OpenGL framework or libraries
+find_package(OpenGL REQUIRED)
+include_directories(${OPENGL_INCLUDE_DIR})
+
 if(APPLE)
     target_link_libraries(${PROJECT_NAME} PRIVATE "-framework OpenGL")
+elseif(WIN32)
+    target_link_libraries(${PROJECT_NAME} PRIVATE ${OPENGL_gl_LIBRARY})
 elseif(UNIX)
-    target_link_libraries(${PROJECT_NAME} PRIVATE GL)
+    target_link_libraries(${PROJECT_NAME} PRIVATE ${OPENGL_gl_LIBRARY})
 endif()
 
 # Compiler definitions

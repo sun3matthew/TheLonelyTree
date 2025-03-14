@@ -4,24 +4,59 @@
 
 #include <glm/gtc/type_ptr.hpp>
 
-static char* readShaderFile(const char* filepath){
-    FILE* file = fopen(filepath, "r");
+#include <stdio.h>
+#include <stdlib.h>
+
+static char* readShaderFile(const char* filepath) {
+    FILE* file = fopen(filepath, "rb");
     if (!file) {
         fprintf(stderr, "Failed to open shader file: %s\n", filepath);
         return NULL;
     }
 
-    fseek(file, 0, SEEK_END);
-    long length = ftell(file);
-    fseek(file, 0, SEEK_SET);
+    // Move the file pointer to the end to determine the file length
+    if (fseek(file, 0, SEEK_END) != 0) {
+        fprintf(stderr, "Failed to seek to end of file: %s\n", filepath);
+        fclose(file);
+        return NULL;
+    }
 
+    long length = ftell(file);
+    if (length < 0) {
+        fprintf(stderr, "Failed to get file length: %s\n", filepath);
+        fclose(file);
+        return NULL;
+    }
+
+    // Return to the beginning of the file
+    if (fseek(file, 0, SEEK_SET) != 0) {
+        fprintf(stderr, "Failed to seek to beginning of file: %s\n", filepath);
+        fclose(file);
+        return NULL;
+    }
+
+    // Allocate memory for the file content plus a null terminator
     char* content = (char*)malloc(length + 1);
-    fread(content, 1, length, file);
-    content[length] = '\0';
+    if (!content) {
+        fprintf(stderr, "Failed to allocate memory for shader content\n");
+        fclose(file);
+        return NULL;
+    }
+
+    // Read the file content into the allocated memory
+    size_t bytesRead = fread(content, 1, length, file);
+    if (bytesRead != length) {
+        fprintf(stderr, "Failed to read the complete file: %s\n", filepath);
+        free(content);
+        fclose(file);
+        return NULL;
+    }
+    content[length] = '\0'; // Null-terminate the string
 
     fclose(file);
     return content;
 }
+
 Shader::Shader(std::string nameIn, const char* vertexPath, const char* fragmentPath, std::vector<std::string> canAcceptList)
     : Shader(nameIn, vertexPath, nullptr, fragmentPath, std::move(canAcceptList))
 {}
@@ -44,7 +79,7 @@ Shader::Shader(std::string nameIn, const char* vertexPath, const char* geometryP
     glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
     if(!success){
         glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-        std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
+        std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << nameIn << " " << infoLog << std::endl;
     }
     free(vertexShaderSource);
 
@@ -57,7 +92,7 @@ Shader::Shader(std::string nameIn, const char* vertexPath, const char* geometryP
         glGetShaderiv(geometryShader, GL_COMPILE_STATUS, &success);
         if(!success){
             glGetShaderInfoLog(geometryShader, 512, NULL, infoLog);
-            std::cout << "ERROR::SHADER::GEOMETRY::COMPILATION_FAILED\n" << infoLog << std::endl;
+            std::cout << "ERROR::SHADER::GEOMETRY::COMPILATION_FAILED\n" << nameIn << " " << infoLog << std::endl;
         }
         free(geometryShaderSource);
     }
@@ -70,7 +105,7 @@ Shader::Shader(std::string nameIn, const char* vertexPath, const char* geometryP
     glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
     if(!success){
         glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
-        std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
+        std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << nameIn << " " << infoLog << std::endl;
     }
     free(fragmentShaderSource);
 
@@ -83,7 +118,7 @@ Shader::Shader(std::string nameIn, const char* vertexPath, const char* geometryP
     glGetProgramiv(ID, GL_LINK_STATUS, &success);
     if(!success){
         glGetProgramInfoLog(ID, 512, NULL, infoLog);
-        std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
+        std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << nameIn << " " << infoLog << std::endl;
     }
 
     glDeleteShader(fragmentShader); 

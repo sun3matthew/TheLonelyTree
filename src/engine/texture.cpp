@@ -3,18 +3,19 @@
 #include <stb/stb_image.h>
 #include <engine/glfw_wrapper.h>
 #include <iostream>
+#include <array> // Include for std::array
 
 Texture Texture::defaultDiffuse(){
-    return Texture((const unsigned char[]) {0xFF, 0xFF, 0xFF}, 1, 1, 3, TextureType::Diffuse);
+    return Texture(std::array<unsigned char, 3>{0xFF, 0xFF, 0xFF}.data(), 1, 1, 3, TextureType::Diffuse);
 }
 Texture Texture::defaultNormal(){
-    return Texture((const unsigned char[]) {0x80, 0x80, 0xFF}, 1, 1, 3, TextureType::Normal);
+    return Texture(std::array<unsigned char, 3>{0x80, 0x80, 0xFF}.data(), 1, 1, 3, TextureType::Normal);
 }
 Texture Texture::defaultSpecular(){
-    return Texture((const unsigned char[]) {0xFF, 0xFF, 0xFF}, 1, 1, 3, TextureType::Specular);
+    return Texture(std::array<unsigned char, 3>{0xFF, 0xFF, 0xFF}.data(), 1, 1, 3, TextureType::Specular);
 }
 Texture Texture::defaultGlossy(){
-    return Texture((const unsigned char[]) {0xFF}, 1, 1, 1, TextureType::Glossy);
+    return Texture(std::array<unsigned char, 1>{0xFF}.data(), 1, 1, 1, TextureType::Glossy);
 }
 Texture Texture::defaultShadow(){
     return RenderManager::instance.getFrameBuffer(SHADOW_BUFFER).textures[0]; // !BAD DESIGN
@@ -30,13 +31,13 @@ std::vector<Texture> Texture::defaultTextures(){
 }
 
 Texture Texture::diffuse(unsigned char r, unsigned char g, unsigned char b){
-    return Texture((const unsigned char[]) {r, g, b}, 1, 1, 3, TextureType::Diffuse);
+    return Texture(std::array<unsigned char, 3>{r, g, b}.data(), 1, 1, 3, TextureType::Diffuse);
 }
 Texture Texture::specular(unsigned char r, unsigned char g, unsigned char b){
-    return Texture((const unsigned char[]) {r, g, b}, 1, 1, 3, TextureType::Specular);
+    return Texture(std::array<unsigned char, 3>{r, g, b}.data(), 1, 1, 3, TextureType::Specular);
 }
 Texture Texture::glossy(unsigned char amt){
-    return Texture((const unsigned char[]) {0xFF}, 1, 1, 1, TextureType::Glossy);
+    return Texture(std::array<unsigned char, 1>{0xFF}.data(), 1, 1, 1, TextureType::Glossy);
 }
 
 Texture::Texture(const char* path, TextureType textureType) : type(textureType){

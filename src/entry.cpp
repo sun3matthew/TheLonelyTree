@@ -1,25 +1,9 @@
 #include <engine/crypto.h>
 
 #include "entry.h"
-
-
-// Entry(std::string date, std::string name, std::string data);
-// ~Entry();
-
-// std::string getDate();
-// std::string getName();
-// std::string getData();
-
-// std::string getProcessedKey();
-// private:
-// std::string date;
-// std::string name;
-// std::string data;
-
-// std::string processedKey;
-
-// unsigned long long hash;
-// std::string hashString;
+#include <algorithm>
+#include <unordered_set>
+#include <string>
 
 const std::unordered_set<std::string> Entry::commonWords = {
     "the", "is", "in", "and", "of", "to", "a", "with", "for", "on", "at", "by", "from", "an", "as",

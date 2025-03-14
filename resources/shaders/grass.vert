@@ -106,7 +106,7 @@ void main(){
     vec3 grassTip = gl_Position.xyz + tipPosition * 80;
     mat4 viewProjection = projection * view;
     vec4 frustumPlanes[6];
-    for (int i = 0; i < 6; i++) {
+    for (int i = 0; i < 4; i++) {
         frustumPlanes[0][i] = viewProjection[i][3] + viewProjection[i][0];
         frustumPlanes[1][i] = viewProjection[i][3] - viewProjection[i][0];
         frustumPlanes[2][i] = viewProjection[i][3] + viewProjection[i][1];
