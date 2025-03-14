@@ -1,3 +1,4 @@
 build/
+.private/
 .DS_Store
 .vscode/
