@@ -28,6 +28,8 @@ class TheLonelyTree : public GLFWWrapper{
         Camera* camera;
         int numLights;
 
+        bool screenShotMode = false;
+
         TreeManager* treeManager;
         UserTree* userTree;
         Font* font;

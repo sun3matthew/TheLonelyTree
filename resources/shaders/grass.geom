@@ -52,7 +52,9 @@ void main() {
 
         // float colorDarkness = 0.6 + (clumpColor[0] * 0.4) + (randomHash[0] * 0.2) - distToCamera / 10000;
         float colorDarkness = 0.6 + (clumpColor[0] * 0.4) + (randomHash[0] * 0.2);
-        vec3 color = vec3(0.5, 0.61, 0.24) * colorDarkness;
+        // vec3 color = vec3(0.5, 0.61, 0.24) * colorDarkness;
+        vec3 color = vec3(1.0, 0.9, 0.04) * colorDarkness;
+
         // color = vec3(perlinValue[0]);
         // color = debugColor[0];
 

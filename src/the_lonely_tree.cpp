@@ -58,7 +58,8 @@ TheLonelyTree::TheLonelyTree()
 {
     TheLonelyTree::instance = this;
 
-    createWindow(800 * 1.5f, 600 * 1.5f, "The Lonely Tree");
+    // createWindow(800 * 1.5f, 600 * 1.5f, "The Lonely Tree");
+    createWindow(900 * 1.5f, 650 * 1.5f, "The Lonely Tree");
     lockCursor(true);
 
     // TODO turn these into enums
@@ -170,7 +171,9 @@ void TheLonelyTree::start(){
     camera->originPosition = cameraGameobject->getPosition();
 
     Gameobject* directionalLight = new Gameobject("Directional Light");
+    // glm::vec3 color = glm::vec3(246.0f / 255.0f, 222.0f / 255.0f, 200.0f / 255.0f);
     glm::vec3 color = glm::vec3(233.0f / 255.0f, 172.0f / 255.0f, 99.0f / 255.0f);
+    // glm::vec3 color = glm::vec3(255.0f / 255.0f, 255.0f / 255.0f, 255.0f / 255.0f);
     LightDirectional *light = new LightDirectional(
         glm::vec3(0.0f, 0.0f, 0.0f),
         glm::normalize(glm::vec3(0.25f, 0.25f, 0.25f) * color),
@@ -181,19 +184,33 @@ void TheLonelyTree::start(){
     directionalLight->addComponent(light);
     addGameobject(directionalLight);
 
-    // Gameobject* tree = GLTFLoader::loadMesh("../resources/models/tree/scene.gltf");
-    // std::list<Gameobject*> allChildren = tree->getAllChildren();
-    // for(Gameobject* child : allChildren){
-    //     RenderObjectComponent* meshComp = child -> getComponent<RenderObjectComponent>();
-    //     if(meshComp){
-    //         Mesh* mesh = static_cast<Mesh*>(meshComp->getRenderObject());
-    //         mesh->addShader(FRAME_BUFFER, "model");
-    //         mesh->addShader(SHADOW_BUFFER, "shadowMap");
-    //     }
-    // }
-    // addGameobject(tree);
-    // tree->setScale(glm::vec3(0.6f));
-    // tree->setPosition(glm::vec3(worldSize / 2, 300, worldSize / 2));
+    Gameobject* tree = GLTFLoader::loadMesh("../resources/models/tree/scene.gltf");
+    std::list<Gameobject*> allChildren = tree->getAllChildren();
+    for(Gameobject* child : allChildren){
+        RenderObjectComponent* meshComp = child -> getComponent<RenderObjectComponent>();
+        if(meshComp){
+            Mesh* mesh = static_cast<Mesh*>(meshComp->getRenderObject());
+            mesh->addShader(FRAME_BUFFER, "model");
+            mesh->addShader(SHADOW_BUFFER, "shadowMap");
+        }
+    }
+    addGameobject(tree);
+    tree->setScale(glm::vec3(0.7f));
+    tree->setPosition(glm::vec3(worldSize / 2, 300, worldSize / 2));
+
+    Gameobject* bird = GLTFLoader::loadMesh("../resources/models/butterfly/scene.gltf");
+    allChildren = bird->getAllChildren();
+    for(Gameobject* child : allChildren){
+        RenderObjectComponent* meshComp = child -> getComponent<RenderObjectComponent>();
+        if(meshComp){
+            Mesh* mesh = static_cast<Mesh*>(meshComp->getRenderObject());
+            mesh->addShader(FRAME_BUFFER, "model");
+            mesh->addShader(SHADOW_BUFFER, "shadowMap");
+        }
+    }
+    addGameobject(bird);
+    bird->setScale(glm::vec3(800.0f));
+    bird->setPosition(glm::vec3(worldSize / 2 - 500, 508, worldSize / 2 + 500));
 
     int seed = 12923952u;
 
@@ -227,11 +244,12 @@ void TheLonelyTree::start(){
     // //! This is the worst code I have ever written
     userTree = new UserTree("https://7sqvdwegyf.execute-api.us-west-2.amazonaws.com", "/default/the-lonely-tree");
     std::string baseBranchID = userTree->read(userTree->constructKey(EntryType::UserIDBranchID, Crypto::toHex(steamID)));
-    if (baseBranchID == ""){
-        treeManager = new TreeManager();
-    }else{
-        treeManager = new TreeManager(Crypto::hexToLong(baseBranchID));
-    }
+    // if (baseBranchID == ""){
+    //     treeManager = new TreeManager();
+    // }else{
+    //     treeManager = new TreeManager(Crypto::hexToLong(baseBranchID));
+    // }
+    treeManager = new TreeManager(5842433818981);
     userTree->updateTreeManager(steamID, treeManager);
 
     treeManager->rootBranch()->pushBackTexture(branchDiffuse);
@@ -240,13 +258,20 @@ void TheLonelyTree::start(){
     treeManager->rootBranch()->addShader(SHADOW_BUFFER, "treeShadowMap");
     treeManager->rootBranch()->getLeafManager()->addShader(FRAME_BUFFER, "leaf");
     treeManager->rootBranch()->getLeafManager()->addShader(SHADOW_BUFFER, "leafShadowMap");
-    int numNodes = 60;
+    int numNodes = 50;
     for (int i = 0; i < numNodes; i++){
         treeManager->rootBranch()->addNode(entry);
     }
     treeManager->rootBranch()->recalculateVertices();
 
     // build tree
+    // srand(time(0));
+
+    int treeSeed = rand();
+    // int seed = rand();
+    std::cout << "Seed: " << treeSeed << std::endl;
+    srand(treeSeed);
+
     std::stack <std::pair<TreeBranch*, int>> branchStack;
     branchStack.push({treeManager->rootBranch(), 3});
     int counter = 0;
@@ -258,8 +283,8 @@ void TheLonelyTree::start(){
         // std::cout << "POP " << depth << std::endl;
 
         if (depth > 0){
-            int numBranches = rand() % 5 + 1;
-            numBranches = 4;
+            int numBranches = rand() % 4 + 1;
+            // numBranches = 4;
             for(int i = 0; i < numBranches; i++){
                 int numNodes = rand() % (10 * depth) + 4;
                 // std::cout << "Num Nodes: " << numNodes << std::endl;
@@ -267,7 +292,7 @@ void TheLonelyTree::start(){
 
                 // random node from 0 to numNodes
                 int totalNodes = branch->getNumNodes();
-                int randomNode = rand() % (totalNodes); // TODO make better
+                int randomNode = rand() % (int)(totalNodes); // TODO make better
                 TreeBranch* newBranch = treeManager->addBranch(branch->getID(), randomNode);
                 newBranch->pushBackTexture(branchDiffuse);
                 newBranch->pushBackTexture(branchNormal);
@@ -302,7 +327,7 @@ void TheLonelyTree::start(){
     treeManager->addComponent(this->userTree);
     treeManager->setPosition(glm::vec3(worldSize/2, 280, worldSize/2));
     treeManager->setScale(glm::vec3(100.0f));
-    addGameobject(treeManager);
+    // addGameobject(treeManager);
 
     // float worldSize = 500.0f;
     // plane->setPosition(glm::vec3(worldSize/2, -50, worldSize/2));
@@ -333,7 +358,8 @@ void TheLonelyTree::start(){
     grass->addComponent(new RenderObjectComponent(grassMesh));
     addGameobject(grass);
 
-    std::string path = "../resources/textures/cubemaps/cloud/";
+    // std::string path = "../resources/textures/cubemaps/cloudDay/";
+    std::string path = "../resources/textures/cubemaps/cloudSunset/";
     std::vector<std::string> faces = {
         path + "right.jpg",
         path + "left.jpg",
@@ -380,6 +406,18 @@ void TheLonelyTree::start(){
 }
 
 void TheLonelyTree::update(){
+    if (Input::getKeyDown(KeyCode::KEY_F12)){
+        screenShotMode = !screenShotMode;
+        if (screenShotMode){
+            lockCursor(false);
+        }else{
+            lockCursor(true);
+        }
+    }
+    if(screenShotMode){
+        return;
+    }
+
     if(!ui->active){
         grass->active = true;
 

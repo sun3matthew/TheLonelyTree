@@ -30,7 +30,9 @@ void main() {
 
     vec3 modelPosition = vec3(gl_in[0].gl_Position);
     vec3 position = vec3(0);
-    Color = modelPosition;
+    // Color = modelPosition;
+    // Color = vec3(0.5, 0.7, 0.04);
+    Color = vec3(0.5, 0.7, 0.04);
 
     float left = float(leafTextureIndex[0])/numLeafTypes;
     float right = float(leafTextureIndex[0] + 1)/numLeafTypes;

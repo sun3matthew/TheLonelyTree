@@ -47,6 +47,7 @@ vec3 CalcDirLight(DirectionalLight light, vec3 norm, vec3 viewDir){
 
     // vec3 BaseColor = Color;
     vec3 BaseColor = vec3(texture(diffuse, TexCoords));
+    BaseColor *= Color;
 
     vec3 ambient = light.lightingData.ambient * BaseColor;
 
