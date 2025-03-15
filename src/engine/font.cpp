@@ -8,6 +8,7 @@
 // !!! CODE OF SHAME
 // assert(!FT_Init_FreeType(&ft));
 // assert(!FT_New_Face(ft, filepath.c_str(), 0, &face));
+// assert(!FT_Load_Char(face, c, FT_LOAD_RENDER));
 // !!! Asserts are not included in release
 
 Font::Font(std::string filepath, int size)
@@ -36,7 +37,7 @@ Font::Font(std::string filepath, int size)
     for (unsigned char c = 0; c < 128; c++)
     {
         // load character glyph 
-        assert(!FT_Load_Char(face, c, FT_LOAD_RENDER));
+        FT_Load_Char(face, c, FT_LOAD_RENDER);
 
         // generate texture
         Texture* texture = new Texture(face->glyph->bitmap.buffer, face->glyph->bitmap.width, face->glyph->bitmap.rows, 1, TextureType::Font, false);

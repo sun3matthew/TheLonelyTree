@@ -11,6 +11,8 @@ bool Input::currentState[(int)KeyCode::MAX_KEYS] = {false};
 bool Input::previousMouseState[(int)MouseButtonCode::MAX_BUTTONS] = {false};
 bool Input::currentMouseState[(int)MouseButtonCode::MAX_BUTTONS] = {false};
 
+std::queue<unsigned int> Input::charBuffer;  // Initialize buffer
+
 GLFWwindow* Input::window = nullptr;
 
 glm::vec2 Input::scroll = glm::vec2(0.0f);
@@ -20,6 +22,21 @@ void Input::setWindow(GLFWwindow* window, int width, int height){
 
     glfwSetCursorPosCallback(window, mouseCallback);
     glfwSetScrollCallback(window, scrollCallback);
+    glfwSetCharCallback(window, charCallback);
+}
+
+void Input::charCallback(GLFWwindow* window, unsigned int codepoint) {
+    charBuffer.push(codepoint);
+}
+
+void Input::clearCharBuffer() {
+    while (!charBuffer.empty()) {
+        charBuffer.pop();
+    }
+}
+
+std::queue<unsigned int> Input::getCharBuffer() {
+    return charBuffer;
 }
 
 void Input::mouseCallback(GLFWwindow* window, double xpos, double ypos){

@@ -6,6 +6,9 @@
 #include <engine/mouse_button_code.h>
 
 #include <glm/gtc/type_ptr.hpp>
+#include <glm/glm.hpp>
+
+#include <queue>
 
 class Input{
     public:
@@ -27,7 +30,13 @@ class Input{
         static bool getMouse(MouseButtonCode button);
         static bool getMouseDown(MouseButtonCode button);
         static bool getMouseUp(MouseButtonCode button);
+
+        static std::queue<unsigned int> getCharBuffer(); 
+        static void clearCharBuffer(); 
     private:
+        static void charCallback(GLFWwindow* window, unsigned int codepoint);
+        static std::queue<unsigned int> charBuffer;  // Buffer for text input
+
         static void mouseCallback(GLFWwindow* window, double xpos, double ypos);
         static void scrollCallback(GLFWwindow* window, double xoffset, double yoffset);
 

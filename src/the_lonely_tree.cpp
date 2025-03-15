@@ -184,33 +184,19 @@ void TheLonelyTree::start(){
     directionalLight->addComponent(light);
     addGameobject(directionalLight);
 
-    Gameobject* tree = GLTFLoader::loadMesh("../resources/models/tree/scene.gltf");
-    std::list<Gameobject*> allChildren = tree->getAllChildren();
-    for(Gameobject* child : allChildren){
-        RenderObjectComponent* meshComp = child -> getComponent<RenderObjectComponent>();
-        if(meshComp){
-            Mesh* mesh = static_cast<Mesh*>(meshComp->getRenderObject());
-            mesh->addShader(FRAME_BUFFER, "model");
-            mesh->addShader(SHADOW_BUFFER, "shadowMap");
-        }
-    }
-    addGameobject(tree);
-    tree->setScale(glm::vec3(0.7f));
-    tree->setPosition(glm::vec3(worldSize / 2, 300, worldSize / 2));
-
-    Gameobject* bird = GLTFLoader::loadMesh("../resources/models/butterfly/scene.gltf");
-    allChildren = bird->getAllChildren();
-    for(Gameobject* child : allChildren){
-        RenderObjectComponent* meshComp = child -> getComponent<RenderObjectComponent>();
-        if(meshComp){
-            Mesh* mesh = static_cast<Mesh*>(meshComp->getRenderObject());
-            mesh->addShader(FRAME_BUFFER, "model");
-            mesh->addShader(SHADOW_BUFFER, "shadowMap");
-        }
-    }
-    addGameobject(bird);
-    bird->setScale(glm::vec3(800.0f));
-    bird->setPosition(glm::vec3(worldSize / 2 - 500, 508, worldSize / 2 + 500));
+    // Gameobject* tree = GLTFLoader::loadMesh("../resources/models/tree/scene.gltf");
+    // std::list<Gameobject*> allChildren = tree->getAllChildren();
+    // for(Gameobject* child : allChildren){
+    //     RenderObjectComponent* meshComp = child -> getComponent<RenderObjectComponent>();
+    //     if(meshComp){
+    //         Mesh* mesh = static_cast<Mesh*>(meshComp->getRenderObject());
+    //         mesh->addShader(FRAME_BUFFER, "model");
+    //         mesh->addShader(SHADOW_BUFFER, "shadowMap");
+    //     }
+    // }
+    // addGameobject(tree);
+    // tree->setScale(glm::vec3(0.7f));
+    // tree->setPosition(glm::vec3(worldSize / 2, 300, worldSize / 2));
 
     int seed = 12923952u;
 
@@ -273,7 +259,8 @@ void TheLonelyTree::start(){
     srand(treeSeed);
 
     std::stack <std::pair<TreeBranch*, int>> branchStack;
-    branchStack.push({treeManager->rootBranch(), 3});
+    for(int i = 0; i < 4; i++)
+        branchStack.push({treeManager->rootBranch(), 3});
     int counter = 0;
     while(!branchStack.empty()){
         std::pair<TreeBranch*, int> branchPair = branchStack.top();
@@ -286,13 +273,18 @@ void TheLonelyTree::start(){
             int numBranches = rand() % 4 + 1;
             // numBranches = 4;
             for(int i = 0; i < numBranches; i++){
-                int numNodes = rand() % (10 * depth) + 4;
-                // std::cout << "Num Nodes: " << numNodes << std::endl;
+                float randPercent = (float)rand() / (float)RAND_MAX;
+                randPercent = randPercent * 0.5 + 0.25;
+                int numNodes = (int)(pow(randPercent * 100 * depth + 4, 0.5f));
+                std::cout << "Num Nodes: " << numNodes << std::endl;
                 counter++;
 
                 // random node from 0 to numNodes
                 int totalNodes = branch->getNumNodes();
-                int randomNode = rand() % (int)(totalNodes); // TODO make better
+                randPercent = (float)rand() / (float)RAND_MAX;
+                randPercent = randPercent * 0.8 + 0.1;
+                int randomNode = (int)(randPercent * totalNodes);
+
                 TreeBranch* newBranch = treeManager->addBranch(branch->getID(), randomNode);
                 newBranch->pushBackTexture(branchDiffuse);
                 newBranch->pushBackTexture(branchNormal);
@@ -436,18 +428,23 @@ void TheLonelyTree::update(){
         camera->ProcessMouseMovement(-mouseDelta.x, mouseDelta.y);
     }else{
         // grass->active = false;
-        
-        for (int i = 0; i < (int)KeyCode::MAX_KEYS; i++){
-            if (Input::getKeyDown((KeyCode)i)){
-                std::string key = KeyCodeToString((KeyCode)i);
-                if (!Input::getKey(KeyCode::KEY_LEFT_SHIFT)){
-                    if(key[0] >= 'A' && key[0] <= 'Z')
-                        key[0] = std::tolower(key[0]);
-                }
-                entry += key;
-                textMesh->setText(entry);
-            }
+
+        std::queue<unsigned int> charBuffer = Input::getCharBuffer();
+
+        int count = 0;
+        std::string buffer = "";
+        while (!charBuffer.empty()) {
+            char c = charBuffer.front();
+            charBuffer.pop();
+
+            buffer += c;
         }
+
+        if (buffer.size() > 0){
+            entry += buffer;
+            // std::cout << "Entry: " << entry << std::endl;
+        }
+
 
         if (Input::getKeyDown(KeyCode::KEY_BACKSPACE)){
             entry = entry.substr(0, entry.size() - 1);
@@ -459,7 +456,8 @@ void TheLonelyTree::update(){
                 entry
             ));
         }
-
+        
+        textMesh->setText(entry);
     }
 
     if (Input::getKeyUp(KeyCode::KEY_ESCAPE)){

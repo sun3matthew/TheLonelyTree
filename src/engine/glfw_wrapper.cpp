@@ -149,6 +149,7 @@ int GLFWWrapper::run(){
         RenderManager::instance.draw();
 
         glfwSwapBuffers(window);
+        Input::clearCharBuffer();
 
         Input::processInput();
         glfwPollEvents();
