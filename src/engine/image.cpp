@@ -3,18 +3,22 @@
 #include <engine/glfw_wrapper.h>
 
 Image::Image(Texture* texture, glm::vec2 min, glm::vec2 max, glm::vec3 color)
-    : texture(texture), color(color)
+    : texture(texture)
 {
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
+    glBindVertexArray(VAO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, NULL, GL_DYNAMIC_DRAW);
+
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+
+    setColor(color);
     setPosition(min, max);
 }
 
 Image::~Image()
 {
-    glDeleteVertexArrays(1, &VAO);
-    glDeleteBuffers(1, &VBO);
 }
 
 void Image::drawCall(Shader* shader)
@@ -22,24 +26,12 @@ void Image::drawCall(Shader* shader)
     UIRenderObject::drawCall(shader);
 
     shader->setVec3("color", color);
-
     texture->bind(0);
 
-    glBindVertexArray(VAO);
-    glDrawArrays(GL_TRIANGLES, 0, 6);
-    glBindVertexArray(0);
-}
-
-void Image::updateTexture(Texture* texture){
-    this->texture = texture;
-}
-
-void Image::setPosition(glm::vec2 min, glm::vec2 max)
-{
     glm::vec2 scale = glm::vec2(GLFWWrapper::width, GLFWWrapper::height);
 
-    this->min = min;
-    this->max = max;
+    glm::vec2 min = aabb.min;
+    glm::vec2 max = aabb.max;
 
     float vertices[] = {
         min.x * scale.x, min.y * scale.y, 0.0f, 0.0f,
@@ -51,19 +43,16 @@ void Image::setPosition(glm::vec2 min, glm::vec2 max)
         max.x * scale.x, min.y * scale.y, 1.0f, 0.0f
     };
 
-
     glBindVertexArray(VAO);
-
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, vertices, GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices); 
+    glDrawArrays(GL_TRIANGLES, 0, 6);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 }
 
-void Image::setColor(glm::vec3 color){
-    this->color = color;
+void Image::updateTexture(Texture* texture){
+    this->texture = texture;
 }

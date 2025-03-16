@@ -14,7 +14,7 @@ class RenderObjectComponent : public Component{
         void updateRenderObject(RenderObject*);
 
         RenderObject* getRenderObject();
-    private:
+    protected:
         RenderObject* renderObject;
 };
 

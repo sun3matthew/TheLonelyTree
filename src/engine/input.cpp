@@ -11,7 +11,7 @@ bool Input::currentState[(int)KeyCode::MAX_KEYS] = {false};
 bool Input::previousMouseState[(int)MouseButtonCode::MAX_BUTTONS] = {false};
 bool Input::currentMouseState[(int)MouseButtonCode::MAX_BUTTONS] = {false};
 
-std::queue<unsigned int> Input::charBuffer;  // Initialize buffer
+std::queue<KeyCode> Input::charBuffer;  // Initialize buffer
 
 GLFWwindow* Input::window = nullptr;
 
@@ -23,10 +23,30 @@ void Input::setWindow(GLFWwindow* window, int width, int height){
     glfwSetCursorPosCallback(window, mouseCallback);
     glfwSetScrollCallback(window, scrollCallback);
     glfwSetCharCallback(window, charCallback);
+    glfwSetKeyCallback(window, keyCallback);
 }
 
 void Input::charCallback(GLFWwindow* window, unsigned int codepoint) {
-    charBuffer.push(codepoint);
+    charBuffer.push((KeyCode)codepoint);
+}
+
+void Input::keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+    if (action == GLFW_PRESS || action == GLFW_REPEAT) {
+        switch (key) {
+            case GLFW_KEY_BACKSPACE:
+            case GLFW_KEY_ENTER:
+            case GLFW_KEY_TAB:
+            case GLFW_KEY_ESCAPE:
+            case GLFW_KEY_LEFT:
+            case GLFW_KEY_RIGHT:
+            case GLFW_KEY_UP:
+            case GLFW_KEY_DOWN:
+                charBuffer.push((KeyCode)key);
+                break;
+            default:
+                break;
+        }
+    }
 }
 
 void Input::clearCharBuffer() {
@@ -35,7 +55,7 @@ void Input::clearCharBuffer() {
     }
 }
 
-std::queue<unsigned int> Input::getCharBuffer() {
+std::queue<KeyCode> Input::getCharBuffer() {
     return charBuffer;
 }
 
@@ -66,6 +86,14 @@ glm::vec2 Input::getMousePosition(){
     double xpos, ypos;
     glfwGetCursorPos(window, &xpos, &ypos);
     return glm::vec2(xpos, ypos);
+}
+
+glm::vec2 Input::getMousePositionScreenSpace(int width, int height){
+    glm::vec2 pos = getMousePosition();
+    return glm::vec2( //! TODO IDFK why this is weird, see for windows
+        (pos.x) * 2,
+        (height / 2 - pos.y) * 2
+    );
 }
 
 glm::vec2 Input::getMouseDelta(){

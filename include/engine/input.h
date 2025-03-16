@@ -24,6 +24,8 @@ class Input{
         static glm::vec2 getMousePosition();
         static glm::vec2 getMouseDelta();
 
+        static glm::vec2 getMousePositionScreenSpace(int width, int height);
+
         static float getMouseScroll();
         static float getMouseScrollX();
 
@@ -31,11 +33,12 @@ class Input{
         static bool getMouseDown(MouseButtonCode button);
         static bool getMouseUp(MouseButtonCode button);
 
-        static std::queue<unsigned int> getCharBuffer(); 
+        static std::queue<KeyCode> getCharBuffer(); 
         static void clearCharBuffer(); 
     private:
         static void charCallback(GLFWwindow* window, unsigned int codepoint);
-        static std::queue<unsigned int> charBuffer;  // Buffer for text input
+        static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
+        static std::queue<KeyCode> charBuffer;
 
         static void mouseCallback(GLFWwindow* window, double xpos, double ypos);
         static void scrollCallback(GLFWwindow* window, double xoffset, double yoffset);

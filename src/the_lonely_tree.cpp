@@ -376,17 +376,17 @@ void TheLonelyTree::start(){
     ui->active = false;
     addGameobject(ui);
 
-    Texture* texture = new Texture("../resources/textures/UI/Button.png", TextureType::Diffuse);
+    Texture* texture = new Texture("../resources/textures/UI/Paper.png", TextureType::Diffuse);
     Gameobject* image = new Gameobject("Image");
-    Image* imageMesh = new Image(texture, glm::vec2(0.1, 0.1), glm::vec2(0.9, 0.9), glm::vec3(1.0f, 1.0f, 1.0f));
+    Image* imageMesh = new Image(texture, glm::vec2(0.05, 0.05), glm::vec2(0.95, 0.95), glm::vec3(1.0f, 1.0f, 1.0f));
     imageMesh->addShader(FRAME_BUFFER, "image");
     image->addComponent(new RenderObjectComponent(imageMesh));
     image->setParent(ui);
 
     Gameobject* text = new Gameobject("Text");
-    textMesh = new Text(font, "The Lonely Tree", glm::vec2(0.2, 0.75), glm::vec2(0.8, 0.25), 1.0f, glm::vec3(1.0f, 1.0f, 1.0f));
-    textMesh->addShader(FRAME_BUFFER, "text");
-    text->addComponent(new RenderObjectComponent(textMesh));
+    inputField = new InputField(font, glm::vec2(0.1, 0.85), glm::vec2(0.9, 0.15), 0.8f, glm::vec3(0.0f, 0.0f, 0.0f));
+    inputField->getRenderObject()->addShader(FRAME_BUFFER, "text");
+    text->addComponent(inputField);
     text->setParent(ui);
 
     std::cout << "Steam Username: " << steamUsername << std::endl;
@@ -411,6 +411,7 @@ void TheLonelyTree::update(){
     }
 
     if(!ui->active){
+        lockCursor(true);
         grass->active = true;
 
         if (Input::getKey(KeyCode::KEY_W))
@@ -427,37 +428,15 @@ void TheLonelyTree::update(){
         glm::vec2 mouseDelta = Input::getMouseDelta();
         camera->ProcessMouseMovement(-mouseDelta.x, mouseDelta.y);
     }else{
-        // grass->active = false;
+        lockCursor(false);
 
-        std::queue<unsigned int> charBuffer = Input::getCharBuffer();
-
-        int count = 0;
-        std::string buffer = "";
-        while (!charBuffer.empty()) {
-            char c = charBuffer.front();
-            charBuffer.pop();
-
-            buffer += c;
-        }
-
-        if (buffer.size() > 0){
-            entry += buffer;
-            // std::cout << "Entry: " << entry << std::endl;
-        }
-
-
-        if (Input::getKeyDown(KeyCode::KEY_BACKSPACE)){
-            entry = entry.substr(0, entry.size() - 1);
-        }
-        if (Input::getKeyDown(KeyCode::KEY_ENTER)){
+        if (Input::getKeyDown(KeyCode::KEY_F11)){
             userTree->addEntry(Entry(
                 getCurrentDateTime(),
                 steamUsername,
-                entry
+                inputField->getTextObject()->getText()
             ));
         }
-        
-        textMesh->setText(entry);
     }
 
     if (Input::getKeyUp(KeyCode::KEY_ESCAPE)){

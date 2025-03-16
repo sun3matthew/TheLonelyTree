@@ -16,20 +16,27 @@ public:
     void drawCall(Shader*) override;
 
     void updateFont(Font* font);
+
     void setText(std::string text);
-    void setPosition(glm::vec2 min, glm::vec2 max);
-    void setColor(glm::vec3 color);
-    void setScale(float scale);
+    std::string getText();
+
+    void setPosition(glm::vec2 min, glm::vec2 max) override;
+    void setScale(float scale) override;
+
+    void setCursorPosition(int position);
+    void setCursorVisible(bool visible);
+
+    std::vector<AABB>& getCharacterAABBs();
 private:
+    void recalculateCache();
+
     Font* font;
 
     std::string text;
+    int cursorPosition;
+    bool cursorVisible;
 
-    glm::vec2 min, max;
-    glm::vec3 color;
-    float scale;
-
-    unsigned int VAO, VBO;
+    std::vector<AABB> characterAABBs;
 };
 
 #endif // TEXT_H

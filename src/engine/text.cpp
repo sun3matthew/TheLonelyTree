@@ -3,24 +3,23 @@
 #include <engine/glfw_wrapper.h>
 
 Text::Text(Font* font, std::string text, glm::vec2 min, glm::vec2 max, float scale, glm::vec3 color)
-    : font(font), text(text), min(min), max(max), scale(scale), color(color)
+    : font(font), text(text)
 {
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
+    setColor(color);
+    setPosition(min, max);
+    setScale(scale);
+    
     glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
+
     glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, NULL, GL_DYNAMIC_DRAW);
+
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0); 
 }
 
 Text::~Text()
-{
-    glDeleteVertexArrays(1, &VAO);
-    glDeleteBuffers(1, &VBO);
-}
+{}
 
 #include <iostream>
 void Text::drawCall(Shader* shader)
@@ -31,66 +30,166 @@ void Text::drawCall(Shader* shader)
 
     glBindVertexArray(VAO);
 
-    std::string::const_iterator c;
-    glm::vec2 currentPosition = min * glm::vec2(GLFWWrapper::width, GLFWWrapper::height);
-    glm::vec2 maxPosition = max * glm::vec2(GLFWWrapper::width, GLFWWrapper::height);
+    for(int i = 0; i < characterAABBs.size(); i++){
+        Character ch = font->Characters[text[i]];
 
-    float lineSpacing = 0.03 * GLFWWrapper::height;
+        float vertices[] = {
+            characterAABBs[i].min.x, characterAABBs[i].max.y, 0.0f, 0.0f,
+            characterAABBs[i].min.x, characterAABBs[i].min.y, 0.0f, 1.0f,
+            characterAABBs[i].max.x, characterAABBs[i].min.y, 1.0f, 1.0f,
 
-    for (c = text.begin(); c != text.end(); c++)
-    {
-        Character ch = font->Characters[*c];
-
-        if (currentPosition.x > maxPosition.x){
-            currentPosition.x = min.x * GLFWWrapper::width;
-            currentPosition.y -= (lineSpacing) * scale;
-        }
-
-        float xpos = currentPosition.x + ch.Bearing.x * scale;
-        float ypos = currentPosition.y - (ch.Size.y - ch.Bearing.y) * scale;
-
-        float w = ch.Size.x * scale;
-        float h = ch.Size.y * scale;
-        float vertices[6][4] = {
-            { xpos,     ypos + h,   0.0f, 0.0f },            
-            { xpos,     ypos,       0.0f, 1.0f },
-            { xpos + w, ypos,       1.0f, 1.0f },
-
-            { xpos,     ypos + h,   0.0f, 0.0f },
-            { xpos + w, ypos,       1.0f, 1.0f },
-            { xpos + w, ypos + h,   1.0f, 0.0f }           
+            characterAABBs[i].min.x, characterAABBs[i].max.y, 0.0f, 0.0f,
+            characterAABBs[i].max.x, characterAABBs[i].min.y, 1.0f, 1.0f,
+            characterAABBs[i].max.x, characterAABBs[i].max.y, 1.0f, 0.0f
         };
-
-        // ! UNSUPPORTED (log once): POSSIBLE ISSUE: unit 0 GLD_TEXTURE_INDEX_2D is unloadable and bound to sampler type (Float) - using zero texture because texture unloadable
-        shader->setTexture(ch.texture, 0);
 
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
         glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices); 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
 
+        shader->setTexture(ch.texture, 0);
         glDrawArrays(GL_TRIANGLES, 0, 6);
-        currentPosition.x += (ch.Advance >> 6) * scale;
+
     }
+
+    if (cursorVisible){
+        // TODO make this better.
+        glm::vec2 currentPosition = aabb.min * glm::vec2(GLFWWrapper::width, GLFWWrapper::height);
+        if (cursorPosition != 0){
+            Character ch = font->Characters[text[cursorPosition - 1]];
+            currentPosition = glm::vec2(
+                characterAABBs[cursorPosition - 1].min.x + (ch.Advance >> 6) * scale,
+                characterAABBs[cursorPosition - 1].min.y
+            );
+        }
+
+        Character ch = font->Characters['|'];
+
+        float w = ch.Size.x * scale;
+        float h = ch.Size.y * scale;
+
+        AABB aabb = AABB(
+            glm::vec2(currentPosition.x, currentPosition.y),
+            glm::vec2(currentPosition.x + w, currentPosition.y + h)
+        );
+
+        float vertices[] = {
+            aabb.min.x, aabb.max.y, 0.0f, 0.0f,
+            aabb.min.x, aabb.min.y, 0.0f, 1.0f,
+            aabb.max.x, aabb.min.y, 1.0f, 1.0f,
+
+            aabb.min.x, aabb.max.y, 0.0f, 0.0f,
+            aabb.max.x, aabb.min.y, 1.0f, 1.0f,
+            aabb.max.x, aabb.max.y, 1.0f, 0.0f
+        };
+
+        glBindBuffer(GL_ARRAY_BUFFER, VBO);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+        shader->setTexture(ch.texture, 0);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+    }
+
+
     glBindVertexArray(0);
+}
+
+void Text::setCursorPosition(int position){
+    cursorPosition = position;
+}
+
+void Text::setCursorVisible(bool visible){
+    cursorVisible = visible;
+}
+
+void Text::setPosition(glm::vec2 min, glm::vec2 max){
+    UIRenderObject::setPosition(min, max);
+    recalculateCache();
+}
+
+void Text::setScale(float scale){
+    UIRenderObject::setScale(scale);
+    recalculateCache();
 }
 
 void Text::updateFont(Font* font){
     this->font = font;
+    recalculateCache();
 }
 
 void Text::setText(std::string text){
+    if (this->text == text)
+        return;
+
     this->text = text;
+    recalculateCache();
 }
 
-void Text::setPosition(glm::vec2 min, glm::vec2 max){
-    this->min = min;
-    this->max = max;
+std::string Text::getText(){
+    return text;
 }
 
-void Text::setColor(glm::vec3 color){
-    this->color = color;
+std::vector<AABB>& Text::getCharacterAABBs(){
+    return characterAABBs;
 }
 
-void Text::setScale(float scale){
-    this->scale = scale;
+void Text::recalculateCache(){
+    characterAABBs.clear();
+
+    std::vector<std::string> splitText;
+
+    // split with whitespace
+    std::string word = "";
+    for (char c : text){
+        if (c == ' '){
+            splitText.push_back(word + " ");
+            word = "";
+        }else{
+            word += c;
+        }
+    }
+    if (word != "")
+        splitText.push_back(word);
+        
+        
+    glm::vec2 currentPosition = aabb.min * glm::vec2(GLFWWrapper::width, GLFWWrapper::height);
+    glm::vec2 maxPosition = aabb.max * glm::vec2(GLFWWrapper::width, GLFWWrapper::height);
+    float lineSpacing = 0.03 * GLFWWrapper::height;
+
+    for (std::string word : splitText){
+        float wordWidth = 0;
+        for (char c : word){
+            Character ch = font->Characters[c];
+            wordWidth += (ch.Advance >> 6) * scale;
+        }
+
+        if (currentPosition.x + wordWidth > maxPosition.x && wordWidth < maxPosition.x){ // make sure word fits
+            currentPosition.x = aabb.min.x * GLFWWrapper::width;
+            currentPosition.y -= (lineSpacing) * scale;
+        }
+
+        for (char c : word){
+            Character ch = font->Characters[c];
+
+            if (currentPosition.x > maxPosition.x){
+                currentPosition.x = aabb.min.x * GLFWWrapper::width;
+                currentPosition.y -= (lineSpacing) * scale;
+            }
+
+            float xPos = currentPosition.x + ch.Bearing.x * scale;
+            float yPos = currentPosition.y - (ch.Size.y - ch.Bearing.y) * scale;
+
+            float w = ch.Size.x * scale;
+            float h = ch.Size.y * scale;
+
+            characterAABBs.push_back(AABB(
+                glm::vec2(xPos, yPos),
+                glm::vec2(xPos + w, yPos + h)
+            ));
+
+            currentPosition.x += (ch.Advance >> 6) * scale;
+        }
+    }
 }
+

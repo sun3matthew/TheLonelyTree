@@ -1,26 +1,7 @@
-// #ifndef UI_RENDER_OBJECT_H
-// #define UI_RENDER_OBJECT_H
-
-// #include <engine/render_object.h>
-
-// class UIRenderObject : public RenderObject
-// {
-// public:
-//     UIRenderObject();
-//     ~UIRenderObject();
-
-//     void drawCall(Shader*) override;
-// private:
-//     unsigned int VAO, VBO;
-// };
-
-// #endif // UI_RENDER_OBJECT_H
-
 #include <engine/ui_render_object.h>
 #include <glad/glad.h>
 
 #include <glm/gtc/matrix_transform.hpp>
-// #include <glm/gtc/type_ptr.hpp>
 #include <engine/glfw_wrapper.h>
 
 UIRenderObject::UIRenderObject()
@@ -41,4 +22,16 @@ void UIRenderObject::drawCall(Shader* shader)
 
     glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(GLFWWrapper::width), 0.0f, static_cast<float>(GLFWWrapper::height));
     shader->setMat4("projection", projection);
+}
+
+void UIRenderObject::setPosition(glm::vec2 min, glm::vec2 max){
+    this->aabb = AABB(min, max);
+}
+
+void UIRenderObject::setColor(glm::vec3 color){
+    this->color = color;
+}
+
+void UIRenderObject::setScale(float scale){
+    this->scale = scale;
 }

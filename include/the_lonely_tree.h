@@ -4,6 +4,7 @@
 #include <engine/glfw_wrapper.h>
 #include <engine/gameobject.h>
 #include <engine/camera.h>
+#include <engine/input_field.h>
 
 #include <engine/font.h>
 #include <engine/text.h>
@@ -36,9 +37,9 @@ class TheLonelyTree : public GLFWWrapper{
 
         Gameobject* ui;
         Gameobject* grass;
-        Text* textMesh;
 
-        std::string entry;
+        InputField* inputField;
+
         std::string steamUsername;
         unsigned long long steamID;
 };  

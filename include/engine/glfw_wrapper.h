@@ -1,7 +1,6 @@
 #ifndef GLFW_WRAPPER_H
 #define GLFW_WRAPPER_H
 
-
 #include <glad/glad.h> 
 #include <GLFW/glfw3.h>
 
