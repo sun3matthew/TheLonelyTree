@@ -49,7 +49,17 @@ void InputField::update(){
 
     for(KeyCode c : specialKeys){
         if (c == KeyCode::KEY_TAB){
-            buffer += "    "; // TODO make better
+            // buffer += "";
+            for (int i = 0; i < 4; i++){
+                buffer = buffer.substr(0, cursorPosition) + " " + buffer.substr(cursorPosition, buffer.size() - cursorPosition);
+                cursorPosition++;
+            }
+        }
+
+        if (c == KeyCode::KEY_ENTER){
+            // buffer += "\n";
+            buffer = buffer.substr(0, cursorPosition) + "\n" + buffer.substr(cursorPosition, buffer.size() - cursorPosition);
+            cursorPosition++;
         }
 
         if (c == KeyCode::KEY_BACKSPACE){
@@ -65,10 +75,6 @@ void InputField::update(){
         if (c == KeyCode::KEY_RIGHT){
             if (cursorPosition < buffer.size())
                 cursorPosition++;
-        }
-
-        if (c == KeyCode::KEY_ENTER){
-            buffer += "\n";
         }
     }
 

@@ -56,9 +56,14 @@ void Text::drawCall(Shader* shader)
         // TODO make this better.
         glm::vec2 currentPosition = aabb.min * glm::vec2(GLFWWrapper::width, GLFWWrapper::height);
         if (cursorPosition != 0){
-            Character ch = font->Characters[text[cursorPosition - 1]];
+            char c = text[cursorPosition - 1];
+            Character ch = font->Characters[c];
+            float advance = (ch.Advance >> 6) * scale;
+            if (c == '\n'){
+                advance = 0;
+            }
             currentPosition = glm::vec2(
-                characterAABBs[cursorPosition - 1].min.x + (ch.Advance >> 6) * scale,
+                characterAABBs[cursorPosition - 1].min.x + advance,
                 characterAABBs[cursorPosition - 1].min.y
             );
         }
@@ -142,8 +147,8 @@ void Text::recalculateCache(){
     // split with whitespace
     std::string word = "";
     for (char c : text){
-        if (c == ' '){
-            splitText.push_back(word + " ");
+        if (c == ' ' || c == '\n'){
+            splitText.push_back(word + c);
             word = "";
         }else{
             word += c;
@@ -172,23 +177,32 @@ void Text::recalculateCache(){
         for (char c : word){
             Character ch = font->Characters[c];
 
-            if (currentPosition.x > maxPosition.x){
+            if (currentPosition.x > maxPosition.x || c == '\n'){
                 currentPosition.x = aabb.min.x * GLFWWrapper::width;
                 currentPosition.y -= (lineSpacing) * scale;
             }
+
 
             float xPos = currentPosition.x + ch.Bearing.x * scale;
             float yPos = currentPosition.y - (ch.Size.y - ch.Bearing.y) * scale;
 
             float w = ch.Size.x * scale;
             float h = ch.Size.y * scale;
+            float advance = (ch.Advance >> 6) * scale;
+
+            if (c == '\n'){
+                w = 0;
+                h = 0;
+                advance = 0;
+            }
+
 
             characterAABBs.push_back(AABB(
                 glm::vec2(xPos, yPos),
                 glm::vec2(xPos + w, yPos + h)
             ));
 
-            currentPosition.x += (ch.Advance >> 6) * scale;
+            currentPosition.x += advance;
         }
     }
 }
