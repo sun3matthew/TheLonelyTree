@@ -3,14 +3,15 @@
 #include <engine/component.h>
 #include <engine/text.h>
 
-#include <engine/render_object_component.h>
+#include <engine/ui_component.h>
 
-class InputField : public RenderObjectComponent{
+class InputField : public UIComponent{
     public:
-        InputField(Font* font, glm::vec2 min, glm::vec2 max, float scale, glm::vec3 color);
+        InputField(Text* textObject);
         ~InputField() override;
 
-        void update() override;
+        void focused() override;
+        void onUnfocused() override;
 
         Text* getTextObject();
     private:

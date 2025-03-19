@@ -3,6 +3,7 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <engine/glfw_wrapper.h>
+#include <engine/ui_canvas.h>
 
 UIRenderObject::UIRenderObject()
 {
@@ -15,6 +16,7 @@ UIRenderObject::~UIRenderObject()
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
 }
+
 
 void UIRenderObject::drawCall(Shader* shader)
 {
@@ -34,4 +36,8 @@ void UIRenderObject::setColor(glm::vec3 color){
 
 void UIRenderObject::setScale(float scale){
     this->scale = scale;
+}
+
+AABB UIRenderObject::getAABB(){
+    return aabb;
 }

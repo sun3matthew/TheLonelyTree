@@ -4,6 +4,8 @@
 #include <engine/render_object.h>
 #include <engine/aabb.h>
 
+class UICanvas;
+
 class UIRenderObject : public RenderObject
 {
 public:
@@ -15,12 +17,13 @@ public:
     virtual void setColor(glm::vec3 color);
     virtual void setPosition(glm::vec2 min, glm::vec2 max);
     virtual void setScale(float scale);
+
+    AABB getAABB();
 protected:
     unsigned int VAO, VBO;
 
     glm::vec3 color;
     float scale;
-
     AABB aabb;
 };
 

@@ -88,11 +88,16 @@ glm::vec2 Input::getMousePosition(){
     return glm::vec2(xpos, ypos);
 }
 
-glm::vec2 Input::getMousePositionScreenSpace(int width, int height){
+glm::vec2 Input::getMousePositionScreenSpace(){
+    glm::vec2 pos = getMousePosition();
+    return glm::vec2(pos.x / GLFWWrapper::width * 2, 1 - pos.y / GLFWWrapper::height * 2);
+}
+
+glm::vec2 Input::getMousePositionPixelSpace(){
     glm::vec2 pos = getMousePosition();
     return glm::vec2( //! TODO IDFK why this is weird, see for windows
         (pos.x) * 2,
-        (height / 2 - pos.y) * 2
+        (GLFWWrapper::height / 2 - pos.y) * 2
     );
 }
 

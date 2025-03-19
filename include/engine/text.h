@@ -7,6 +7,19 @@
 
 #include <engine/ui_render_object.h>
 
+enum class TextAlignment
+{
+    UPPER_LEFT,
+    UPPER_CENTER,
+    UPPER_RIGHT,
+    MIDDLE_LEFT,
+    MIDDLE_CENTER,
+    MIDDLE_RIGHT,
+    LOWER_LEFT,
+    LOWER_CENTER,
+    LOWER_RIGHT
+};
+
 class Text : public UIRenderObject
 {
 public:
@@ -26,11 +39,14 @@ public:
     void setCursorPosition(int position);
     void setCursorVisible(bool visible);
 
+    void setAlignment(TextAlignment alignment);
+
     std::vector<AABB>& getCharacterAABBs();
 private:
     void recalculateCache();
 
     Font* font;
+    TextAlignment alignment;
 
     std::string text;
     int cursorPosition;

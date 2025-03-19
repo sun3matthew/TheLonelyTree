@@ -58,8 +58,8 @@ TheLonelyTree::TheLonelyTree()
 {
     TheLonelyTree::instance = this;
 
-    // createWindow(800 * 1.5f, 600 * 1.5f, "The Lonely Tree");
-    createWindow(900 * 1.5f, 650 * 1.5f, "The Lonely Tree");
+    createWindow(800 * 1.5f, 500 * 1.5f, "The Lonely Tree");
+    // createWindow(900 * 1.5f, 650 * 1.5f, "The Lonely Tree");
     lockCursor(true);
 
     // TODO turn these into enums
@@ -138,6 +138,10 @@ TheLonelyTree::TheLonelyTree()
     }
 }
 
+
+// !!!! You need to take a fine tooth comb and find all the memory leaks. 
+// ! Technically there arn't any for this game since every thing loaded will never be unloaded
+// ! But its the principle.
 TheLonelyTree::~TheLonelyTree(){
     // delete camera; //! Do not delete, just a reference to a component
     delete font;
@@ -373,28 +377,36 @@ void TheLonelyTree::start(){
 
 
     ui = new Gameobject("UI");
+    uiCanvas = new UICanvas();
+    ui->addComponent(uiCanvas);
     ui->active = false;
     addGameobject(ui);
 
     Texture* texture = new Texture("../resources/textures/UI/Paper.png", TextureType::Diffuse);
-    Gameobject* image = new Gameobject("Image");
     Image* imageMesh = new Image(texture, glm::vec2(0.05, 0.05), glm::vec2(0.95, 0.95), glm::vec3(1.0f, 1.0f, 1.0f));
     imageMesh->addShader(FRAME_BUFFER, "image");
-    image->addComponent(new RenderObjectComponent(imageMesh));
-    image->setParent(ui);
+    uiCanvas->addUIRenderObject(imageMesh);
 
-    Gameobject* text = new Gameobject("Text");
-    inputField = new InputField(font, glm::vec2(0.1, 0.85), glm::vec2(0.9, 0.15), 0.8f, glm::vec3(0.0f, 0.0f, 0.0f));
+    // Text* text = new Text(font, "", glm::vec2(0.1, 0.15), glm::vec2(0.9, 0.85), 0.8f, glm::vec3(0.0f, 0.0f, 0.0f));
+
+    Text* headerText = new Text(font, "", glm::vec2(0.1, 0.80), glm::vec2(0.9, 0.85), 1.2f, glm::vec3(0.0f, 0.0f, 0.0f));
+    headerText->setAlignment(TextAlignment::UPPER_LEFT);
+    InputField* headerInputField = new InputField(headerText);
+    headerInputField->getRenderObject()->addShader(FRAME_BUFFER, "text");
+    uiCanvas->addUIComponent(headerInputField);
+
+    Text* text = new Text(font, "", glm::vec2(0.1, 0.15), glm::vec2(0.9, 0.80), 0.8f, glm::vec3(0.0f, 0.0f, 0.0f));
+    text->setAlignment(TextAlignment::UPPER_LEFT);
+    InputField* inputField = new InputField(text);
     inputField->getRenderObject()->addShader(FRAME_BUFFER, "text");
-    text->addComponent(inputField);
-    text->setParent(ui);
+    uiCanvas->addUIComponent(inputField);
 
-    std::cout << "Steam Username: " << steamUsername << std::endl;
-    Gameobject* text2 = new Gameobject("Text");
-    Text* textMesh2 = new Text(font, steamUsername, glm::vec2(0.0, 0.0), glm::vec2(0.8, 0.25), 1.0f, glm::vec3(1.0f, 1.0f, 1.0f));
-    textMesh2->addShader(FRAME_BUFFER, "text");
-    text2->addComponent(new RenderObjectComponent(textMesh2));
-    text2->setParent(ui);
+    this->inputField = inputField;
+
+
+    Text* text2 = new Text(font, steamUsername, glm::vec2(0.0, 0.0), glm::vec2(0.8, 0.25), 1.0f, glm::vec3(1.0f, 1.0f, 1.0f));
+    text2->addShader(FRAME_BUFFER, "text");
+    uiCanvas->addUIRenderObject(text2);
 }
 
 void TheLonelyTree::update(){

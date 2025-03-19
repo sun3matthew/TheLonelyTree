@@ -8,6 +8,7 @@
 
 #include <engine/font.h>
 #include <engine/text.h>
+#include <engine/ui_canvas.h>
 
 #include <vector>
 #include <list>
@@ -36,6 +37,8 @@ class TheLonelyTree : public GLFWWrapper{
         Font* font;
 
         Gameobject* ui;
+        UICanvas* uiCanvas;
+
         Gameobject* grass;
 
         InputField* inputField;

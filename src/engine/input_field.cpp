@@ -1,12 +1,12 @@
 
-#include <engine/glfw_wrapper.h>
-
 #include <engine/input_field.h>
 #include <engine/input.h>
 
-InputField::InputField(Font* font, glm::vec2 min, glm::vec2 max, float scale, glm::vec3 color)
-    : RenderObjectComponent(new Text(font, "", min, max, scale, color))
+InputField::InputField(Text* textObject)
+    : UIComponent(textObject)
 {
+    clickable = true;
+
     buffer = "";
     blinkCounter = 0.0f;
     cursorPosition = 0;
@@ -14,7 +14,7 @@ InputField::InputField(Font* font, glm::vec2 min, glm::vec2 max, float scale, gl
 
 InputField::~InputField()
 {
-    // ! Holy F*cking Sh*t, c++ is so hard to be a bad programmer in
+    // ! Holy F*cking Sh*t, c++ is so easy to be a bad programmer in
     // ! I need stricter rules to follow
     // if(textObject)
     //     delete textObject;
@@ -25,10 +25,11 @@ Text* InputField::getTextObject(){
     return dynamic_cast<Text*>(renderObject);
 }
 
-#include <iostream>
-void InputField::update(){
-    RenderObjectComponent::update();
+void InputField::onUnfocused(){
+    this->getTextObject()->setCursorVisible(false);
+}
 
+void InputField::focused(){
     std::queue<KeyCode> charBuffer = Input::getCharBuffer();
 
     std::vector<KeyCode> specialKeys;
@@ -63,8 +64,10 @@ void InputField::update(){
         }
 
         if (c == KeyCode::KEY_BACKSPACE){
-            buffer = buffer.substr(0, cursorPosition - 1) + buffer.substr(cursorPosition, buffer.size() - cursorPosition);
-            cursorPosition--;
+            if (cursorPosition > 0){
+                buffer = buffer.substr(0, cursorPosition - 1) + buffer.substr(cursorPosition, buffer.size() - cursorPosition);
+                cursorPosition--;
+            }
         }
 
         if (c == KeyCode::KEY_LEFT){
@@ -84,7 +87,7 @@ void InputField::update(){
     if (Input::getMouseDown(MouseButtonCode::MOUSE_BUTTON_LEFT)){
         cursorPosition = buffer.size();
 
-        glm::vec2 mousePosition = Input::getMousePositionScreenSpace(GLFWWrapper::width, GLFWWrapper::height);
+        glm::vec2 mousePosition = Input::getMousePositionPixelSpace();
 
         std::vector<AABB> characterAABBs = textObject->getCharacterAABBs();
         for (int i = 0; i < characterAABBs.size(); i++){

@@ -3,12 +3,12 @@
 #include <engine/glfw_wrapper.h>
 
 Text::Text(Font* font, std::string text, glm::vec2 min, glm::vec2 max, float scale, glm::vec3 color)
-    : font(font), text(text)
+    : font(font), text(text), alignment(TextAlignment::LOWER_LEFT), cursorPosition(-1), cursorVisible(false)
 {
     setColor(color);
     setPosition(min, max);
     setScale(scale);
-    
+
     glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
@@ -21,7 +21,30 @@ Text::Text(Font* font, std::string text, glm::vec2 min, glm::vec2 max, float sca
 Text::~Text()
 {}
 
-#include <iostream>
+AABB getAlignmentAABB(TextAlignment alignment, AABB aabb){
+    glm::vec2 min = aabb.min;
+    glm::vec2 max = aabb.max;
+
+    // bottom left is 0, 0
+    switch (alignment){
+        case TextAlignment::UPPER_LEFT:
+            return AABB(glm::vec2(min.x, max.y), glm::vec2(max.x, min.y));
+        // case TextAlignment::UPPER_CENTER:
+        case TextAlignment::UPPER_RIGHT:
+            return AABB(glm::vec2(max.x, max.y), glm::vec2(min.x, min.y));
+        // case TextAlignment::MIDDLE_LEFT:
+        // case TextAlignment::MIDDLE_CENTER:
+        // case TextAlignment::MIDDLE_RIGHT:
+        case TextAlignment::LOWER_LEFT:
+            return AABB(glm::vec2(min.x, min.y), glm::vec2(max.x, max.y));
+        // case TextAlignment::LOWER_CENTER:
+        case TextAlignment::LOWER_RIGHT:
+            return AABB(glm::vec2(max.x, min.y), glm::vec2(min.x, max.y));
+        default:
+            return AABB(glm::vec2(min.x, max.y), glm::vec2(max.x, min.y));
+    }
+}
+
 void Text::drawCall(Shader* shader)
 {
     UIRenderObject::drawCall(shader);
@@ -54,7 +77,7 @@ void Text::drawCall(Shader* shader)
 
     if (cursorVisible){
         // TODO make this better.
-        glm::vec2 currentPosition = aabb.min * glm::vec2(GLFWWrapper::width, GLFWWrapper::height);
+        glm::vec2 currentPosition = getAlignmentAABB(alignment, aabb).min * glm::vec2(GLFWWrapper::width, GLFWWrapper::height);
         if (cursorPosition != 0){
             char c = text[cursorPosition - 1];
             Character ch = font->Characters[c];
@@ -123,6 +146,11 @@ void Text::updateFont(Font* font){
     recalculateCache();
 }
 
+void Text::setAlignment(TextAlignment alignment){
+    this->alignment = alignment;
+    recalculateCache();
+}
+
 void Text::setText(std::string text){
     if (this->text == text)
         return;
@@ -157,9 +185,14 @@ void Text::recalculateCache(){
     if (word != "")
         splitText.push_back(word);
         
-        
-    glm::vec2 currentPosition = aabb.min * glm::vec2(GLFWWrapper::width, GLFWWrapper::height);
-    glm::vec2 maxPosition = aabb.max * glm::vec2(GLFWWrapper::width, GLFWWrapper::height);
+    AABB textAABB = getAlignmentAABB(alignment, aabb);
+
+    glm::vec2 currentPosition = textAABB.min;
+    glm::vec2 maxPosition = textAABB.max;
+
+    currentPosition *= glm::vec2(GLFWWrapper::width, GLFWWrapper::height);
+    maxPosition *= glm::vec2(GLFWWrapper::width, GLFWWrapper::height);
+
     float lineSpacing = 0.03 * GLFWWrapper::height;
 
     for (std::string word : splitText){

@@ -1,12 +1,14 @@
 #ifndef INPUT_H
 #define INPUT_H
 
-#include <GLFW/glfw3.h>
+#include <engine/glfw_wrapper.h>
+
 #include <engine/key_code.h>
 #include <engine/mouse_button_code.h>
 
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/glm.hpp>
+
 
 #include <queue>
 
@@ -24,7 +26,8 @@ class Input{
         static glm::vec2 getMousePosition();
         static glm::vec2 getMouseDelta();
 
-        static glm::vec2 getMousePositionScreenSpace(int width, int height);
+        static glm::vec2 getMousePositionPixelSpace();
+        static glm::vec2 getMousePositionScreenSpace();
 
         static float getMouseScroll();
         static float getMouseScrollX();
