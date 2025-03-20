@@ -7,6 +7,7 @@
 #include <engine/gameobject.h>
 #include <engine/render_manager.h>
 #include <engine/texture.h>
+#include <engine/audio.h>
 
 #include <list>
 #include <string>

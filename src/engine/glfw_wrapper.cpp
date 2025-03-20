@@ -3,7 +3,6 @@
 #include <iostream>
 #include <engine/input.h>
 
-
 float GLFWWrapper::lastX = 0.0f;
 float GLFWWrapper::lastY = 0.0f;
 float GLFWWrapper::width = 0.0f;
@@ -147,6 +146,7 @@ int GLFWWrapper::run(){
 
         // END OF FRAME
         RenderManager::instance.draw();
+        Audio::instance.update();
 
         glfwSwapBuffers(window);
         Input::clearCharBuffer();

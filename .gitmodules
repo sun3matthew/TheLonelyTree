@@ -19,3 +19,6 @@
 [submodule "external/steamworks"]
 	path = external/steamworks
 	url = https://github.com/sun3matthew/steamworks-sdk-clone.git
+[submodule "external/soloud"]
+	path = external/soloud
+	url = https://github.com/jarikomppa/soloud.git

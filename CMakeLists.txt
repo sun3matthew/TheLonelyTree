@@ -47,6 +47,24 @@ target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/include )
 include_directories(external/PerlinNoise)
 include_directories(external/http)
 
+# Add SoLoud source files
+file(GLOB_RECURSE SOLOUD_SRC_FILES
+    ${CMAKE_SOURCE_DIR}/external/soloud/src/*.c
+    ${CMAKE_SOURCE_DIR}/external/soloud/src/*.cpp
+)
+list(FILTER SOLOUD_SRC_FILES EXCLUDE REGEX "external/soloud/src/backend/vita_homebrew/.*")
+list(FILTER SOLOUD_SRC_FILES EXCLUDE REGEX "external/soloud/src/tools/.*")
+add_library(soloud STATIC ${SOLOUD_SRC_FILES})
+target_include_directories(soloud PUBLIC ${CMAKE_SOURCE_DIR}/external/soloud/include)
+target_link_libraries(${PROJECT_NAME} PRIVATE soloud)
+target_compile_definitions(soloud PRIVATE WITH_SDL2_STATIC)
+
+# Find SDL2
+find_package(SDL2 REQUIRED)
+include_directories(${SDL2_INCLUDE_DIRS})
+target_link_libraries(${PROJECT_NAME} PRIVATE ${SDL2_LIBRARIES})
+
+
 set(TINYGLTF_HEADER_ONLY ON CACHE INTERNAL "" FORCE)
 set(TINYGLTF_INSTALL OFF CACHE INTERNAL "" FORCE)
 add_subdirectory(external/tinygltf)

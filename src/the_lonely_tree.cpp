@@ -117,6 +117,9 @@ TheLonelyTree::TheLonelyTree()
 
     font = new Font("../resources/fonts/arial.ttf", 48);
 
+    Audio::instance.load("summer", "../resources/audio/summer.wav");
+    Audio::instance.load("test", "../resources/audio/test.wav");
+
     SaveFile::Initialize("SunCats", "TheLonelyTree");
 
     if (SteamAPI_Init()) {
@@ -407,9 +410,15 @@ void TheLonelyTree::start(){
     Text* text2 = new Text(font, steamUsername, glm::vec2(0.0, 0.0), glm::vec2(0.8, 0.25), 1.0f, glm::vec3(1.0f, 1.0f, 1.0f));
     text2->addShader(FRAME_BUFFER, "text");
     uiCanvas->addUIRenderObject(text2);
+
+    Audio::instance.play("summer");
 }
 
 void TheLonelyTree::update(){
+    if (Input::getKeyDown(KeyCode::KEY_F10)){
+        Audio::instance.play("test");
+    }
+
     if (Input::getKeyDown(KeyCode::KEY_F12)){
         screenShotMode = !screenShotMode;
         if (screenShotMode){
