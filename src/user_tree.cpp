@@ -2,6 +2,9 @@
 #include "user_tree.h"
 #include <engine/save_file.h>
 #include <engine/crypto.h>
+#include <iostream>
+#include <engine/input.h>
+#include <future>
 
 UserTree::UserTree(std::string url, std::string dataPath)
     : treeManager(nullptr), url(url), dataPath(dataPath), client(url, dataPath)
@@ -14,7 +17,7 @@ UserTree::~UserTree(){
 
 void UserTree::updateTreeManager(unsigned long long userID, TreeManager* treeManager){
     this->treeManager = treeManager;
-    int result = write(constructKey(EntryType::UserIDBranchID, Crypto::toHex(userID)), treeManager->rootBranch()->getIDString());
+    write(constructKey(EntryType::UserIDBranchID, Crypto::toHex(userID)), treeManager->rootBranch()->getIDString());
 }
 
 std::string UserTree::constructKey(EntryType type, std::string key){
@@ -25,14 +28,24 @@ std::string UserTree::constructKey(EntryType type, unsigned int secondaryID, std
     return EntryTypeToString(type) + "-" + key + "-" + std::to_string(secondaryID);
 }
 
-bool UserTree::write(std::string key, std::string value){
+void UserTree::write(std::string key, std::string value){
     int val = client.write(key, value);
     if(!val){
         std::cout << "Write failed: " << val << " " << key << " " << value << std::endl;
     }
 
     SaveFile::Save(key, value);
-    return val;
+}
+
+void UserTree::writeAsync(std::string key, std::string value){
+    fireAndForget([this, key, value] {
+        int val = client.write(key, value);
+        if(!val){
+            std::cout << "Write failed: " << val << " " << key << " " << value << std::endl;
+        }
+
+        SaveFile::Save(key, value);
+    });
 }
 
 std::string UserTree::read(std::string key){
@@ -43,17 +56,51 @@ std::string UserTree::read(std::string key){
     return value;
 }
 
+void UserTree::readAsync(std::string key){
+    if (future.valid() && future.wait_for(std::chrono::milliseconds(0)) != std::future_status::ready) {
+        return;
+    }
+
+    future = std::async(std::launch::async, [this, key] {
+        std::string value = client.read(key);
+        if (value == ""){
+            value = SaveFile::Load(key);
+        }
+        return value;
+    });
+}
+
+bool UserTree::isAsyncDone(){
+    return future.valid() && future.wait_for(std::chrono::milliseconds(0)) == std::future_status::ready;
+}
+
+std::string UserTree::getAsyncResult(){
+    if (isAsyncDone()) {
+        return future.get();
+    }
+    return "";
+}
+
+
 void UserTree::update(){
+    if (Input::getKeyDown(KeyCode::KEY_F9)){
+        // writeAsync("test", "test value test");
+        readAsync("test");
+    }
+
+    std::cout << "Result: " << getAsyncResult() << std::endl;
+
     counter++;
+
+    int numNodes = treeManager->rootBranch()->getNumNodes();
+
+
     // std::cout << "Counter: " << counter << std::endl;
     // if (counter % 100 == 0)
     //     client.read(constructKey(EntryType::UserIDBranchID, "0"));
 }
 
 void UserTree::addEntry(Entry entry){
-    // std::string url = "https://7sqvdwegyf.execute-api.us-west-2.amazonaws.com";
-    // std::string dataPath = "/default/the-lonely-tree";
-
     //TODO change such that server has more checks. Add "append" functionality
     // TODO add all checks for if malicious data gets sent on the server
 
@@ -65,9 +112,8 @@ void UserTree::addEntry(Entry entry){
 
     treeManager->rootBranch()->addNode(entry);
 
-    int result = 0;
-    result = write(constructKey(EntryType::EntryIDEntry, entry.getHashString()), entry.getData());
-    result = write(constructKey(EntryType::EntryPCount, entry.getProcessedKeyHash()), std::to_string(count + 1));
-    result = write(constructKey(EntryType::EntryPEntryID, count, entry.getProcessedKeyHash()), entry.getHashString());
-    result = write(constructKey(EntryType::BranchIDEntryIDs, treeManager->rootBranch()->getIDString()), treeManager->rootBranch()->serializeNodes());
+    write(constructKey(EntryType::EntryIDEntry, entry.getHashString()), entry.getData());
+    write(constructKey(EntryType::EntryPCount, entry.getProcessedKeyHash()), std::to_string(count + 1));
+    write(constructKey(EntryType::EntryPEntryID, count, entry.getProcessedKeyHash()), entry.getHashString());
+    write(constructKey(EntryType::BranchIDEntryIDs, treeManager->rootBranch()->getIDString()), treeManager->rootBranch()->serializeNodes());
 }

@@ -3,6 +3,7 @@
 
 #include <engine/component.h>
 #include <engine/http_client.h>
+#include <future>
 
 #include "entry.h"
 #include "tree_manager.h"
@@ -52,10 +53,18 @@ class UserTree : public Component{
         std::string constructKey(EntryType type, std::string key);
         std::string constructKey(EntryType type, unsigned int secondaryID, std::string key);
 
-        bool write(std::string key, std::string value);
+        void write(std::string key, std::string value);
+        void writeAsync(std::string key, std::string value);
+
         std::string read(std::string key);
 
+        void readAsync(std::string key);
+        std::string getAsyncResult();
+        bool isAsyncDone();
+
     private:
+        std::future<std::string> future;
+
         TreeManager* treeManager;
         std::string url;
         std::string dataPath;
@@ -64,5 +73,11 @@ class UserTree : public Component{
 
         int counter;
 };
+
+template<typename F>
+void fireAndForget(F&& f) {
+    std::thread(std::forward<F>(f)).detach();
+}
+
 
 #endif // USER_TREE_H

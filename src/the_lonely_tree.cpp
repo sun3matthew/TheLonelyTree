@@ -326,7 +326,7 @@ void TheLonelyTree::start(){
     treeManager->addComponent(this->userTree);
     treeManager->setPosition(glm::vec3(worldSize/2, 280, worldSize/2));
     treeManager->setScale(glm::vec3(100.0f));
-    // addGameobject(treeManager);
+    addGameobject(treeManager);
 
     // float worldSize = 500.0f;
     // plane->setPosition(glm::vec3(worldSize/2, -50, worldSize/2));
