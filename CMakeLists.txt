@@ -60,6 +60,21 @@ target_link_libraries(${PROJECT_NAME} PRIVATE soloud)
 target_compile_definitions(soloud PRIVATE WITH_SDL2_STATIC)
 
 # Find SDL2
+if (WIN32)
+    set(SDL2_DIR "C:/libs/SDL2/cmake")
+endif()
+if ( BUILD_TARGET STREQUAL "Windows" )
+    set(SDL2_DLL_PATH "C:/libs/SDL2/x86_64-w64-mingw32/bin/SDL2.dll")
+    add_custom_command(
+        TARGET ${PROJECT_NAME}
+        POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${SDL2_DLL_PATH}"
+            "$<TARGET_FILE_DIR:${PROJECT_NAME}>/SDL2.dll"
+        COMMENT "Copying SDL2.dll to the output directory"
+    )
+endif()
+
 find_package(SDL2 REQUIRED)
 include_directories(${SDL2_INCLUDE_DIRS})
 target_link_libraries(${PROJECT_NAME} PRIVATE ${SDL2_LIBRARIES})
@@ -84,25 +99,6 @@ if ( BUILD_TARGET STREQUAL "OSX" )
 
     # Link OpenSSL to your app
     target_link_libraries(${PROJECT_NAME} PRIVATE ${OPENSSL_LIBS})
-# elseif ( BUILD_TARGET STREQUAL "Windows" )
-#     set(OPENSSL_USE_STATIC_LIBS ON)
-#     find_package(OpenSSL REQUIRED)
-    
-#     message("Libs: ${OPENSSL_SSL_LIBRARY}")
-#     message("Dirs: ${OPENSSL_INCLUDE_DIR}")
-
-#     target_include_directories(${PROJECT_NAME} PRIVATE ${OPENSSL_INCLUDE_DIR})
-
-#     # target_link_libraries(${PROJECT_NAME} PRIVATE OpenSSL::SSL)
-
-#     set(OPENSSL_LIBS "C:/Program Files/OpenSSL-Win64/lib/VC/x64/MD/libssl.lib")
-#     set(OPENSSL_INCLUDE_DIR ${OPENSSL_INCLUDE_DIR})
-
-#     set(APP_FRAMEWORKS_DIR "${CMAKE_BINARY_DIR}/")
-#     file(COPY ${OPENSSL_LIBS} DESTINATION ${APP_FRAMEWORKS_DIR})
-
-#     # Link OpenSSL to your app
-#     target_link_libraries(${PROJECT_NAME} PRIVATE ${OPENSSL_LIBS})
 else ()
     find_package(OpenSSL REQUIRED)
     target_link_libraries(${PROJECT_NAME} PRIVATE OpenSSL::SSL)

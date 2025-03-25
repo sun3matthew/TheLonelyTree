@@ -5,6 +5,7 @@
 #include <vector>
 #include <list>
 #include <unordered_map>
+#include <string>
 
 struct AudioHandle {
     std::string name;

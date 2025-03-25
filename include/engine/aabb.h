@@ -1,6 +1,9 @@
 #pragma once
 #include <glm/glm.hpp>
 
+#undef min
+#undef max
+
 struct AABB {
     glm::vec2 min;  // Bottom-left
     glm::vec2 max;  // Top-right
