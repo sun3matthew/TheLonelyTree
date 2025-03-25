@@ -1,4 +1,5 @@
 build/
+debug/
 .private/
 .DS_Store
 .vscode/

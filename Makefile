@@ -1,15 +1,13 @@
 # Set the build directory
 
 BUILD_DIR = build
+BUILD_DIR_DEBUG = debug
+
 BUILD_DIR_OSX = $(BUILD_DIR)/osx
 BUILD_DIR_WIN = $(BUILD_DIR)/win
 
 # Default build type (Release or Debug)
-BUILD_TYPE ?= Release
-
 PROJECT_NAME = TheLonelyTree
-
-run-lldb: BUILD_TYPE = debug
 
 # Default target to configure and build
 all: build
@@ -18,7 +16,7 @@ all: build
 # cd $(BUILD_DIR) && cmake -G Ninja -DCMAKE_BUILD_TYPE=$(BUILD_TYPE) ..
 configure:
 	cmake -E make_directory $(BUILD_DIR)
-	cmake -B $(BUILD_DIR) -S . -G Ninja -DCMAKE_BUILD_TYPE=$(BUILD_TYPE)
+	cmake -B $(BUILD_DIR) -S . -G Ninja -DCMAKE_BUILD_TYPE=Release
 
 # Build the project
 build: configure
@@ -32,13 +30,25 @@ else
 endif
 
 
-run-lldb: build
-	cd $(BUILD_DIR) && lldb ./$(PROJECT_NAME)
+
+configure-debug:
+	cmake -E make_directory $(BUILD_DIR_DEBUG)
+	cmake -B $(BUILD_DIR_DEBUG) -S . -G Ninja -DCMAKE_BUILD_TYPE=Debug
+
+build-debug: configure-debug
+	cmake --build $(BUILD_DIR_DEBUG) --target $(PROJECT_NAME)
+
+run-debug: build-debug
+	cd $(BUILD_DIR_DEBUG) && ./$(PROJECT_NAME)
+
+run-lldb: build-debug
+	cd $(BUILD_DIR_DEBUG) && lldb ./$(PROJECT_NAME)
+
+
 
 # Clean the build files
 clean:
 	cmake -E remove_directory $(BUILD_DIR)
-
 
 
 # Application bundle variables
