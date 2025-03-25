@@ -12,16 +12,20 @@
 
 class TreeManager{
     public:
-        TreeManager(unsigned long long id = 0);
+        TreeManager(unsigned long long id);
         ~TreeManager();
 
-        TreeBranch* addBranch(TreeNode* node);
-        TreeBranch* addBranch(unsigned int branchId, int nodeIndex);
+        // void writeEntryData();
+        // void writeBranchData();
+
+        // TreeBranch* addBranch(TreeNode* node);
+        // TreeBranch* addBranch(unsigned int branchId, int nodeIndex);
+
+        TreeBranch* addBranch(unsigned long long branchId, unsigned long long parentBranchID, std::string nodeKey);
+
         void deleteBranch(unsigned int id);
         
         TreeBranch* rootBranch(){ return tree[rootBranchID]; }
-
-        unsigned long long generateRandomID();
 
         std::unordered_map<unsigned int, TreeBranch*> tree;
         unsigned long long rootBranchID;

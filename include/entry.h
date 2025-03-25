@@ -4,30 +4,50 @@
 #include <string>
 #include <unordered_set>
 
+#include "entry_type.h"
+
 class Entry{
     public:
-        Entry(std::string date, std::string name, std::string entry);
+        static std::string constructEntryKey(unsigned int ID, unsigned int commitID);
+
+        Entry(unsigned long long branchID, std::string date, std::string name, std::string entry);
+        Entry(std::string key, std::string data);
         ~Entry();
+
+        void setCommitID(unsigned int commitID);
 
         std::string getDate();
         std::string getName();
+        std::string getEntry();
+
         std::string getData();
 
         std::string getProcessedKey();
-        std::string getProcessedKeyHash();
-        std::string getHashString();
-        unsigned long long getHash();
+
+        unsigned int getID();
+        bool isCommited();
+        unsigned int getCommitID();
+        unsigned long long getBranchID();
+
+        std::string getKey(EntryType);
+        std::string getKey();
+
+        std::string getIDString();
+
     private:
+        void recalculateKey();
+
         std::string date;
         std::string name;
         std::string entry;
         std::string data;
 
         std::string processedKey;
-        std::string processedKeyHash;
 
-        unsigned long long hash;
-        std::string hashString;
+        unsigned long long branchID;
+
+        unsigned int ID;
+        unsigned int commitID;
 
         static const std::unordered_set<std::string> commonWords;
 };

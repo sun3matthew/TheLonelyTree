@@ -62,6 +62,12 @@ class Crypto{
             ss << std::hex << std::setw(12) << std::setfill('0') << value;
             return ss.str();
         }
+
+        static std::string toHex(unsigned int i){
+            std::stringstream stream;
+            stream << std::setfill ('0') << std::setw(sizeof(unsigned int)*2) << std::hex << i;
+            return stream.str();
+        }
         
         static unsigned long long hexToLong(const std::string& hex_str) {
             unsigned long long value;
@@ -78,11 +84,6 @@ class Crypto{
             return hash;
         }
 
-        static std::string toHex(unsigned int i){
-            std::stringstream stream;
-            stream << std::setfill ('0') << std::setw(sizeof(unsigned int)*2) << std::hex << i;
-            return stream.str();
-        }
 };
 
 #endif // CRYPTO_H

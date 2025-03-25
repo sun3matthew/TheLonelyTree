@@ -8,13 +8,22 @@ HttpClient::~HttpClient()
 {}
 
 std::string HttpClient::read(std::string key){
-    auto res = client.Get((dataPath + "?key=" + key).c_str());
-    if(!res)
+    bool dummy;
+    return read(dummy, key);
+}
+
+std::string HttpClient::read(bool& success, std::string key){
+    httplib::Result res = client.Get((dataPath + "?key=" + key).c_str());
+    if(!res){
+        success = false;
         return "";
+    }
     if(res->status != 200){
+        success = false;
         return "";
     }
 
+    success = true;
     std::string body = res->body;
     std::string data = body.substr(body.find(":") + 3);
     data = data.substr(0, data.size() - 2);

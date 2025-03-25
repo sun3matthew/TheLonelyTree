@@ -32,7 +32,6 @@ class TheLonelyTree : public GLFWWrapper{
 
         bool screenShotMode = false;
 
-        TreeManager* treeManager;
         UserTree* userTree;
         Font* font;
 
@@ -41,6 +40,7 @@ class TheLonelyTree : public GLFWWrapper{
 
         Gameobject* grass;
 
+        InputField* headerInputField;
         InputField* inputField;
 
         std::string steamUsername;

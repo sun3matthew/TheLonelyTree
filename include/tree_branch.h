@@ -13,6 +13,37 @@ struct PointDirection{
     glm::vec3 direction;
 };
 
+    // ParentNodeID:Current#:New#:{metadata},...,...
+    // std::string data = "";
+    // for(int i = 0; i < childBranches.size(); i++){
+    //     TreeBranch* branch = childBranches[i];
+    //     TreeNode* root = branch->getRootNode();
+    //     if (root != nullptr && branch->getNumNodes() > 0){
+    //         data += Crypto::toHex(branch->getID());
+    //         data += ":";
+    //         data += std::to_string(root->getEntry().getCommitID()); // attached node
+    //         data += ":";
+    //         data += std::to_string(branch->getNode(0)->getEntry().getCommitID()); // root node
+    //         data += ":";
+    //         data += std::to_string(0); // ! metadata
+    //         data += ",";
+    //     }
+    // }
+struct SerializedBranch{
+    unsigned long long branchID;
+    unsigned int originKey;
+    unsigned int idParent;
+    unsigned int idRoot;
+    unsigned int metadata;
+
+
+    SerializedBranch(unsigned long long branchID, unsigned int originKey, unsigned int idParent, unsigned int idRoot, unsigned int metadata);
+    SerializedBranch(std::string data);
+    std::string toString();
+};
+
+// inline std::string serializedBranchToString
+
 class TreeBranch : public RenderObject{
 public:
     TreeBranch(unsigned long long ID, TreeBranch* parentBranch, TreeNode* node, LeafManager* leafManager);

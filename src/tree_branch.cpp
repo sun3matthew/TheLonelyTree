@@ -9,6 +9,29 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include <engine/crypto.h>
+#include <engine/str_utils.h>
+
+SerializedBranch::SerializedBranch(unsigned long long branchID, unsigned int originKey, unsigned int idParent, unsigned int idRoot, unsigned int metadata){
+    this->branchID = branchID;
+    this->originKey = originKey;
+    this->idParent = idParent;
+    this->idRoot = idRoot;
+    this->metadata = metadata;
+}
+
+SerializedBranch::SerializedBranch(std::string data){
+    std::vector<std::string> splitData = StrUtils::split(data, ':');
+    branchID = std::stoull(splitData[0]);
+    originKey = std::stoi(splitData[1]);
+    idParent = std::stoi(splitData[2]);
+    idRoot = std::stoi(splitData[3]);
+    metadata = std::stoi(splitData[4]);
+}
+
+std::string SerializedBranch::toString(){
+    return std::to_string(branchID) + ":" + std::to_string(originKey) + ":" + std::to_string(idParent) + ":" + std::to_string(idRoot) + ":" + std::to_string(metadata);
+}
+
 
 TreeBranch::TreeBranch(unsigned long long id, TreeBranch* parentBranch, TreeNode* node, LeafManager* leafManager){
     this->depth = 1;
@@ -245,19 +268,31 @@ void TreeBranch::addNode(Entry entry){
 }
 
 std::string TreeBranch::serializeNodes(){
-    std::string serialized = "";
+    std::string data = "";
     for(int i = 0; i < nodes.size(); i++){
-        serialized += nodes[i]->getEntry().getHashString();
+        data += nodes[i]->getEntry().getKey();
+        data += ",";
     }
-    return serialized;
+    return data;
 }
 
 std::string TreeBranch::serializeChildBranches(){
-    std::string serialized = "";
+    // ParentNodeID:Current#:New#:{metadata},...,...
+    std::string data = "";
     for(int i = 0; i < childBranches.size(); i++){
-        serialized += childBranches[i]->IDString;
+        TreeBranch* branch = childBranches[i];
+        TreeNode* root = branch->getRootNode();
+        if (root != nullptr && branch->getNumNodes() > 0){
+            data += SerializedBranch(
+                branch->getID(),
+                root->getEntry().getID(),
+                root->getEntry().getCommitID(),
+                branch->getNode(0)->getEntry().getCommitID(),
+                0).toString();
+            data += ",";
+        }
     }
-    return serialized;
+    return data;
 }
 
 unsigned long long TreeBranch::getID(){ return ID; }

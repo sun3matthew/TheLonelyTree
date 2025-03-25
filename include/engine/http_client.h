@@ -12,6 +12,7 @@ public:
     ~HttpClient();
 
     std::string read(std::string key);
+    std::string read(bool& success, std::string key);
     bool write(std::string key, std::string value);
 private:
     httplib::Client client;

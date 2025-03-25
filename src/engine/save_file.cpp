@@ -21,15 +21,15 @@ void SaveFile::Initialize(std::string developerName, std::string gameName){
     std::cout << "Save Folder: " << saveFolder << "\n";
 }
 
-void SaveFile::Save(std::string fileName, std::string data){
+void SaveFile::write(std::string fileName, std::string data){
     std::string filePath = saveFolder + "/" + fileName;
     std::ofstream file(filePath);
     file << data;
     file.close();
 }
 
-std::string SaveFile::Load(std::string fileName){
-    if (saveFolder == "" || !Exists(fileName)){
+std::string SaveFile::read(std::string fileName){
+    if (saveFolder == "" || !exists(fileName)){
         return "";
     }
     std::string filePath = saveFolder + "/" + fileName;
@@ -39,7 +39,7 @@ std::string SaveFile::Load(std::string fileName){
     return data;
 }
 
-void SaveFile::Delete(std::string fileName){
+void SaveFile::remove(std::string fileName){
     if (saveFolder == ""){
         return;
     }
@@ -47,13 +47,13 @@ void SaveFile::Delete(std::string fileName){
     std::remove(filePath.c_str());
 }
 
-bool SaveFile::Exists(std::string fileName){
+bool SaveFile::exists(std::string fileName){
     std::string filePath = saveFolder + "/" + fileName;
     std::ifstream file(filePath);
     return file.good();
 }
 
-void SaveFile::Clear(){
+void SaveFile::clear(){
     if (saveFolder == ""){
         return;
     }

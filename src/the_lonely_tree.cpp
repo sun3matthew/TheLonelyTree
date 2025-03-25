@@ -127,12 +127,14 @@ TheLonelyTree::TheLonelyTree()
         steamUsername = SteamFriends()->GetPersonaName();
         steamID = SteamUser()->GetSteamID().ConvertToUint64();
 
-        SaveFile::Save("steamID", std::to_string(steamID));
+        std::cout << "Steam ID: " << steamID << std::endl;
+
+        SaveFile::write("steamID", std::to_string(steamID));
     }else{
         steamUsername = "Offline";
         steamID = 0;
 
-        std::string steamIDString = SaveFile::Load("steamID");
+        std::string steamIDString = SaveFile::read("steamID");
         if (steamIDString != ""){
             steamID = std::stoull(steamIDString);
         }
@@ -148,8 +150,8 @@ TheLonelyTree::TheLonelyTree()
 TheLonelyTree::~TheLonelyTree(){
     // delete camera; //! Do not delete, just a reference to a component
     delete font;
-    if (treeManager)
-        delete treeManager;
+    if (userTree)
+        delete userTree;
 
     SteamAPI_Shutdown();
 }
@@ -226,6 +228,7 @@ void TheLonelyTree::start(){
     unsigned int numLeafTypes = 2;
 
     Entry entry = Entry(
+        0,
         "2021-09-01",
         "The Lonely Tree",
         "The Lonely Tree is a project that aims to create a procedurally generated tree that can be used in a variety of applications. The tree is generated using a combination of L-systems and Perlin noise to create a realistic looking tree. The tree is then rendered using OpenGL and GLSL to create a realistic 3D model. The tree can be viewed from any angle and can be used in a variety of applications such as games, simulations, and visualizations."
@@ -235,95 +238,100 @@ void TheLonelyTree::start(){
     Texture branchNormal = Texture("../resources/textures/tree/Normal.png", TextureType::Normal);
 
     // //! This is the worst code I have ever written
-    userTree = new UserTree("https://7sqvdwegyf.execute-api.us-west-2.amazonaws.com", "/default/the-lonely-tree");
-    std::string baseBranchID = userTree->read(userTree->constructKey(EntryType::UserIDBranchID, Crypto::toHex(steamID)));
+    if (steamID == 0){
+        std::cout << "!!!!!!! Steam ID is 0 !!!!!!!!" << std::endl;
+    }
+    userTree = new UserTree("https://7sqvdwegyf.execute-api.us-west-2.amazonaws.com", "/default/the-lonely-tree", steamID);
+    // bool success;
+    // std::string baseBranchID = userTree->read(constructKey(EntryType::UserIDBranchID, Crypto::toHex(steamID)));
     // if (baseBranchID == ""){
-    //     treeManager = new TreeManager();
+    //     treeManager = new TreeManager(0);
     // }else{
     //     treeManager = new TreeManager(Crypto::hexToLong(baseBranchID));
     // }
-    treeManager = new TreeManager(5842433818981);
-    userTree->updateTreeManager(steamID, treeManager);
 
-    treeManager->rootBranch()->pushBackTexture(branchDiffuse);
-    treeManager->rootBranch()->pushBackTexture(branchNormal);
-    treeManager->rootBranch()->addShader(FRAME_BUFFER, "tree");
-    treeManager->rootBranch()->addShader(SHADOW_BUFFER, "treeShadowMap");
-    treeManager->rootBranch()->getLeafManager()->addShader(FRAME_BUFFER, "leaf");
-    treeManager->rootBranch()->getLeafManager()->addShader(SHADOW_BUFFER, "leafShadowMap");
-    int numNodes = 50;
-    for (int i = 0; i < numNodes; i++){
-        treeManager->rootBranch()->addNode(entry);
-    }
-    treeManager->rootBranch()->recalculateVertices();
+    // // treeManager = new TreeManager(5842433818981);
+    // userTree->updateTreeManager(steamID, treeManager);
+
+    // treeManager->rootBranch()->pushBackTexture(branchDiffuse);
+    // treeManager->rootBranch()->pushBackTexture(branchNormal);
+    // treeManager->rootBranch()->addShader(FRAME_BUFFER, "tree");
+    // treeManager->rootBranch()->addShader(SHADOW_BUFFER, "treeShadowMap");
+    // treeManager->rootBranch()->getLeafManager()->addShader(FRAME_BUFFER, "leaf");
+    // treeManager->rootBranch()->getLeafManager()->addShader(SHADOW_BUFFER, "leafShadowMap");
+    // int numNodes = 50;
+    // for (int i = 0; i < numNodes; i++){
+    //     treeManager->rootBranch()->addNode(entry);
+    // }
+    // treeManager->rootBranch()->recalculateVertices();
 
     // build tree
     // srand(time(0));
 
-    int treeSeed = rand();
-    // int seed = rand();
-    std::cout << "Seed: " << treeSeed << std::endl;
-    srand(treeSeed);
+    // int treeSeed = rand();
+    // // int seed = rand();
+    // std::cout << "Seed: " << treeSeed << std::endl;
+    // srand(treeSeed);
 
-    std::stack <std::pair<TreeBranch*, int>> branchStack;
-    for(int i = 0; i < 4; i++)
-        branchStack.push({treeManager->rootBranch(), 3});
-    int counter = 0;
-    while(!branchStack.empty()){
-        std::pair<TreeBranch*, int> branchPair = branchStack.top();
-        branchStack.pop();
-        TreeBranch* branch = branchPair.first;
-        int depth = branchPair.second;
-        // std::cout << "POP " << depth << std::endl;
+    // std::stack <std::pair<TreeBranch*, int>> branchStack;
+    // for(int i = 0; i < 4; i++)
+    //     branchStack.push({treeManager->rootBranch(), 3});
+    // int counter = 0;
+    // while(!branchStack.empty()){
+    //     std::pair<TreeBranch*, int> branchPair = branchStack.top();
+    //     branchStack.pop();
+    //     TreeBranch* branch = branchPair.first;
+    //     int depth = branchPair.second;
+    //     // std::cout << "POP " << depth << std::endl;
 
-        if (depth > 0){
-            int numBranches = rand() % 4 + 1;
-            // numBranches = 4;
-            for(int i = 0; i < numBranches; i++){
-                float randPercent = (float)rand() / (float)RAND_MAX;
-                randPercent = randPercent * 0.5 + 0.25;
-                int numNodes = (int)(pow(randPercent * 100 * depth + 4, 0.5f));
-                std::cout << "Num Nodes: " << numNodes << std::endl;
-                counter++;
+    //     if (depth > 0){
+    //         int numBranches = rand() % 4 + 1;
+    //         // numBranches = 4;
+    //         for(int i = 0; i < numBranches; i++){
+    //             float randPercent = (float)rand() / (float)RAND_MAX;
+    //             randPercent = randPercent * 0.5 + 0.25;
+    //             int numNodes = (int)(pow(randPercent * 100 * depth + 4, 0.5f));
+    //             std::cout << "Num Nodes: " << numNodes << std::endl;
+    //             counter++;
 
-                // random node from 0 to numNodes
-                int totalNodes = branch->getNumNodes();
-                randPercent = (float)rand() / (float)RAND_MAX;
-                randPercent = randPercent * 0.8 + 0.1;
-                int randomNode = (int)(randPercent * totalNodes);
+    //             // random node from 0 to numNodes
+    //             int totalNodes = branch->getNumNodes();
+    //             randPercent = (float)rand() / (float)RAND_MAX;
+    //             randPercent = randPercent * 0.8 + 0.1;
+    //             int randomNode = (int)(randPercent * totalNodes);
 
-                TreeBranch* newBranch = treeManager->addBranch(branch->getID(), randomNode);
-                newBranch->pushBackTexture(branchDiffuse);
-                newBranch->pushBackTexture(branchNormal);
-                newBranch->addShader(FRAME_BUFFER, "tree");
-                newBranch->addShader(SHADOW_BUFFER, "treeShadowMap");
-                newBranch->getLeafManager()->addShader(FRAME_BUFFER, "leaf");
-                newBranch->getLeafManager()->addShader(SHADOW_BUFFER, "leafShadowMap");
-                for (int i = 0; i < numNodes; i++)
-                    newBranch->addNode(entry);
-                newBranch->recalculateVertices();
+    //             TreeBranch* newBranch = treeManager->addBranch(branch->getID(), randomNode);
+    //             newBranch->pushBackTexture(branchDiffuse);
+    //             newBranch->pushBackTexture(branchNormal);
+    //             newBranch->addShader(FRAME_BUFFER, "tree");
+    //             newBranch->addShader(SHADOW_BUFFER, "treeShadowMap");
+    //             newBranch->getLeafManager()->addShader(FRAME_BUFFER, "leaf");
+    //             newBranch->getLeafManager()->addShader(SHADOW_BUFFER, "leafShadowMap");
+    //             for (int i = 0; i < numNodes; i++)
+    //                 newBranch->addNode(entry);
+    //             newBranch->recalculateVertices();
 
-                // for( int i = 0; i < newBranch->getNumNodes(); ){
-                //     TreeVertex* vertex = newBranch->getNode(i)->getVertexData();
-                //     LeafKey key = newBranch->getLeafManager()->getNewLeafKey();
-                //     newBranch->getLeafManager()->writeLeafData(key, vertex->position, vertex->direction);
-                //     // i += rand() % 3 + 1;
-                //     i++;
-                // }
-                // newBranch->getLeafManager()->writeDataToGPU();
+    //             // for( int i = 0; i < newBranch->getNumNodes(); ){
+    //             //     TreeVertex* vertex = newBranch->getNode(i)->getVertexData();
+    //             //     LeafKey key = newBranch->getLeafManager()->getNewLeafKey();
+    //             //     newBranch->getLeafManager()->writeLeafData(key, vertex->position, vertex->direction);
+    //             //     // i += rand() % 3 + 1;
+    //             //     i++;
+    //             // }
+    //             // newBranch->getLeafManager()->writeDataToGPU();
 
-                if (depth - 1 > 0){
-                    // std::cout << "PUSH " << (depth - 1) << std::endl;
-                    branchStack.push({newBranch, depth - 1});
-                }
-            }
-        }
-    }
+    //             if (depth - 1 > 0){
+    //                 // std::cout << "PUSH " << (depth - 1) << std::endl;
+    //                 branchStack.push({newBranch, depth - 1});
+    //             }
+    //         }
+    //     }
+    // }
 
 
     Gameobject* treeManager = new Gameobject("Tree Manager");
-    treeManager->addComponent(new TreeRendererComponent(this->treeManager));
     treeManager->addComponent(this->userTree);
+    // treeManager->addComponent(new TreeRendererComponent(this->userTree->getTreeManager()));
     treeManager->setPosition(glm::vec3(worldSize/2, 280, worldSize/2));
     treeManager->setScale(glm::vec3(100.0f));
     addGameobject(treeManager);
@@ -394,17 +402,16 @@ void TheLonelyTree::start(){
 
     Text* headerText = new Text(font, "", glm::vec2(0.1, 0.80), glm::vec2(0.9, 0.85), 1.2f, glm::vec3(0.0f, 0.0f, 0.0f));
     headerText->setAlignment(TextAlignment::UPPER_LEFT);
-    InputField* headerInputField = new InputField(headerText);
+    headerInputField = new InputField(headerText);
     headerInputField->getRenderObject()->addShader(FRAME_BUFFER, "text");
     uiCanvas->addUIComponent(headerInputField);
 
+
     Text* text = new Text(font, "", glm::vec2(0.1, 0.15), glm::vec2(0.9, 0.80), 0.8f, glm::vec3(0.0f, 0.0f, 0.0f));
     text->setAlignment(TextAlignment::UPPER_LEFT);
-    InputField* inputField = new InputField(text);
+    inputField = new InputField(text);
     inputField->getRenderObject()->addShader(FRAME_BUFFER, "text");
     uiCanvas->addUIComponent(inputField);
-
-    this->inputField = inputField;
 
 
     Text* text2 = new Text(font, steamUsername, glm::vec2(0.0, 0.0), glm::vec2(0.8, 0.25), 1.0f, glm::vec3(1.0f, 1.0f, 1.0f));
@@ -452,11 +459,11 @@ void TheLonelyTree::update(){
         lockCursor(false);
 
         if (Input::getKeyDown(KeyCode::KEY_F11)){
-            userTree->addEntry(Entry(
+            userTree->addEntry(
                 getCurrentDateTime(),
-                steamUsername,
+                headerInputField->getTextObject()->getText(),
                 inputField->getTextObject()->getText()
-            ));
+            );
         }
     }
 

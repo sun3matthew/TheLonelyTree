@@ -8,11 +8,11 @@ public:
 
     static void Initialize(std::string developerName, std::string gameName);
 
-    static void Save(std::string fileName, std::string data);
-    static std::string Load(std::string fileName);
-    static void Delete(std::string fileName);
-    static bool Exists(std::string fileName);
-    static void Clear();
+    static void write(std::string fileName, std::string data);
+    static std::string read(std::string fileName);
+    static void remove(std::string fileName);
+    static bool exists(std::string fileName);
+    static void clear();
 
     static std::string getSaveFolder();
 private:
