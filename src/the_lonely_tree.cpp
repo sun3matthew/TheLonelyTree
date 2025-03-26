@@ -143,8 +143,8 @@ TheLonelyTree::TheLonelyTree() : GLFWWrapper("TheLonelyTree", "SunCats")
 TheLonelyTree::~TheLonelyTree(){
     // delete camera; //! Do not delete, just a reference to a component
     delete font;
-    if (userTree)
-        delete userTree;
+    // if (userTree) //! also do not delete, it gets attached a gameobject
+    //     delete userTree;
 
     SteamAPI_Shutdown();
 }
@@ -234,7 +234,13 @@ void TheLonelyTree::start(){
     if (steamID == 0){
         Logger::log("WARNING: Steam ID is 0");
     }
-    userTree = new UserTree("https://7sqvdwegyf.execute-api.us-west-2.amazonaws.com", "/default/the-lonely-tree", steamID);
+    userTree = new UserTree(
+        "https://7sqvdwegyf.execute-api.us-west-2.amazonaws.com",
+        "/default/the-lonely-tree",
+        steamID,
+        branchDiffuse,
+        branchNormal
+    ); 
     // bool success;
     // std::string baseBranchID = userTree->read(constructKey(EntryType::UserIDBranchID, Crypto::toHex(steamID)));
     // if (baseBranchID == ""){
@@ -320,12 +326,12 @@ void TheLonelyTree::start(){
     //     }
     // }
 
-
     Gameobject* treeManager = new Gameobject("Tree Manager");
     treeManager->addComponent(this->userTree);
-    // treeManager->addComponent(new TreeRendererComponent(this->userTree->getTreeManager()));
+    treeManager->addComponent(new TreeRendererComponent(this->userTree->getTreeManager()));
     treeManager->setPosition(glm::vec3(worldSize/2, 280, worldSize/2));
     treeManager->setScale(glm::vec3(100.0f));
+    // treeManager->setScale(glm::vec3(300.0f));
     addGameobject(treeManager);
 
     // float worldSize = 500.0f;
@@ -412,12 +418,13 @@ void TheLonelyTree::start(){
 
     Audio::instance.play("summer");
 
-    std::string result = userTree->addEntry(
-        getCurrentDateTime(),
-        "This is a test header",
-        "This is a test entry"
-    );
-    Logger::log(result);
+    // std::string result = userTree->addEntry(
+    //     getCurrentDateTime(),
+    //     "This is a test header",
+    //     "This is a test entry"
+    // );
+    // Logger::log(result);
+
 }
 
 void TheLonelyTree::update(){

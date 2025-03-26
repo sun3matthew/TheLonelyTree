@@ -13,8 +13,8 @@ unsigned long long generateRandomID(){
     return dist(rng);
 }
 
-UserTree::UserTree(std::string url, std::string dataPath, unsigned long long steamID)
-    : treeManager(nullptr), url(url), dataPath(dataPath), client(url, dataPath)
+UserTree::UserTree(std::string url, std::string dataPath, unsigned long long steamID, Texture branchDiffuse, Texture branchNormal)
+    : treeManager(nullptr), url(url), dataPath(dataPath), client(url, dataPath), branchDiffuse(branchDiffuse), branchNormal(branchNormal)
 {
     // UserTree::instance = this;
 
@@ -107,6 +107,7 @@ UserTree::UserTree(std::string url, std::string dataPath, unsigned long long ste
 }
 
 UserTree::~UserTree(){
+    delete treeManager;
 }
 
 // void UserTree::loadBranch(unsigned long long branchID, unsigned long long parentBranchID, ){
@@ -115,6 +116,12 @@ void UserTree::loadBranch(unsigned long long parentID, SerializedBranch serializ
 
     unsigned long long branchID = serializedBranch.branchID;
     TreeBranch* branch = treeManager->addBranch(branchID, parentID, Entry::constructEntryKey(serializedBranch.originKey, serializedBranch.idParent));
+    branch->pushBackTexture(branchDiffuse);
+    branch->pushBackTexture(branchNormal);
+    branch->addShader(FRAME_BUFFER, "tree");
+    branch->addShader(SHADOW_BUFFER, "treeShadowMap");
+    branch->getLeafManager()->addShader(FRAME_BUFFER, "leaf");
+    branch->getLeafManager()->addShader(SHADOW_BUFFER, "leafShadowMap");
 
     std::string entryData = "";
     std::string branchData = "";
@@ -146,6 +153,7 @@ void UserTree::loadBranch(unsigned long long parentID, SerializedBranch serializ
             Entry entry = Entry(entryID, value);
             branch->addNode(entry);
         }
+        branch->recalculateVertices();
     }
 
     if (branchData != ""){
@@ -366,8 +374,9 @@ std::string UserTree::addEntry(std::string date, std::string name, std::string m
         SaveFile::write(offlineEntry.getKey(EntryType::EntryIDEntry), offlineEntry.getData());
     }
 
-    treeManager->rootBranch()->addNode(entry);
     TreeBranch* rootBranch = treeManager->rootBranch();
+    rootBranch->addNode(entry);
+    rootBranch->recalculateVertices();
     write(constructKey(EntryType::BranchIDEntryIDs, rootBranch->getIDString()), rootBranch->serializeNodes());
     return "";
 }

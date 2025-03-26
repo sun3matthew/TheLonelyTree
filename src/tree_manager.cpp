@@ -94,7 +94,9 @@ TreeBranch* TreeManager::addBranch(unsigned long long branchId, unsigned long lo
 
 void TreeManager::deleteBranch(unsigned int id){
     TreeBranch* branch = tree[id];
-    assert(branch != nullptr);
+    if (branch == nullptr){
+        return;
+    }
 
     branch->markForDeletion();
     delete branch;

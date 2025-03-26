@@ -13,7 +13,7 @@
 
 class UserTree : public Component{
     public:
-        UserTree(std::string url, std::string dataPath, unsigned long long steamID); 
+        UserTree(std::string url, std::string dataPath, unsigned long long steamID, Texture branchDiffuse, Texture branchNormal);
         ~UserTree() override;
 
         TreeManager* getTreeManager();
@@ -46,6 +46,9 @@ class UserTree : public Component{
         HttpClient client;
 
         float counter;
+
+        Texture branchDiffuse;
+        Texture branchNormal;
 };
 
 template<typename F>

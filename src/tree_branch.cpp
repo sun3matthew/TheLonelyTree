@@ -11,6 +11,8 @@
 #include <engine/crypto.h>
 #include <engine/str_utils.h>
 
+#include <engine/logger.h>
+
 SerializedBranch::SerializedBranch(unsigned long long branchID, unsigned int originKey, unsigned int idParent, unsigned int idRoot, unsigned int metadata){
     this->branchID = branchID;
     this->originKey = originKey;
@@ -222,6 +224,8 @@ void TreeBranch::recalculateVertices(){
 
             leafManager->writeLeafData(key, vertex->position, direction);
         }
+
+        // Logger::log("Node: " + nodes[i]->getEntry().getKey() + " Position: " + std::to_string(position.x) + ", " + std::to_string(position.y) + ", " + std::to_string(position.z));
     }
 
     writeDataToGPU();
@@ -263,7 +267,7 @@ TreeVertex* TreeBranch::getVertex(int idx){
 void TreeBranch::addNode(Entry entry){
     vertices.push_back(TreeVertex());
     nodes.push_back(new TreeNode(this, vertices.size() - 1, entry));
-    // writeDataToGPU();
+    // recalculateVertices();
 }
 
 std::string TreeBranch::serializeNodes(){

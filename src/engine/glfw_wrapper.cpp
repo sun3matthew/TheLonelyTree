@@ -162,6 +162,8 @@ int GLFWWrapper::run(){
 
         calculateFPS();
         calculateDeltaTime();
+
+        break;
     }
     return 0;
 }
