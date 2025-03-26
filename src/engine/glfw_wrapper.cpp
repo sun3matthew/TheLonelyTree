@@ -1,7 +1,8 @@
 #include <engine/glfw_wrapper.h>
 
-#include <iostream>
 #include <engine/input.h>
+#include <engine/save_file.h>
+#include <engine/logger.h>
 
 float GLFWWrapper::lastX = 0.0f;
 float GLFWWrapper::lastY = 0.0f;
@@ -9,9 +10,12 @@ float GLFWWrapper::width = 0.0f;
 float GLFWWrapper::height = 0.0f;
 GLFWWrapper* GLFWWrapper::instance = nullptr;
 
-GLFWWrapper::GLFWWrapper(){
+GLFWWrapper::GLFWWrapper(std::string name, std::string developer) : name(name), developer(developer){
+    SaveFile::Initialize("SunCats", "TheLonelyTree");
+    Logger::init(SaveFile::createLogFile());
+
     if (!glfwInit()){
-        std::cout << "Failed to initialize GLFW" << std::endl;
+        Logger::log("ERROR: Failed to initialize GLFW");
         exit(-1);
     }
 
@@ -30,6 +34,8 @@ GLFWWrapper::GLFWWrapper(){
 }
 
 GLFWWrapper::~GLFWWrapper(){
+    Logger::shutdown();
+
     for (Gameobject* gameobject : gameobjects)
         delete gameobject;
 
@@ -52,13 +58,13 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height){
 int GLFWWrapper::createWindow(int width, int height, const char* title){
     window = glfwCreateWindow(width, height, title, NULL, NULL);
     if (window == NULL){
-        std::cout << "Failed to create GLFW window" << std::endl;
+        Logger::log("ERROR: Failed to create GLFW window");
         return -1;
     }
     glfwMakeContextCurrent(window);
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)){
-        std::cout << "Failed to initialize GLAD" << std::endl;
+        Logger::log("ERROR: Failed to initialize GLAD");
         return -1;
     }
 
@@ -130,7 +136,7 @@ void GLFWWrapper::removeGameobject(Gameobject* gameobject){
 int GLFWWrapper::run(){
     start();
     if (!window){
-        std::cout << "Window not created" << std::endl;
+    Logger::log("ERROR: Window not created");
         return -1;
     }
 

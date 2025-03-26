@@ -1,9 +1,9 @@
 #include "user_tree.h"
 
-#include <iostream>
-
 #include <engine/input.h>
 #include <engine/str_utils.h>
+
+#include <engine/logger.h>
 
 // UserTree* UserTree::instance = nullptr;
 
@@ -33,23 +33,31 @@ UserTree::UserTree(std::string url, std::string dataPath, unsigned long long ste
 
     if (id == 0){ // Attempt to create a new ID
         unsigned long long newID;
-        int MAX_ITERATIONS = 1000;
+        int MAX_ITERATIONS = 100;
         for(int i = 0; i < MAX_ITERATIONS; i++){
             newID = generateRandomID();
-            if(client.write(key, Crypto::toHex(newID))){
-                // migrate
 
+            bool received;
+            bool success;
+            client.read(received, success, constructKey(EntryType::BranchIDEntryIDs, Crypto::toHex(newID)));
+
+            if(!received){
+                break;
+            }
+
+            if(!success){ // if key does not exist
+                write(key, Crypto::toHex(newID));
+
+                // migrate and create empty keys
                 std::string entryData = SaveFile::read(constructKey(EntryType::BranchIDEntryIDs, Crypto::toHex(id)));
-                if (entryData != "")
-                    write(constructKey(EntryType::BranchIDEntryIDs, Crypto::toHex(newID)), entryData);
+                write(constructKey(EntryType::BranchIDEntryIDs, Crypto::toHex(newID)), entryData);
 
                 std::string branchData = SaveFile::read(constructKey(EntryType::BranchIDBranchIDs, Crypto::toHex(id)));
-                if (branchData != "")
-                    write(constructKey(EntryType::BranchIDBranchIDs, Crypto::toHex(newID)), branchData);
+                write(constructKey(EntryType::BranchIDBranchIDs, Crypto::toHex(newID)), branchData);
 
                 id = newID;
 
-                //! individual entry data should be always checked to be migrated always
+                //* individual entry data should be always checked to be migrated always
                 break;
             }
         }
@@ -60,20 +68,36 @@ UserTree::UserTree(std::string url, std::string dataPath, unsigned long long ste
         std::string entryData = SaveFile::read(constructKey(EntryType::BranchIDEntryIDs, Crypto::toHex(id)));
         if (entryData != ""){
             std::vector<std::string> entryIDs = StrUtils::split(entryData, ',');
+            bool migrated = false;
             for(int i = 0; i < entryIDs.size(); i++){
+                Logger::log("Checking entry: " + entryIDs[i]);
                 std::string key = constructKey(EntryType::EntryIDEntry, entryIDs[i]);
                 std::string value = SaveFile::read(key);
-                if (value != ""){
-                    Entry entry = Entry(entryIDs[i], value);
-                    if(entry.getBranchID() == 0){
-                        entry = Entry(id, entry.getDate(), entry.getName(), entry.getEntry());
-                        write(entry.getKey(EntryType::EntryIDEntry), entry.getData());
-                        entryIDs[i] = entry.getKey();
-                    }
+                Entry entry = Entry(entryIDs[i], value);
+                if (entry.getBranchID() == 0){ //* if offline entry
+                    entry = Entry(id, entry.getDate(), entry.getName(), entry.getEntry());
+                    if(writeEntryToServer(entry)){
+                        migrated = true;
+                    } 
                 }
+
+                // if (value != ""){ // ! this checks for if the server entry has been tampered with
+                //     std::string clientValue = client.read(key);
+                //     if (clientValue != value){
+                //         Entry entry = Entry(entryIDs[i], value);
+                //         entry = Entry(id, entry.getDate(), entry.getName(), entry.getEntry());
+
+                //         if(writeEntryToServer(entry)){
+                //             entryIDs[i] = entry.getKey();
+                //             migrated = true;
+                //         }
+                //     }
+                // }
             }
-            std::string newEntryData = StrUtils::join(entryIDs, ',');
-            write(constructKey(EntryType::BranchIDEntryIDs, Crypto::toHex(id)), newEntryData);
+            if(migrated){
+                std::string newEntryData = StrUtils::join(entryIDs, ',');
+                write(constructKey(EntryType::BranchIDEntryIDs, Crypto::toHex(id)), newEntryData);
+            }
         }
     }
 
@@ -113,8 +137,9 @@ void UserTree::loadBranch(unsigned long long parentID, SerializedBranch serializ
             if (value == ""){
                 value = client.read(key); // do this so that it does not override cache
             }
+            Logger::log("Loading Entry: " + entryID);
             if (value == ""){
-                std::cerr << "Failed to load entry: " << key << std::endl;
+                Logger::log("ERROR: Failed to load entry: " + key);
                 continue;
             }
 
@@ -138,20 +163,21 @@ TreeManager* UserTree::getTreeManager(){
     return treeManager;
 }
 
-void UserTree::write(std::string key, std::string value){
+bool UserTree::write(std::string key, std::string value){
     int val = client.write(key, value); 
     if(!val){
-        std::cout << "Write failed: " << val << " " << key << " " << value << std::endl;
+        Logger::log("Write failed: " + std::to_string(val) + " " + key + " " + value);
     }
 
     SaveFile::write(key, value);
+    return val;
 }
 
 void UserTree::writeAsync(std::string key, std::string value){
     fireAndForget([this, key, value] {
         int val = client.write(key, value);
         if(!val){
-            std::cout << "Write failed: " << val << " " << key << " " << value << std::endl;
+            Logger::log("Write failed: " + std::to_string(val) + " " + key + " " + value);
         }
 
         SaveFile::write(key, value);
@@ -252,9 +278,6 @@ void UserTree::update(){
             }
         }
 
-
-        
-
         // for (int i = 0; i < numNodes; i++){
         //     Entry entry = treeManager->rootBranch()->getNode(i)->getEntry();
         //     std::string readCount = read(constructKey(EntryType::EntryPCount, entry.getProcessedKeyHash()));
@@ -274,6 +297,31 @@ void UserTree::update(){
         // client.read(constructKey(EntryType::UserIDBranchID, "0"));
     }
 
+}
+
+bool UserTree::writeEntryToServer(Entry& entry){
+    bool received;
+    bool success;
+    std::string value = client.read(received, success, entry.getKey(EntryType::EntryIDCount));
+    if (!received){
+        return false;
+    }
+
+    int count = 0;
+    if (value != ""){
+        count = std::stoi(value);
+    }
+    entry.setCommitID(count);
+
+    if(!write(entry.getKey(EntryType::EntryIDCount), std::to_string(count + 1))){
+        return false;
+    }
+
+    if(!write(entry.getKey(EntryType::EntryIDEntry), entry.getData())){
+        return false;
+    }
+
+    return true;
 }
 
 std::string UserTree::addEntry(std::string date, std::string name, std::string mainEntry){
@@ -296,28 +344,15 @@ std::string UserTree::addEntry(std::string date, std::string name, std::string m
         // }
     }
 
-
-    // std::string readCount = read(constructKey(EntryType::EntryPCount, entry.getProcessedKeyHash()));
-    bool success;
-    std::string value = client.read(success, entry.getKey(EntryType::EntryIDCount));
-    int count = 0;
-    if (success){
-        count = 0;
-        if (value != ""){
-            count = std::stoi(value);
-        }
-
-        entry.setCommitID(count);
-
-        write(entry.getKey(EntryType::EntryIDEntry), entry.getData());
-        write(entry.getKey(EntryType::EntryIDCount), std::to_string(count + 1));
-    }else{
+    if (!writeEntryToServer(entry)){
+        Entry offlineEntry = Entry(0, date, name, mainEntry);
         int MAX_COUNT = 10000;
+        int count = 0;
         std::string entryID = "";
         bool found = false;
         for (int i = 0; i < MAX_COUNT; i++){
-            entry.setCommitID(i);
-            if (!SaveFile::exists(entry.getKey(EntryType::EntryIDEntry))){
+            offlineEntry.setCommitID(i);
+            if (!SaveFile::exists(offlineEntry.getKey(EntryType::EntryIDEntry))){
                 found = true;
                 break;
             }
@@ -328,7 +363,7 @@ std::string UserTree::addEntry(std::string date, std::string name, std::string m
             return "!Use a different name";
         }
 
-        SaveFile::write(entry.getKey(EntryType::EntryIDEntry), entry.getData());
+        SaveFile::write(offlineEntry.getKey(EntryType::EntryIDEntry), offlineEntry.getData());
     }
 
     treeManager->rootBranch()->addNode(entry);

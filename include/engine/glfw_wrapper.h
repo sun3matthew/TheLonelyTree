@@ -16,7 +16,7 @@ class GLFWWrapper{
     public:
         int run();
 
-        GLFWWrapper();
+        GLFWWrapper(std::string name, std::string developer);
         virtual ~GLFWWrapper();
 
         static float lastX, lastY;
@@ -42,7 +42,9 @@ class GLFWWrapper{
         std::list<Gameobject*> gameobjects;
         
         GLFWwindow* window;
-        
+
+        std::string name;
+        std::string developer;
 
         double fpsLastTime;
         int fpsCounter;

@@ -1,7 +1,6 @@
 
 #include <world_generation.h>
 #include <vector>
-#include <iostream>
 #include <engine/constants.h>
 #include <engine/glfw_wrapper.h>
 
@@ -104,10 +103,6 @@ Mesh* WorldGeneration::createWorld(unsigned int seedIn, float heightIn, float si
             indices.push_back(y       * (segments + 1) + x + 1);
         }
     }
-
-    // std::cout << vertices.size() << std::endl;
-    // std::cout << indices.size() << std::endl;
-    // std::cout << segments << std::endl;
 
     return new Mesh(std::move(vertices), std::move(indices), Texture::defaultTextures());
         // ,std::vector<Texture>{Texture::diffuse(0x30, 0x2D, 0x33), Texture::specular(0, 0, 0), Texture::defaultGlossy(), Texture::defaultNormal()}

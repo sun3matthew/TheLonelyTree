@@ -1,9 +1,8 @@
 
 #include <engine/font.h>
-
+#include <engine/logger.h>
 #include <glad/glad.h>
 
-#include <iostream>
 
 // !!! CODE OF SHAME
 // assert(!FT_Init_FreeType(&ft));
@@ -19,14 +18,14 @@ Font::Font(std::string filepath, int size)
     bool success = FT_Init_FreeType(&ft);
     if (success != 0)
     {
-        std::cerr << "ERROR::FREETYPE: Could not init FreeType Library" << std::endl;
+        Logger::log("ERROR::FREETYPE: Could not init FreeType Library");        
         return;
     }
 
     success = FT_New_Face(ft, filepath.c_str(), 0, &face);
     if (success != 0)
     {
-        std::cerr << "ERROR::FREETYPE: Failed to load font" << std::endl;
+        Logger::log("ERROR::FREETYPE: Failed to load font");
         return;
     }
 

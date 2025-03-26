@@ -74,7 +74,9 @@ TreeManager::~TreeManager(){
 TreeBranch* TreeManager::addBranch(unsigned long long branchId, unsigned long long parentBranchID, std::string nodeKey){
     TreeBranch* parentBranch = tree[parentBranchID];
     if (parentBranch == nullptr){
-        return new TreeBranch(branchId, nullptr, nullptr, new LeafManager());
+        TreeBranch* newBranch = new TreeBranch(branchId, nullptr, nullptr, new LeafManager());
+        tree[branchId] = newBranch;
+        return newBranch;
     }
 
     // TODO optimize

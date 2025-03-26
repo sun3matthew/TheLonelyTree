@@ -80,7 +80,6 @@ void Camera::updateCameraVectors() {
     Up = glm::normalize(glm::cross(Right, Front));
 }
 
-#include <iostream>
 void Camera::update(){
     glm::mat4 view = GetViewMatrix();
     glm::mat4 projection = glm::perspective(glm::radians(Zoom), 800.0f / 600.0f, 10.0f, 5000.0f);

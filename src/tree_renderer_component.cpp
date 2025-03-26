@@ -11,7 +11,6 @@ TreeRendererComponent::TreeRendererComponent(TreeManager *treeManager){
 TreeRendererComponent::~TreeRendererComponent(){
 }
 
-#include <iostream>
 void TreeRendererComponent::update(){
     glm::mat4 modelMatrix = gameobject->getModelMatrix();
 

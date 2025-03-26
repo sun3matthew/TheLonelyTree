@@ -11,7 +11,6 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <vector>
 #include <string> 
-#include <iostream>
 #include <cassert>
 
 const float* GetAttributeData(const tinygltf::Model &model, const tinygltf::Primitive &primitive, const std::string &attributeName) {
@@ -76,7 +75,6 @@ const std::vector<Gameobject*> processMesh(tinygltf::Mesh &mesh, glm::mat4 &tran
             }
         }
         // TODO do a move
-        // std::cout << primitive.material << std::endl;
         // Extract indices
         
         Mesh* generatedMesh = new Mesh(vertices, indices, mats[primitive.material]);

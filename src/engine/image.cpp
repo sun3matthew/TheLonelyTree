@@ -30,8 +30,8 @@ void Image::drawCall(Shader* shader)
 
     glm::vec2 scale = glm::vec2(GLFWWrapper::width, GLFWWrapper::height);
 
-    glm::vec2 min = aabb.min;
-    glm::vec2 max = aabb.max;
+    glm::vec2 min = aabb.minPoint;
+    glm::vec2 max = aabb.maxPoint;
 
     float vertices[] = {
         min.x * scale.x, min.y * scale.y, 0.0f, 0.0f,

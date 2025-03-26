@@ -1,7 +1,8 @@
 #include <engine/save_file.h>
 #include <engine/platform_folders.h>
 
-#include <iostream>
+#include <engine/logger.h>
+
 #include <fstream>
 #include <filesystem>
 
@@ -18,7 +19,8 @@ void SaveFile::Initialize(std::string developerName, std::string gameName){
     if (!std::filesystem::exists(saveFolder)){
         std::filesystem::create_directories(saveFolder);
     }
-    std::cout << "Save Folder: " << saveFolder << "\n";
+
+    Logger::log("Save Folder: " + saveFolder);
 }
 
 void SaveFile::write(std::string fileName, std::string data){
@@ -63,4 +65,21 @@ void SaveFile::clear(){
 
 std::string SaveFile::getSaveFolder(){
     return saveFolder;
+}
+
+std::string SaveFile::createLogFile(){
+    int count = 0;
+    std::string logDir = saveFolder + "/logs";
+    if (!std::filesystem::exists(logDir)){
+        std::filesystem::create_directories(logDir);
+    }
+    for (const auto& entry : std::filesystem::directory_iterator(logDir)){
+        if (entry.path().extension() == ".txt"){
+            count++;
+        }
+    }
+
+    std::string logFile = logDir + "/log-" + std::to_string(count) + ".txt";
+    write(logFile, "");
+    return logFile;
 }

@@ -22,8 +22,8 @@ Text::~Text()
 {}
 
 AABB getAlignmentAABB(TextAlignment alignment, AABB aabb){
-    glm::vec2 min = aabb.min;
-    glm::vec2 max = aabb.max;
+    glm::vec2 min = aabb.minPoint;
+    glm::vec2 max = aabb.maxPoint;
 
     // bottom left is 0, 0
     switch (alignment){
@@ -57,13 +57,13 @@ void Text::drawCall(Shader* shader)
         Character ch = font->Characters[text[i]];
 
         float vertices[] = {
-            characterAABBs[i].min.x, characterAABBs[i].max.y, 0.0f, 0.0f,
-            characterAABBs[i].min.x, characterAABBs[i].min.y, 0.0f, 1.0f,
-            characterAABBs[i].max.x, characterAABBs[i].min.y, 1.0f, 1.0f,
+            characterAABBs[i].minPoint.x, characterAABBs[i].maxPoint.y, 0.0f, 0.0f,
+            characterAABBs[i].minPoint.x, characterAABBs[i].minPoint.y, 0.0f, 1.0f,
+            characterAABBs[i].maxPoint.x, characterAABBs[i].minPoint.y, 1.0f, 1.0f,
 
-            characterAABBs[i].min.x, characterAABBs[i].max.y, 0.0f, 0.0f,
-            characterAABBs[i].max.x, characterAABBs[i].min.y, 1.0f, 1.0f,
-            characterAABBs[i].max.x, characterAABBs[i].max.y, 1.0f, 0.0f
+            characterAABBs[i].minPoint.x, characterAABBs[i].maxPoint.y, 0.0f, 0.0f,
+            characterAABBs[i].maxPoint.x, characterAABBs[i].minPoint.y, 1.0f, 1.0f,
+            characterAABBs[i].maxPoint.x, characterAABBs[i].maxPoint.y, 1.0f, 0.0f
         };
 
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
@@ -77,7 +77,7 @@ void Text::drawCall(Shader* shader)
 
     if (cursorVisible){
         // TODO make this better.
-        glm::vec2 currentPosition = getAlignmentAABB(alignment, aabb).min * glm::vec2(GLFWWrapper::width, GLFWWrapper::height);
+        glm::vec2 currentPosition = getAlignmentAABB(alignment, aabb).minPoint * glm::vec2(GLFWWrapper::width, GLFWWrapper::height);
         if (cursorPosition != 0){
             char c = text[cursorPosition - 1];
             Character ch = font->Characters[c];
@@ -86,8 +86,8 @@ void Text::drawCall(Shader* shader)
                 advance = 0;
             }
             currentPosition = glm::vec2(
-                characterAABBs[cursorPosition - 1].min.x + advance,
-                characterAABBs[cursorPosition - 1].min.y
+                characterAABBs[cursorPosition - 1].minPoint.x + advance,
+                characterAABBs[cursorPosition - 1].minPoint.y
             );
         }
 
@@ -102,13 +102,13 @@ void Text::drawCall(Shader* shader)
         );
 
         float vertices[] = {
-            aabb.min.x, aabb.max.y, 0.0f, 0.0f,
-            aabb.min.x, aabb.min.y, 0.0f, 1.0f,
-            aabb.max.x, aabb.min.y, 1.0f, 1.0f,
+            aabb.minPoint.x, aabb.maxPoint.y, 0.0f, 0.0f,
+            aabb.minPoint.x, aabb.minPoint.y, 0.0f, 1.0f,
+            aabb.maxPoint.x, aabb.minPoint.y, 1.0f, 1.0f,
 
-            aabb.min.x, aabb.max.y, 0.0f, 0.0f,
-            aabb.max.x, aabb.min.y, 1.0f, 1.0f,
-            aabb.max.x, aabb.max.y, 1.0f, 0.0f
+            aabb.minPoint.x, aabb.maxPoint.y, 0.0f, 0.0f,
+            aabb.maxPoint.x, aabb.minPoint.y, 1.0f, 1.0f,
+            aabb.maxPoint.x, aabb.maxPoint.y, 1.0f, 0.0f
         };
 
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
@@ -187,8 +187,8 @@ void Text::recalculateCache(){
         
     AABB textAABB = getAlignmentAABB(alignment, aabb);
 
-    glm::vec2 currentPosition = textAABB.min;
-    glm::vec2 maxPosition = textAABB.max;
+    glm::vec2 currentPosition = textAABB.minPoint;
+    glm::vec2 maxPosition = textAABB.maxPoint;
 
     currentPosition *= glm::vec2(GLFWWrapper::width, GLFWWrapper::height);
     maxPosition *= glm::vec2(GLFWWrapper::width, GLFWWrapper::height);
@@ -203,7 +203,7 @@ void Text::recalculateCache(){
         }
 
         if (currentPosition.x + wordWidth > maxPosition.x && wordWidth < maxPosition.x){ // make sure word fits
-            currentPosition.x = aabb.min.x * GLFWWrapper::width;
+            currentPosition.x = aabb.minPoint.x * GLFWWrapper::width;
             currentPosition.y -= (lineSpacing) * scale;
         }
 
@@ -211,7 +211,7 @@ void Text::recalculateCache(){
             Character ch = font->Characters[c];
 
             if (currentPosition.x > maxPosition.x || c == '\n'){
-                currentPosition.x = aabb.min.x * GLFWWrapper::width;
+                currentPosition.x = aabb.minPoint.x * GLFWWrapper::width;
                 currentPosition.y -= (lineSpacing) * scale;
             }
 

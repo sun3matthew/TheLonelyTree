@@ -13,7 +13,6 @@ LightDirectional::LightDirectional(glm::vec3 dir, glm::vec3 amb, glm::vec3 diff,
 }
 void LightDirectional::update(){
     // angle += 0.11 * GLFWWrapper::instance->getDeltaTime();
-    // std::cout << angle << std::endl;
     direction = glm::vec3(cos(angle), sin(angle), 0);
     std::vector<Shader*> shaders = RenderManager::instance.getShadersAccepting("dirLight");
     for(Shader* shader : shaders){

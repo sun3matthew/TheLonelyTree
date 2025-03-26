@@ -229,7 +229,6 @@ void TreeBranch::recalculateVertices(){
 }
 
 
-#include <iostream>
 void TreeBranch::drawCall(Shader* shader){
     shader->setMat4("model", modelMatrix);
 

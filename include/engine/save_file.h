@@ -5,7 +5,6 @@
 
 class SaveFile{
 public:
-
     static void Initialize(std::string developerName, std::string gameName);
 
     static void write(std::string fileName, std::string data);
@@ -14,11 +13,10 @@ public:
     static bool exists(std::string fileName);
     static void clear();
 
+    static std::string createLogFile();
+
     static std::string getSaveFolder();
 private:
-    // Define Developer
-    // Define Game
-
     static std::string saveFolder;
     static std::string developerName;
     static std::string gameName;

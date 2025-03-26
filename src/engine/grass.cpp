@@ -8,7 +8,6 @@
 
 #include <engine/constants.h>
 #include <engine/glfw_wrapper.h>
-#include <iostream>
 
 #include <engine/render_manager.h>
 
@@ -74,8 +73,6 @@ Grass::Grass(){
     //         vertices.push_back(vertex);
     //     }
     // }
-
-    std::cout << vertices.size() << std::endl;
 
     perlinLane = NoiseGeneration::GetPerlinLane(83475923u, 512 * 2, 1, 0.005f);
 

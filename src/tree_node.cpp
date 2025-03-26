@@ -18,7 +18,6 @@ float calculateRadius(float x){
     return (1 / (1 - exp(-RADIUS_C))) * (exp(-RADIUS_C * x) - exp(-RADIUS_C));
 }
 // radius
-#include <iostream>
 void TreeNode::setVertexData(TreeNode* parent, glm::vec3 position, float nodePercent){
 
     TreeVertex* vertex = associatedBranch->getVertex(index);

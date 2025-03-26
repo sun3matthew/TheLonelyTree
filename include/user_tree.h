@@ -22,7 +22,7 @@ class UserTree : public Component{
 
         std::string addEntry(std::string date, std::string name, std::string entry);
 
-        void write(std::string key, std::string value);
+        bool write(std::string key, std::string value);
         void writeAsync(std::string key, std::string value);
 
         std::string read(std::string key);
@@ -33,6 +33,7 @@ class UserTree : public Component{
 
     private:
         void loadBranch(unsigned long long parentID, SerializedBranch serializedBranch);
+        bool writeEntryToServer(Entry& entry);
 
         EntryType readEntryType;
         Entry* currentEntry;

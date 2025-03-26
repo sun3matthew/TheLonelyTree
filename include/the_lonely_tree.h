@@ -17,8 +17,6 @@
 
 class TheLonelyTree : public GLFWWrapper{
     public:
-        TheLonelyTree* instance;
-
         TheLonelyTree();
         ~TheLonelyTree() override;
     protected:

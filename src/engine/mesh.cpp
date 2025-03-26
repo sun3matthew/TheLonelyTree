@@ -5,7 +5,6 @@
 
 #include <engine/glfw_wrapper.h>
 
-// #include <iostream>
 // Maybe look into using pointer..? but tbh you shouldn't be loading meshes during play
 Mesh::Mesh(std::vector<Vertex> verticesIn, 
            std::vector<unsigned int> indicesIn, 
@@ -19,12 +18,6 @@ Mesh::Mesh(std::vector<Vertex> verticesIn,
     if(vertices[0].Tangent.x < -1)
         ComputeTangents(vertices, indices);
 
-    // for(Vertex vertex : vertices){
-    //     std::cout << vertex.Normal.x << "," << vertex.Normal.y << "," << vertex.Normal.z << std::endl;
-    //     std::cout << vertex.Tangent.x << "," << vertex.Tangent.y << "," << vertex.Tangent.z << std::endl;
-    //     std::cout << vertex.Bitangent.x << "," << vertex.Bitangent.y << "," << vertex.Bitangent.z << std::endl;
-    //     std::cout << std::endl;
-    // }
     setupMesh();
 }
 

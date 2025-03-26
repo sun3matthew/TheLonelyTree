@@ -22,8 +22,6 @@ UICanvas::~UICanvas()
 // UIComponent* getUIComponent(int index);
 // UIComponent* getCurrentFocused();
 
-#include <iostream>
-
 void UICanvas::update()
 {
     if (Input::getMouseDown(MouseButtonCode::MOUSE_BUTTON_LEFT)){

@@ -45,6 +45,7 @@ endif ()
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/include )
 
 include_directories(external/PerlinNoise)
+include_directories(external/json)
 include_directories(external/http)
 
 # Add SoLoud source files

@@ -10,8 +10,6 @@
     
 #include <glm/glm.hpp>
 
-#include <iostream>
-
 class NoiseGeneration {
 public:
     static Texture* GetPerlinLane(unsigned int seed, int resolution, float aspectRatio, float zoom){

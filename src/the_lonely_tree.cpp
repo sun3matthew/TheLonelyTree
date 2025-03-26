@@ -1,14 +1,13 @@
 #include "the_lonely_tree.h"
 
-#include <iostream>
 #include <glm/glm.hpp>
 
+#include <engine/logger.h>
 #include <engine/input.h>
 #include <engine/mesh_generation.h>
 #include <engine/texture_type.h>
 #include <engine/frame_buffer_generation.h>
 #include <engine/crypto.h>
-#include <engine/save_file.h>
 
 #include <engine/gltf_loader.h>
 #include <engine/render_object_component.h>
@@ -28,8 +27,6 @@
 #include <noise_generation.h>
 #include <leaf_manager.h>
 #include <tree_renderer_component.h>
-
-#include <iostream>
 
 #include <sstream>
 #include <chrono>
@@ -54,12 +51,11 @@ std::string getCurrentDateTime() {
 }
 
 // Camera 
-TheLonelyTree::TheLonelyTree()
+TheLonelyTree::TheLonelyTree() : GLFWWrapper("TheLonelyTree", "SunCats")
 {
-    TheLonelyTree::instance = this;
-
     createWindow(800 * 1.5f, 500 * 1.5f, "The Lonely Tree");
     // createWindow(900 * 1.5f, 650 * 1.5f, "The Lonely Tree");
+
     lockCursor(true);
 
     // TODO turn these into enums
@@ -111,7 +107,7 @@ TheLonelyTree::TheLonelyTree()
 
     // Check framebuffer status
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-        std::cerr << "Framebuffer not complete!" << std::endl;
+        Logger::log("ERROR: Framebuffer not complete!");
     }
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
@@ -120,14 +116,11 @@ TheLonelyTree::TheLonelyTree()
     Audio::instance.load("summer", "../resources/audio/summer.wav");
     Audio::instance.load("test", "../resources/audio/test.wav");
 
-    SaveFile::Initialize("SunCats", "TheLonelyTree");
-
     if (SteamAPI_Init()) {
-        // std::cout << "Hello, Steam! User: " << SteamFriends()->GetPersonaName() << std::endl;
         steamUsername = SteamFriends()->GetPersonaName();
         steamID = SteamUser()->GetSteamID().ConvertToUint64();
 
-        std::cout << "Steam ID: " << steamID << std::endl;
+        Logger::log("Steam ID: " + std::to_string(steamID));
 
         SaveFile::write("steamID", std::to_string(steamID));
     }else{
@@ -139,7 +132,7 @@ TheLonelyTree::TheLonelyTree()
             steamID = std::stoull(steamIDString);
         }
 
-        std::cerr << "Failed to initialize Steam API!" << std::endl;
+        Logger::log("ERROR: Failed to initialize Steam API!");
     }
 }
 
@@ -239,7 +232,7 @@ void TheLonelyTree::start(){
 
     // //! This is the worst code I have ever written
     if (steamID == 0){
-        std::cout << "!!!!!!! Steam ID is 0 !!!!!!!!" << std::endl;
+        Logger::log("WARNING: Steam ID is 0");
     }
     userTree = new UserTree("https://7sqvdwegyf.execute-api.us-west-2.amazonaws.com", "/default/the-lonely-tree", steamID);
     // bool success;
@@ -270,7 +263,7 @@ void TheLonelyTree::start(){
 
     // int treeSeed = rand();
     // // int seed = rand();
-    // std::cout << "Seed: " << treeSeed << std::endl;
+    // Logger::log("Seed: " + std::to_string(treeSeed));
     // srand(treeSeed);
 
     // std::stack <std::pair<TreeBranch*, int>> branchStack;
@@ -282,7 +275,6 @@ void TheLonelyTree::start(){
     //     branchStack.pop();
     //     TreeBranch* branch = branchPair.first;
     //     int depth = branchPair.second;
-    //     // std::cout << "POP " << depth << std::endl;
 
     //     if (depth > 0){
     //         int numBranches = rand() % 4 + 1;
@@ -419,6 +411,13 @@ void TheLonelyTree::start(){
     uiCanvas->addUIRenderObject(text2);
 
     Audio::instance.play("summer");
+
+    std::string result = userTree->addEntry(
+        getCurrentDateTime(),
+        "This is a test header",
+        "This is a test entry"
+    );
+    Logger::log(result);
 }
 
 void TheLonelyTree::update(){
@@ -458,18 +457,20 @@ void TheLonelyTree::update(){
     }else{
         lockCursor(false);
 
-        if (Input::getKeyDown(KeyCode::KEY_F11)){
-            userTree->addEntry(
+        if (Input::getKeyDown(KeyCode::KEY_F10)){
+            std::string result = userTree->addEntry(
                 getCurrentDateTime(),
                 headerInputField->getTextObject()->getText(),
                 inputField->getTextObject()->getText()
             );
+            Logger::log(result);
         }
     }
 
     if (Input::getKeyUp(KeyCode::KEY_ESCAPE)){
         ui->active = !ui->active;
     }
+
     // std::cout << "FPS: " << FPS() << std::endl;
 }
 

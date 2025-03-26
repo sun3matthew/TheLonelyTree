@@ -39,7 +39,7 @@ Entry::Entry(unsigned long long branchID, std::string date, std::string name, st
     this->name = name;
     this->entry = entry;
 
-    this->data = std::to_string(branchID) + "\n" + date + "\n" + name + "\n" + entry;
+    this->data = Crypto::toHex(branchID) + "\n" + date + "\n" + name + "\n" + entry;
 
     recalculateKey();
 }
@@ -49,7 +49,7 @@ Entry::Entry(std::string key, std::string data){
 
     //TODO
     std::vector<std::string> splitData = StrUtils::split(data, '\n');
-    this->branchID = std::stoull(splitData[0]);
+    this->branchID = Crypto::hexToLong(splitData[0]);
     this->date = splitData[1];
     this->name = splitData[2];
     this->entry = splitData[3];

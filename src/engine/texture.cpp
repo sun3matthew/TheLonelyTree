@@ -1,8 +1,10 @@
+#include <engine/glfw_wrapper.h>
+
 #include <engine/texture.h>
+#include <engine/logger.h>
+
 #include <glad/glad.h>
 #include <stb/stb_image.h>
-#include <engine/glfw_wrapper.h>
-#include <iostream>
 #include <array> // Include for std::array
 
 Texture Texture::defaultDiffuse(){
@@ -60,7 +62,7 @@ Texture::Texture(const char* path, TextureType textureType) : type(textureType){
         }
         glGenerateMipmap(GL_TEXTURE_2D);
     }else{
-        std::cout << "Failed to load texture " << path << std::endl;
+        Logger::log("Failed to load texture " + std::string(path)); 
     }
     stbi_image_free(data);
 
@@ -168,7 +170,7 @@ Texture::Texture(std::vector<std::string> faces)
         }
         else
         {
-            std::cout << "Cubemap tex failed to load at path: " << faces[i] << std::endl;
+            Logger::log("Cubemap tex failed to load at path: " + faces[i]);
             stbi_image_free(data);
         }
     }
