@@ -176,7 +176,10 @@ public:
                     }
 
                     unsigned int value = static_cast<unsigned int>((minDist / cellSize) * 255);
-                    data[i] = 0xff - static_cast<unsigned char>(std::min(value, 255u));
+                    if (value > 255u){
+                        value = 255u;
+                    }
+                    data[i] = 0xff - static_cast<unsigned char>(value);
                     i++;
                 }
             }
