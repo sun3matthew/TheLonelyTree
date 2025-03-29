@@ -65,7 +65,19 @@ if (WIN32)
     set(SDL2_DIR "C:/libs/SDL2/cmake")
 endif()
 if ( BUILD_TARGET STREQUAL "Windows" )
-    set(SDL2_DLL_PATH "C:/libs/SDL2/x86_64-w64-mingw32/bin/SDL2.dll")
+    set(OPENSSL_DLL_DIR "C:/Program Files/OpenSSL-Win64/bin") # adjust this to where your OpenSSL is installed
+
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${OPENSSL_DLL_DIR}/libssl-3-x64.dll"
+            "$<TARGET_FILE_DIR:${PROJECT_NAME}>/libssl-3-x64.dll"
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${OPENSSL_DLL_DIR}/libcrypto-3-x64.dll"
+            "$<TARGET_FILE_DIR:${PROJECT_NAME}>/libcrypto-3-x64.dll"
+        COMMENT "Copying OpenSSL DLLs to output directory"
+    )
+
+    set(SDL2_DLL_PATH "C:/libs/SDL2/lib/x64/SDL2.dll")
     add_custom_command(
         TARGET ${PROJECT_NAME}
         POST_BUILD
