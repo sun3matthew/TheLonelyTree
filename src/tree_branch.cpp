@@ -165,6 +165,7 @@ void TreeBranch::recalculateVertices(){
     }
     // parentDepth += 10;
 
+    // * first generate key points of a bezier curve to follow
     for(int i = 0; i < maxKeyPoints; i++){
         float completion = nodes.size()/(growthStageSize * i);
         if (completion > 1)

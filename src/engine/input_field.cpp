@@ -2,15 +2,21 @@
 #include <engine/input_field.h>
 #include <engine/input.h>
 
-InputField::InputField(Text* textObject)
-    : UIComponent(textObject)
+InputField::InputField(Text* textObject, std::string emptyString)
+    : UIComponent(textObject), emptyString(emptyString)
 {
     clickable = true;
 
     buffer = "";
     blinkCounter = 0.0f;
     cursorPosition = 0;
+
+    onUnfocused();
 }
+
+InputField::InputField(Text* textObject)
+    : InputField(textObject, "")
+{}
 
 InputField::~InputField()
 {
@@ -27,6 +33,9 @@ Text* InputField::getTextObject(){
 
 void InputField::onUnfocused(){
     this->getTextObject()->setCursorVisible(false);
+    if (buffer == ""){
+        this->getTextObject()->setText(emptyString);
+    }
 }
 
 void InputField::focused(){
@@ -43,6 +52,7 @@ void InputField::focused(){
         if (s.size() == 1){
             buffer = buffer.substr(0, cursorPosition) + s + buffer.substr(cursorPosition, buffer.size() - cursorPosition);
             cursorPosition++;
+            blinkCounter = 0.0f;
         }else{
             specialKeys.push_back(c);
         }
@@ -54,6 +64,7 @@ void InputField::focused(){
             for (int i = 0; i < 4; i++){
                 buffer = buffer.substr(0, cursorPosition) + " " + buffer.substr(cursorPosition, buffer.size() - cursorPosition);
                 cursorPosition++;
+                blinkCounter = 0.0f;
             }
         }
 
@@ -61,23 +72,29 @@ void InputField::focused(){
             // buffer += "\n";
             buffer = buffer.substr(0, cursorPosition) + "\n" + buffer.substr(cursorPosition, buffer.size() - cursorPosition);
             cursorPosition++;
+            blinkCounter = 0.0f;
         }
 
         if (c == KeyCode::KEY_BACKSPACE){
             if (cursorPosition > 0){
                 buffer = buffer.substr(0, cursorPosition - 1) + buffer.substr(cursorPosition, buffer.size() - cursorPosition);
                 cursorPosition--;
+                blinkCounter = 0.0f;
             }
         }
 
         if (c == KeyCode::KEY_LEFT){
-            if (cursorPosition > 0)
+            if (cursorPosition > 0){
                 cursorPosition--;
+                blinkCounter = 0.0f;
+            }
         }
 
         if (c == KeyCode::KEY_RIGHT){
-            if (cursorPosition < buffer.size())
+            if (cursorPosition < buffer.size()){
                 cursorPosition++;
+                blinkCounter = 0.0f;
+            }
         }
     }
 
@@ -93,6 +110,7 @@ void InputField::focused(){
         for (int i = 0; i < characterAABBs.size(); i++){
             if (characterAABBs[i].contains(mousePosition)){
                 cursorPosition = i + 1;
+                blinkCounter = 0.0f;
                 break;
             }
         }

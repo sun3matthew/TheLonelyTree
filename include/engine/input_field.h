@@ -8,6 +8,7 @@
 class InputField : public UIComponent{
     public:
         InputField(Text* textObject);
+        InputField(Text* textObject, std::string emptyString);
         ~InputField() override;
 
         void focused() override;
@@ -16,6 +17,7 @@ class InputField : public UIComponent{
         Text* getTextObject();
     private:
         std::string buffer;
+        std::string emptyString;
 
         float blinkCounter;
         int cursorPosition;

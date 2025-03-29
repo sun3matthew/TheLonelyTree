@@ -78,6 +78,11 @@ void Text::drawCall(Shader* shader)
     if (cursorVisible){
         // TODO make this better.
         glm::vec2 currentPosition = getAlignmentAABB(alignment, aabb).minPoint * glm::vec2(GLFWWrapper::width, GLFWWrapper::height);
+        float lineSpacing = 0.03 * GLFWWrapper::height;
+        if(alignment == TextAlignment::UPPER_LEFT || alignment == TextAlignment::UPPER_RIGHT){
+            currentPosition.y -= (lineSpacing) * scale;
+        }
+
         if (cursorPosition != 0){
             char c = text[cursorPosition - 1];
             Character ch = font->Characters[c];
@@ -194,6 +199,11 @@ void Text::recalculateCache(){
     maxPosition *= glm::vec2(GLFWWrapper::width, GLFWWrapper::height);
 
     float lineSpacing = 0.03 * GLFWWrapper::height;
+
+    if(alignment == TextAlignment::UPPER_LEFT || alignment == TextAlignment::UPPER_RIGHT){
+        currentPosition.y -= (lineSpacing) * scale;
+    }
+
 
     for (std::string word : splitText){
         float wordWidth = 0;

@@ -398,16 +398,16 @@ void TheLonelyTree::start(){
 
     // Text* text = new Text(font, "", glm::vec2(0.1, 0.15), glm::vec2(0.9, 0.85), 0.8f, glm::vec3(0.0f, 0.0f, 0.0f));
 
-    Text* headerText = new Text(font, "", glm::vec2(0.1, 0.80), glm::vec2(0.9, 0.85), 1.2f, glm::vec3(0.0f, 0.0f, 0.0f));
+    Text* headerText = new Text(font, "", glm::vec2(0.1, 0.85), glm::vec2(0.9, 0.90), 1.2f, glm::vec3(0.0f, 0.0f, 0.0f));
     headerText->setAlignment(TextAlignment::UPPER_LEFT);
-    headerInputField = new InputField(headerText);
+    headerInputField = new InputField(headerText, "Header Text");
     headerInputField->getRenderObject()->addShader(FRAME_BUFFER, "text");
     uiCanvas->addUIComponent(headerInputField);
 
 
-    Text* text = new Text(font, "", glm::vec2(0.1, 0.15), glm::vec2(0.9, 0.80), 0.8f, glm::vec3(0.0f, 0.0f, 0.0f));
+    Text* text = new Text(font, "", glm::vec2(0.1, 0.15), glm::vec2(0.9, 0.85), 0.8f, glm::vec3(0.0f, 0.0f, 0.0f));
     text->setAlignment(TextAlignment::UPPER_LEFT);
-    inputField = new InputField(text);
+    inputField = new InputField(text, "Body Text");
     inputField->getRenderObject()->addShader(FRAME_BUFFER, "text");
     uiCanvas->addUIComponent(inputField);
 
